@@ -34,7 +34,7 @@ api.interceptors.request.use(
     const userStore = useUserStore()
 
     // 检查是否是刷新token的请求
-    if (config.url === '/auth/token/refresh/') {
+    if (config.url === '/auth/refresh') {
       return config
     }
 
@@ -90,6 +90,11 @@ api.interceptors.request.use(
 // 响应拦截器
 api.interceptors.response.use(
   (response) => {
+    // Java后端返回: { code, message, data }
+    // 统一处理，提取data字段
+    if (response.data && response.data.data !== undefined) {
+      response.data = response.data.data
+    }
     return response
   },
   async (error) => {
@@ -99,7 +104,7 @@ api.interceptors.response.use(
     // 如果是401错误且不是刷新token的请求
     if (error.response?.status === 401 && !originalRequest._retry) {
       // 如果是logout请求失败，直接清除本地状态不再重试logout，防止死循环
-      if (originalRequest.url === '/auth/logout/') {
+      if (originalRequest.url === '/auth/logout') {
         console.error('Logout请求401，直接清除本地状态')
         userStore.$patch((state) => {
           state.accessToken = ''
@@ -116,7 +121,7 @@ api.interceptors.response.use(
       }
 
       // 如果是刷新token的请求失败
-      if (originalRequest.url === '/auth/token/refresh/') {
+      if (originalRequest.url === '/auth/refresh') {
         console.error('Refresh token失败，跳转登录页')
         await userStore.logout()
         return Promise.reject(error)
