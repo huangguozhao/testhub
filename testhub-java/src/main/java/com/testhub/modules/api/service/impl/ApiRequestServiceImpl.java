@@ -145,7 +145,7 @@ public class ApiRequestServiceImpl extends ServiceImpl<ApiRequestMapper, ApiRequ
         }
 
         log.info("执行API请求: id={}, url={}", dto.getRequestId(), request.getUrl());
-        return apiExecutor.execute(request, variables);
+        return apiExecutor.execute(request, variables, null, null);
     }
 
     @Override

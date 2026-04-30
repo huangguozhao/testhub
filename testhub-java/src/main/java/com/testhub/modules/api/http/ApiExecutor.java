@@ -6,11 +6,7 @@ import com.testhub.modules.api.domain.ApiEnvironment;
 import com.testhub.modules.api.domain.ApiExecutionRecord;
 import com.testhub.modules.api.domain.ApiRequest;
 import com.testhub.modules.api.domain.ApiTestSuite;
-import com.testhub.modules.api.service.ApiCollectionService;
-import com.testhub.modules.api.service.ApiEnvironmentService;
-import com.testhub.modules.api.service.ApiExecutionRecordService;
-import com.testhub.modules.api.service.ApiRequestService;
-import com.testhub.modules.api.service.ApiTestSuiteService;
+import com.testhub.modules.api.service.*;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,12 +35,22 @@ public class ApiExecutor {
     private final ApiTestSuiteService apiTestSuiteService;
     private final AssertionEngine assertionEngine;
     private final VariableExtractor variableExtractor;
+    private final ApiRequestHistoryService apiRequestHistoryService;
 
     /**
      * 执行API请求
      */
     public ApiResponse execute(ApiRequest request, Map<String, String> variables) {
+        return execute(request, variables, null, null);
+    }
+
+    /**
+     * 执行API请求并保存历史记录
+     */
+    public ApiResponse execute(ApiRequest request, Map<String, String> variables,
+                               Long suiteExecutionId, Long executedBy) {
         long startTime = System.currentTimeMillis();
+        ApiResponse response;
 
         try {
             // 替换变量
@@ -56,7 +62,7 @@ public class ApiExecutor {
             HttpEntity<String> entity = new HttpEntity<>(body, headers);
 
             // 发送请求
-            ResponseEntity<String> response = restTemplate.exchange(
+            ResponseEntity<String> httpResponse = restTemplate.exchange(
                     url,
                     HttpMethod.valueOf(request.getMethod().toUpperCase()),
                     entity,
@@ -65,11 +71,11 @@ public class ApiExecutor {
 
             long duration = System.currentTimeMillis() - startTime;
 
-            return ApiResponse.builder()
+            response = ApiResponse.builder()
                     .success(true)
-                    .statusCode(response.getStatusCode().value())
-                    .headers(response.getHeaders().toSingleValueMap())
-                    .body(response.getBody())
+                    .statusCode(httpResponse.getStatusCode().value())
+                    .headers(httpResponse.getHeaders().toSingleValueMap())
+                    .body(httpResponse.getBody())
                     .responseTime(duration)
                     .build();
 
@@ -77,12 +83,17 @@ public class ApiExecutor {
             long duration = System.currentTimeMillis() - startTime;
             log.error("API执行失败: {}", e.getMessage(), e);
 
-            return ApiResponse.builder()
+            response = ApiResponse.builder()
                     .success(false)
                     .error(e.getMessage())
                     .responseTime(duration)
                     .build();
         }
+
+        // 保存历史记录
+        saveRequestHistory(request, response, variables, suiteExecutionId, executedBy);
+
+        return response;
     }
 
     /**
@@ -201,6 +212,9 @@ public class ApiExecutor {
                         Map<String, String> extracted = variableExtractor.extractVariables(request.getExtractors(), response);
                         variables.putAll(extracted);
                     }
+
+                    // 保存历史记录
+                    saveRequestHistory(request, response, variables, null, null);
                 }
             }
 
@@ -270,6 +284,29 @@ public class ApiExecutor {
             }
         }
         return variables;
+    }
+
+    /**
+     * 保存请求历史记录
+     */
+    private void saveRequestHistory(ApiRequest request, ApiResponse response,
+                                    Map<String, String> variables, Long suiteExecutionId, Long executedBy) {
+        try {
+            apiRequestHistoryService.saveFromExecution(
+                    request.getId(),
+                    request.getMethod(),
+                    request.getUrl(),
+                    request.getHeaders(),
+                    request.getBodyContent(),
+                    response,
+                    request.getAssertions(),
+                    variables,
+                    suiteExecutionId,
+                    executedBy
+            );
+        } catch (Exception e) {
+            log.warn("保存请求历史失败: {}", e.getMessage());
+        }
     }
 
     /**
