@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Testing Report</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+        }
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+        .header .meta {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .summary-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .summary-card .label {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+        .summary-card .value {
+            font-size: 32px;
+            font-weight: 600;
+        }
+        .summary-card .value.passed {
+            color: #10b981;
+        }
+        .summary-card .value.failed {
+            color: #ef4444;
+        }
+        .summary-card .value.total {
+            color: #3b82f6;
+        }
+        .summary-card .value.duration {
+            color: #8b5cf6;
+            font-size: 24px;
+        }
+        .results {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            overflow: hidden;
+        }
+        .results-header {
+            padding: 20px;
+            border-bottom: 1px solid #e5e7eb;
+            font-weight: 600;
+            font-size: 16px;
+        }
+        .request-item {
+            border-bottom: 1px solid #f3f4f6;
+        }
+        .request-item:last-child {
+            border-bottom: none;
+        }
+        .request-header {
+            display: flex;
+            align-items: center;
+            padding: 16px 20px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .request-header:hover {
+            background: #f9fafb;
+        }
+        .request-header .method {
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-right: 12px;
+        }
+        .method.GET { background: #dbeafe; color: #1d4ed8; }
+        .method.POST { background: #d1fae5; color: #059669; }
+        .method.PUT { background: #fef3c7; color: #d97706; }
+        .method.DELETE { background: #fee2e2; color: #dc2626; }
+        .method.PATCH { background: #f3e8ff; color: #7c3aed; }
+        .request-name {
+            flex: 1;
+            font-weight: 500;
+        }
+        .request-status {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .request-status.passed {
+            background: #d1fae5;
+            color: #059669;
+        }
+        .request-status.failed {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+        .request-meta {
+            margin-left: 12px;
+            color: #888;
+            font-size: 13px;
+        }
+        .request-details {
+            display: none;
+            padding: 0 20px 20px;
+            background: #f9fafb;
+        }
+        .request-details.show {
+            display: block;
+        }
+        .detail-section {
+            margin-bottom: 16px;
+        }
+        .detail-section:last-child {
+            margin-bottom: 0;
+        }
+        .detail-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .detail-content {
+            background: white;
+            border-radius: 6px;
+            padding: 12px;
+            font-size: 13px;
+            overflow-x: auto;
+        }
+        .detail-content pre {
+            margin: 0;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .assertion-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            background: white;
+            border-radius: 6px;
+            margin-bottom: 6px;
+        }
+        .assertion-item:last-child {
+            margin-bottom: 0;
+        }
+        .assertion-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+        .assertion-icon.passed {
+            background: #d1fae5;
+            color: #059669;
+        }
+        .assertion-icon.failed {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+        .assertion-name {
+            flex: 1;
+        }
+        .assertion-result {
+            font-size: 12px;
+            color: #666;
+        }
+        .extracted-vars {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .var-tag {
+            background: #e0e7ff;
+            color: #4338ca;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #888;
+        }
+        .chart-container {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .pie-chart {
+            display: flex;
+            align-items: center;
+            gap: 40px;
+        }
+        .pie-legend {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+        }
+        .legend-color.passed { background: #10b981; }
+        .legend-color.failed { background: #ef4444; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>API Testing Report</h1>
+            <div class="meta">
+                <span id="suiteName">Test Suite</span> |
+                <span id="environment">Environment</span> |
+                <span id="executedAt">-</span>
+            </div>
+        </div>
+
+        <div class="summary">
+            <div class="summary-card">
+                <div class="label">Total Requests</div>
+                <div class="value total" id="totalCount">0</div>
+            </div>
+            <div class="summary-card">
+                <div class="label">Passed</div>
+                <div class="value passed" id="passCount">0</div>
+            </div>
+            <div class="summary-card">
+                <div class="label">Failed</div>
+                <div class="value failed" id="failCount">0</div>
+            </div>
+            <div class="summary-card">
+                <div class="label">Pass Rate</div>
+                <div class="value passed" id="passRate">0%</div>
+            </div>
+            <div class="summary-card">
+                <div class="label">Duration</div>
+                <div class="value duration" id="duration">0ms</div>
+            </div>
+        </div>
+
+        <div class="results">
+            <div class="results-header">Request Results</div>
+            <div id="resultsList"></div>
+        </div>
+    </div>
+
+    <script>
+        // Sample data - replace with actual test results
+        const reportData = {
+            suiteName: "用户服务集成测试",
+            environment: "测试环境",
+            executedAt: new Date().toLocaleString('zh-CN'),
+            totalCount: 3,
+            passCount: 2,
+            failCount: 1,
+            duration: 1250,
+            requestResults: [
+                {
+                    requestId: 1,
+                    requestName: "用户登录",
+                    method: "POST",
+                    url: "/auth/login",
+                    success: true,
+                    statusCode: 200,
+                    responseTime: 156,
+                    assertions: [
+                        { name: "状态码验证", passed: true, expected: "200", actual: "200" },
+                        { name: "包含token", passed: true, expected: "token", actual: "token" }
+                    ],
+                    extractedVariables: { accessToken: "eyJhbGciOiJIUzI1NiJ9..." }
+                },
+                {
+                    requestId: 2,
+                    requestName: "获取用户信息",
+                    method: "GET",
+                    url: "/users/me",
+                    success: true,
+                    statusCode: 200,
+                    responseTime: 89,
+                    assertions: [
+                        { name: "状态码验证", passed: true, expected: "200", actual: "200" }
+                    ]
+                },
+                {
+                    requestId: 3,
+                    requestName: "更新用户资料",
+                    method: "PUT",
+                    url: "/users/profile",
+                    success: false,
+                    statusCode: 401,
+                    responseTime: 45,
+                    error: "Unauthorized",
+                    assertions: [
+                        { name: "状态码验证", passed: false, expected: "200", actual: "401" }
+                    ]
+                }
+            ]
+        };
+
+        function renderReport(data) {
+            document.getElementById('suiteName').textContent = data.suiteName;
+            document.getElementById('environment').textContent = data.environment;
+            document.getElementById('executedAt').textContent = data.executedAt;
+            document.getElementById('totalCount').textContent = data.totalCount;
+            document.getElementById('passCount').textContent = data.passCount;
+            document.getElementById('failCount').textContent = data.failCount;
+            document.getElementById('passRate').textContent =
+                data.totalCount > 0 ? Math.round((data.passCount / data.totalCount) * 100) + '%' : '0%';
+            document.getElementById('duration').textContent = data.duration + 'ms';
+
+            const resultsList = document.getElementById('resultsList');
+            resultsList.innerHTML = data.requestResults.map((req, index) => `
+                <div class="request-item">
+                    <div class="request-header" onclick="toggleDetails(${index})">
+                        <span class="method ${req.method}">${req.method}</span>
+                        <span class="request-name">${req.requestName}</span>
+                        <span class="request-meta">${req.statusCode || '-'} | ${req.responseTime}ms</span>
+                        <span class="request-status ${req.success ? 'passed' : 'failed'}">
+                            ${req.success ? 'PASSED' : 'FAILED'}
+                        </span>
+                    </div>
+                    <div class="request-details" id="details-${index}">
+                        ${req.error ? `
+                            <div class="detail-section">
+                                <div class="detail-title">Error</div>
+                                <div class="detail-content">
+                                    <pre style="color: #dc2626;">${req.error}</pre>
+                                </div>
+                            </div>
+                        ` : ''}
+                        ${req.assertions && req.assertions.length > 0 ? `
+                            <div class="detail-section">
+                                <div class="detail-title">Assertions</div>
+                                <div class="detail-content">
+                                    ${req.assertions.map(a => `
+                                        <div class="assertion-item">
+                                            <span class="assertion-icon ${a.passed ? 'passed' : 'failed'}">
+                                                ${a.passed ? '✓' : '✗'}
+                                            </span>
+                                            <span class="assertion-name">${a.name}</span>
+                                            <span class="assertion-result">
+                                                ${a.passed ? 'Passed' : `${a.expected} ≠ ${a.actual}`}
+                                            </span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+                        ${req.extractedVariables && Object.keys(req.extractedVariables).length > 0 ? `
+                            <div class="detail-section">
+                                <div class="detail-title">Extracted Variables</div>
+                                <div class="detail-content">
+                                    <div class="extracted-vars">
+                                        ${Object.entries(req.extractedVariables).map(([key, value]) => `
+                                            <span class="var-tag">${key} = ${value.substring(0, 20)}${value.length > 20 ? '...' : ''}</span>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            </div>
+                        ` : ''}
+                        <div class="detail-section">
+                            <div class="detail-title">Request URL</div>
+                            <div class="detail-content">
+                                <pre>${req.url}</pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function toggleDetails(index) {
+            const details = document.getElementById(`details-${index}`);
+            details.classList.toggle('show');
+        }
+
+        renderReport(reportData);
+    </script>
+</body>
+</html>

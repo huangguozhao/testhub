@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.testhub.modules.project.mapper.ProjectMapper">
+
+    <resultMap id="BaseResultMap" type="com.testhub.modules.project.domain.Project">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="description" property="description"/>
+        <result column="status" property="status"/>
+        <result column="owner_id" property="ownerId"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+    </resultMap>
+
+    <resultMap id="WithCreatorResultMap" type="com.testhub.modules.project.domain.Project">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="description" property="description"/>
+        <result column="status" property="status"/>
+        <result column="owner_id" property="ownerId"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+        <result column="creator_username" property="creatorUsername"/>
+        <result column="creator_real_name" property="creatorRealName"/>
+    </resultMap>
+
+    <select id="selectProjectsByUserId" resultMap="BaseResultMap">
+        SELECT p.* FROM prj_project p
+        INNER JOIN prj_project_member pm ON p.id = pm.project_id
+        WHERE pm.user_id = #{userId} AND p.status = 'active'
+        ORDER BY p.created_at DESC
+    </select>
+
+    <select id="selectProjectWithCreator" resultMap="WithCreatorResultMap">
+        SELECT p.*,
+               u.username as creator_username,
+               u.real_name as creator_real_name
+        FROM prj_project p
+        LEFT JOIN sys_user u ON p.owner_id = u.id
+        WHERE p.id = #{id}
+    </select>
+
+    <select id="searchProjects" resultMap="BaseResultMap">
+        SELECT p.* FROM prj_project p
+        INNER JOIN prj_project_member pm ON p.id = pm.project_id
+        WHERE pm.user_id = #{userId}
+          AND p.status = 'active'
+          AND (p.name LIKE CONCAT('%', #{keyword}, '%')
+               OR p.description LIKE CONCAT('%', #{keyword}, '%'))
+        ORDER BY p.created_at DESC
+    </select>
+
+</mapper>

@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TestHub - AI驱动的测试管理平台</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #fafafa;
+            --bg-tertiary: #f5f5f5;
+            --text-primary: #1a1a1a;
+            --text-secondary: #666666;
+            --text-tertiary: #999999;
+            --border: #e5e5e5;
+            --accent: #1a1a1a;
+            --accent-light: #333333;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        /* Navigation */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 60px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+
+        .logo span {
+            color: var(--text-tertiary);
+            font-weight: 300;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 40px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 400;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--text-primary);
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .btn {
+            padding: 10px 24px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-primary);
+        }
+
+        .btn-ghost:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-light);
+        }
+
+        /* Main Content */
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 60px;
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 100px 0 80px;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 48px;
+            font-weight: 600;
+            letter-spacing: -1.5px;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        .hero h1 span {
+            background: linear-gradient(120deg, #1a1a1a 0%, #666666 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 18px;
+            color: var(--text-secondary);
+            max-width: 500px;
+            margin: 0 auto 40px;
+            font-weight: 300;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+        }
+
+        .hero-buttons .btn {
+            padding: 14px 32px;
+        }
+
+        /* Stats */
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 80px;
+            padding: 60px 0;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            margin: 60px 0;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 36px;
+            font-weight: 600;
+            letter-spacing: -1px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: var(--text-tertiary);
+            margin-top: 4px;
+        }
+
+        /* Section */
+        .section-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 30px;
+        }
+
+        /* Test Cards */
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            margin-bottom: 60px;
+        }
+
+        .test-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 28px;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .test-card:hover {
+            border-color: var(--text-tertiary);
+            transform: translateY(-2px);
+        }
+
+        .test-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        .test-type {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .test-status {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .status-pass { background: #22c55e; }
+        .status-fail { background: #ef4444; }
+        .status-pending { background: #eab308; }
+
+        .test-card h3 {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .test-card p {
+            font-size: 14px;
+            color: var(--text-secondary);
+            font-weight: 300;
+        }
+
+        .test-meta {
+            display: flex;
+            gap: 16px;
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+        }
+
+        .test-meta span {
+            font-size: 12px;
+            color: var(--text-tertiary);
+        }
+
+        /* AI Insights */
+        .insights-panel {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 32px;
+            margin: 60px 0;
+        }
+
+        .insights-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .insights-header h3 {
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        .ai-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: var(--text-tertiary);
+            background: var(--bg-tertiary);
+            padding: 6px 12px;
+            border-radius: 20px;
+        }
+
+        .ai-dot {
+            width: 6px;
+            height: 6px;
+            background: #22c55e;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .insight-item {
+            display: flex;
+            gap: 16px;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .insight-item:last-child {
+            border-bottom: none;
+        }
+
+        .insight-icon {
+            width: 36px;
+            height: 36px;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .insight-content h4 {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .insight-content p {
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 300;
+        }
+
+        /* Footer */
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 40px 60px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        footer p {
+            font-size: 13px;
+            color: var(--text-tertiary);
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 24px;
+        }
+
+        .footer-links a {
+            font-size: 13px;
+            color: var(--text-tertiary);
+            text-decoration: none;
+        }
+
+        .footer-links a:hover {
+            color: var(--text-primary);
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="logo">TestHub<span>.ai</span></div>
+        <ul class="nav-links">
+            <li><a href="#" class="active">概览</a></li>
+            <li><a href="#">测试用例</a></li>
+            <li><a href="#">执行记录</a></li>
+            <li><a href="#">报告</a></li>
+        </ul>
+        <div class="nav-right">
+            <button class="btn btn-ghost">文档</button>
+            <button class="btn btn-primary">新建测试</button>
+        </div>
+    </nav>
+
+    <main>
+        <section class="hero">
+            <h1>简约高效的<br><span>测试管理</span></h1>
+            <p>AI驱动的测试管理平台，帮助团队更高效地组织、执行和分析测试工作。</p>
+            <div class="hero-buttons">
+                <button class="btn btn-primary">开始使用</button>
+                <button class="btn btn-ghost">了解更多</button>
+            </div>
+        </section>
+
+        <section class="stats">
+            <div class="stat-item">
+                <div class="stat-value">1,284</div>
+                <div class="stat-label">测试用例</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">98.2%</div>
+                <div class="stat-label">通过率</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">156</div>
+                <div class="stat-label">本周执行</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">12</div>
+                <div class="stat-label">测试套件</div>
+            </div>
+        </section>
+
+        <div class="section-title">最近测试</div>
+        <div class="test-grid">
+            <div class="test-card">
+                <div class="test-card-header">
+                    <span class="test-type">单元测试</span>
+                    <span class="test-status status-pass"></span>
+                </div>
+                <h3>用户认证模块</h3>
+                <p>登录、注册、密码重置等功能测试</p>
+                <div class="test-meta">
+                    <span>23 个用例</span>
+                    <span>刚刚运行</span>
+                </div>
+            </div>
+
+            <div class="test-card">
+                <div class="test-card-header">
+                    <span class="test-type">集成测试</span>
+                    <span class="test-status status-pass"></span>
+                </div>
+                <h3>API 接口测试</h3>
+                <p>RESTful API 端点全面覆盖测试</p>
+                <div class="test-meta">
+                    <span>45 个用例</span>
+                    <span>2小时前</span>
+                </div>
+            </div>
+
+            <div class="test-card">
+                <div class="test-card-header">
+                    <span class="test-type">E2E 测试</span>
+                    <span class="test-status status-fail"></span>
+                </div>
+                <h3>支付流程测试</h3>
+                <p>完整的支付链路端到端验证</p>
+                <div class="test-meta">
+                    <span>8 个用例</span>
+                    <span>5小时前</span>
+                </div>
+            </div>
+
+            <div class="test-card">
+                <div class="test-card-header">
+                    <span class="test-type">性能测试</span>
+                    <span class="test-status status-pending"></span>
+                </div>
+                <h3>接口响应时间</h3>
+                <p>关键接口性能基准测试</p>
+                <div class="test-meta">
+                    <span>15 个用例</span>
+                    <span>昨天</span>
+                </div>
+            </div>
+
+            <div class="test-card">
+                <div class="test-card-header">
+                    <span class="test-type">安全测试</span>
+                    <span class="test-status status-pass"></span>
+                </div>
+                <h3>XSS 防护验证</h3>
+                <p>跨站脚本攻击防护能力测试</p>
+                <div class="test-meta">
+                    <span>32 个用例</span>
+                    <span>2天前</span>
+                </div>
+            </div>
+
+            <div class="test-card">
+                <div class="test-card-header">
+                    <span class="test-type">UI 测试</span>
+                    <span class="test-status status-pass"></span>
+                </div>
+                <h3>响应式布局</h3>
+                <p>多端设备界面适配验证</p>
+                <div class="test-meta">
+                    <span>18 个用例</span>
+                    <span>3天前</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="insights-panel">
+            <div class="insights-header">
+                <h3>AI 智能分析</h3>
+                <div class="ai-badge">
+                    <span class="ai-dot"></span>
+                    AI 分析中
+                </div>
+            </div>
+            <div class="insight-item">
+                <div class="insight-icon">📊</div>
+                <div class="insight-content">
+                    <h4>覆盖率趋势</h4>
+                    <p>本周测试覆盖率提升 12%，建议继续关注边缘场景测试。</p>
+                </div>
+            </div>
+            <div class="insight-item">
+                <div class="insight-icon">⚠️</div>
+                <div class="insight-content">
+                    <h4>失败风险预警</h4>
+                    <p>支付模块有 2 个用例存在不稳定因素，建议优先修复。</p>
+                </div>
+            </div>
+            <div class="insight-item">
+                <div class="insight-icon">💡</div>
+                <div class="insight-content">
+                    <h4>优化建议</h4>
+                    <p>可复用测试用例 28 个，建议提取公共方法减少重复代码。</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 TestHub. 简约测试管理平台</p>
+        <div class="footer-links">
+            <a href="#">帮助文档</a>
+            <a href="#">更新日志</a>
+            <a href="#">联系我们</a>
+        </div>
+    </footer>
+</body>
+</html>

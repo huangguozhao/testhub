@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.testhub.modules.system.mapper.UserMapper">
+
+    <resultMap id="BaseResultMap" type="com.testhub.modules.system.domain.User">
+        <id column="id" property="id"/>
+        <result column="username" property="username"/>
+        <result column="email" property="email"/>
+        <result column="password" property="password"/>
+        <result column="real_name" property="realName"/>
+        <result column="phone" property="phone"/>
+        <result column="avatar" property="avatar"/>
+        <result column="status" property="status"/>
+        <result column="last_login_time" property="lastLoginTime"/>
+        <result column="last_login_ip" property="lastLoginIp"/>
+        <result column="is_deleted" property="isDeleted"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+    </resultMap>
+
+    <select id="selectByUsername" resultMap="BaseResultMap">
+        SELECT * FROM sys_user
+        WHERE username = #{username} AND is_deleted = 0
+    </select>
+
+    <select id="selectByEmail" resultMap="BaseResultMap">
+        SELECT * FROM sys_user
+        WHERE email = #{email} AND is_deleted = 0
+    </select>
+
+    <select id="selectByUsernameOrEmail" resultMap="BaseResultMap">
+        SELECT * FROM sys_user
+        WHERE (username = #{username} OR email = #{email}) AND is_deleted = 0
+    </select>
+
+    <select id="selectUserPage" resultMap="BaseResultMap">
+        SELECT * FROM sys_user
+        WHERE is_deleted = 0
+        <if test="keyword != null and keyword != ''">
+            AND (username LIKE CONCAT('%', #{keyword}, '%')
+                 OR real_name LIKE CONCAT('%', #{keyword}, '%')
+                 OR email LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+        ORDER BY created_at DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="selectUserCount" resultType="long">
+        SELECT COUNT(*) FROM sys_user
+        WHERE is_deleted = 0
+        <if test="keyword != null and keyword != ''">
+            AND (username LIKE CONCAT('%', #{keyword}, '%')
+                 OR real_name LIKE CONCAT('%', #{keyword}, '%')
+                 OR email LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+    </select>
+
+    <select id="selectProjectCountByUserId" resultType="long">
+        SELECT COUNT(DISTINCT pm.project_id)
+        FROM prj_project_member pm
+        JOIN prj_project p ON pm.project_id = p.id
+        WHERE pm.user_id = #{userId} AND p.status = 'active'
+    </select>
+
+</mapper>

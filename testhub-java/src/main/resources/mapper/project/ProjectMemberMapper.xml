@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.testhub.modules.project.mapper.ProjectMemberMapper">
+
+    <resultMap id="BaseResultMap" type="com.testhub.modules.project.domain.ProjectMember">
+        <id column="id" property="id"/>
+        <result column="project_id" property="projectId"/>
+        <result column="user_id" property="userId"/>
+        <result column="role" property="role"/>
+        <result column="joined_at" property="joinedAt"/>
+    </resultMap>
+
+    <resultMap id="WithUserResultMap" type="com.testhub.modules.project.domain.ProjectMember">
+        <id column="id" property="id"/>
+        <result column="project_id" property="projectId"/>
+        <result column="user_id" property="userId"/>
+        <result column="role" property="role"/>
+        <result column="joined_at" property="joinedAt"/>
+        <result column="username" property="username"/>
+        <result column="real_name" property="realName"/>
+        <result column="email" property="email"/>
+        <result column="avatar" property="avatar"/>
+    </resultMap>
+
+    <select id="selectByProjectId" resultMap="WithUserResultMap">
+        SELECT pm.*, u.username, u.real_name, u.email, u.avatar
+        FROM prj_project_member pm
+        INNER JOIN sys_user u ON pm.user_id = u.id
+        WHERE pm.project_id = #{projectId}
+        ORDER BY
+            CASE pm.role
+                WHEN 'owner' THEN 1
+                WHEN 'admin' THEN 2
+                WHEN 'developer' THEN 3
+                WHEN 'tester' THEN 4
+                ELSE 5
+            END,
+            pm.joined_at ASC
+    </select>
+
+    <select id="selectByProjectAndUser" resultMap="BaseResultMap">
+        SELECT * FROM prj_project_member
+        WHERE project_id = #{projectId} AND user_id = #{userId}
+    </select>
+
+    <select id="countByUserId" resultType="long">
+        SELECT COUNT(*) FROM prj_project_member
+        WHERE user_id = #{userId}
+    </select>
+
+    <select id="existsByProjectAndUser" resultType="boolean">
+        SELECT COUNT(*) > 0 FROM prj_project_member
+        WHERE project_id = #{projectId} AND user_id = #{userId}
+    </select>
+
+    <select id="selectByUserId" resultMap="BaseResultMap">
+        SELECT * FROM prj_project_member
+        WHERE user_id = #{userId}
+    </select>
+
+</mapper>
