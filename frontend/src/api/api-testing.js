@@ -1,6 +1,6 @@
 import request from '@/utils/api'
 
-// 仪表盘相关API - 需要后端实现 /api/api-testing/dashboard/stats
+// 仪表盘相关API
 export function getDashboardStats() {
   return request({
     url: '/api-testing/dashboard/stats/',
@@ -11,7 +11,7 @@ export function getDashboardStats() {
 // 获取定时任务列表
 export function getScheduledTasks(params) {
   return request({
-    url: '/api-testing/scheduled-tasks/',
+    url: '/api-scheduled-tasks/',
     method: 'get',
     params
   })
@@ -20,7 +20,7 @@ export function getScheduledTasks(params) {
 // 创建定时任务
 export function createScheduledTask(data) {
   return request({
-    url: '/api-testing/scheduled-tasks/',
+    url: '/api-scheduled-tasks/',
     method: 'post',
     data
   })
@@ -29,7 +29,7 @@ export function createScheduledTask(data) {
 // 更新定时任务
 export function updateScheduledTask(id, data) {
   return request({
-    url: `/api-testing/scheduled-tasks/${id}/`,
+    url: `/api-scheduled-tasks/${id}/`,
     method: 'patch',
     data
   })
@@ -38,7 +38,7 @@ export function updateScheduledTask(id, data) {
 // 删除定时任务
 export function deleteScheduledTask(id) {
   return request({
-    url: `/api-testing/scheduled-tasks/${id}/`,
+    url: `/api-scheduled-tasks/${id}/`,
     method: 'delete'
   })
 }
@@ -46,7 +46,7 @@ export function deleteScheduledTask(id) {
 // 立即执行定时任务
 export function runScheduledTask(id) {
   return request({
-    url: `/api-testing/scheduled-tasks/${id}/run_now/`,
+    url: `/api-scheduled-tasks/${id}/run_now/`,
     method: 'post'
   })
 }
@@ -54,7 +54,7 @@ export function runScheduledTask(id) {
 // 获取执行日志
 export function getExecutionLogs(taskId, params = {}) {
   return request({
-    url: `/api-testing/scheduled-tasks/${taskId}/execution_logs/`,
+    url: `/api-scheduled-tasks/${taskId}/execution_logs/`,
     method: 'get',
     params
   })
@@ -63,7 +63,7 @@ export function getExecutionLogs(taskId, params = {}) {
 // 获取测试套件列表
 export function getTestSuites(params) {
   return request({
-    url: '/api-testing/test-suites/',
+    url: '/api-test-suites/',
     method: 'get',
     params
   })
@@ -72,7 +72,7 @@ export function getTestSuites(params) {
 // 获取API请求列表
 export function getApiRequests(params) {
   return request({
-    url: '/api-testing/requests/',
+    url: '/api-requests/',
     method: 'get',
     params
   })
@@ -81,7 +81,7 @@ export function getApiRequests(params) {
 // 获取环境列表
 export function getEnvironments(params) {
   return request({
-    url: '/api-testing/environments/',
+    url: '/api-environments/',
     method: 'get',
     params
   })
@@ -90,7 +90,7 @@ export function getEnvironments(params) {
 // 获取项目列表
 export function getApiProjects(params) {
   return request({
-    url: '/api-testing/projects/',
+    url: '/api-projects/',
     method: 'get',
     params
   })
@@ -99,7 +99,7 @@ export function getApiProjects(params) {
 // 获取集合列表
 export function getApiCollections(params) {
   return request({
-    url: '/api-testing/collections/',
+    url: '/api-collections/',
     method: 'get',
     params
   })
@@ -108,7 +108,7 @@ export function getApiCollections(params) {
 // 执行测试套件
 export function executeTestSuite(id, data) {
   return request({
-    url: `/api-testing/test-suites/${id}/execute/`,
+    url: `/api-test-suites/${id}/execute/`,
     method: 'post',
     data
   })
@@ -117,7 +117,7 @@ export function executeTestSuite(id, data) {
 // 执行API请求
 export function executeApiRequest(id, data) {
   return request({
-    url: `/api-testing/api-requests/${id}/execute/`,
+    url: `/api-requests/${id}/execute/`,
     method: 'post',
     data
   })
@@ -126,7 +126,7 @@ export function executeApiRequest(id, data) {
 // 获取执行结果
 export function getExecutionResult(id) {
   return request({
-    url: `/api-testing/executions/${id}/`,
+    url: `/api-execution-records/${id}/`,
     method: 'get'
   })
 }
@@ -134,7 +134,7 @@ export function getExecutionResult(id) {
 // 获取请求历史
 export function getRequestHistory(params) {
   return request({
-    url: '/api-testing/histories/',
+    url: '/api-request-histories/',
     method: 'get',
     params
   })
@@ -143,7 +143,7 @@ export function getRequestHistory(params) {
 // 删除请求历史
 export function deleteRequestHistory(id) {
   return request({
-    url: `/api-testing/histories/${id}/`,
+    url: `/api-request-histories/${id}/`,
     method: 'delete'
   })
 }
@@ -151,7 +151,7 @@ export function deleteRequestHistory(id) {
 // 批量删除请求历史
 export function batchDeleteRequestHistory(ids) {
   return request({
-    url: '/api-testing/histories/batch-delete/',
+    url: '/api-request-histories/batch-delete/',
     method: 'post',
     data: { ids }
   })
