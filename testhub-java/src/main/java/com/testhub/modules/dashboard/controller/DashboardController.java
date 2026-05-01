@@ -2,10 +2,10 @@ package com.testhub.modules.dashboard.controller;
 
 import com.testhub.common.result.Result;
 import com.testhub.modules.dashboard.dto.DashboardStatsDTO;
-import com.testhub.modules.api.service.ApiProjectService;
-import com.testhub.modules.api.service.ApiRequestService;
-import com.testhub.modules.api.service.ApiTestSuiteService;
-import com.testhub.modules.api.service.ApiRequestHistoryService;
+import com.testhub.modules.api_testing.service.ApiProjectService;
+import com.testhub.modules.api_testing.service.ApiRequestService;
+import com.testhub.modules.api_testing.service.ApiTestSuiteService;
+import com.testhub.modules.api_testing.service.ApiRequestHistoryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
