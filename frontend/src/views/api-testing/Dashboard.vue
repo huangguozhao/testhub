@@ -212,8 +212,8 @@ const loadDashboardData = async () => {
   try {
     // 并行加载统计数据和操作日志
     const [statsRes, logsRes] = await Promise.all([
-      getDashboardStats(),
-      getOperationLogs({ page_size: 20, ordering: '-created_at' })
+      getDashboardStats().catch(err => ({ data: {} })),
+      getOperationLogs({ page_size: 20, ordering: '-created_at' }).catch(err => ({ data: { results: [] } }))
     ])
 
     // 更新统计数据
@@ -222,12 +222,11 @@ const loadDashboardData = async () => {
     interfaceCount.value = stats.interface_count || 0
     suiteCount.value = stats.suite_count || 0
     historyCount.value = stats.history_count || 0
-    
+
     // 更新操作日志
-    operationLogs.value = logsRes.data.results || []
+    operationLogs.value = logsRes.data?.results || []
 
   } catch (error) {
-    // ElMessage.error('加载仪表板数据失败')
     console.error('加载仪表板数据失败:', error)
   } finally {
     loading.value = false

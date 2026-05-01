@@ -1,6 +1,6 @@
 import request from '@/utils/api'
 
-// 仪表盘相关API
+// 仪表盘相关API - 需要后端实现 /api/api-testing/dashboard/stats
 export function getDashboardStats() {
   return request({
     url: '/api-testing/dashboard/stats/',
@@ -168,7 +168,7 @@ export function getUsers(params) {
 // 获取操作日志
 export function getOperationLogs(params) {
   return request({
-    url: '/api-testing/operation-logs/',
+    url: '/operation-logs/',
     method: 'get',
     params
   })
