@@ -141,7 +141,8 @@ const handleLogin = async () => {
         ElMessage.success(t('auth.loginSuccess'))
         await router.replace('/home')
       } catch (error) {
-        ElMessage.error(error.response?.data?.error || t('auth.loginFailed'))
+        const errorMsg = error.response?.data?.error || error.response?.data?.message || t('auth.loginFailed')
+        ElMessage.error(errorMsg)
       } finally {
         loading.value = false
       }

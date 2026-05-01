@@ -188,6 +188,13 @@ const form = reactive({
   position: ''
 })
 
+// 合并姓和名为真实姓名
+const getRealName = () => {
+  const first = form.first_name?.trim() || ''
+  const last = form.last_name?.trim() || ''
+  return [first, last].filter(Boolean).join(' ')
+}
+
 const rules = {
   username: [
     { required: true, message: computed(() => t('auth.usernameRequired')), trigger: 'blur' },
@@ -223,11 +230,17 @@ const handleRegister = async () => {
     if (valid) {
       loading.value = true
       try {
-        await userStore.register(form)
+        const registerData = {
+          username: form.username,
+          email: form.email,
+          password: form.password,
+          realName: getRealName()
+        }
+        await userStore.register(registerData)
         ElMessage.success(t('auth.registerSuccess'))
         router.push('/login')
       } catch (error) {
-        ElMessage.error(error.response?.data?.error || t('auth.registerFailed'))
+        ElMessage.error(error.response?.data?.message || error.response?.data?.error || t('auth.registerFailed'))
       } finally {
         loading.value = false
       }

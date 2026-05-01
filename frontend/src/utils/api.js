@@ -91,9 +91,19 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => {
     // Java后端返回: { code, message, data }
-    // 统一处理，提取data字段
-    if (response.data && response.data.data !== undefined) {
-      response.data = response.data.data
+    // 检查业务状态码，只有成功时才提取data
+    if (response.data && typeof response.data.code !== 'undefined') {
+      if (response.data.code !== 0 && response.data.code !== '0' && response.data.code !== '200' && response.data.code !== 200) {
+        // 业务错误，抛出错误让catch处理
+        const error = new Error(response.data.message || '请求失败')
+        error.response = response
+        error.response.data = response.data
+        return Promise.reject(error)
+      }
+      // 成功时提取data字段
+      if (response.data.data !== undefined) {
+        response.data = response.data.data
+      }
     }
     return response
   },
@@ -169,6 +179,8 @@ api.interceptors.response.use(
       ElMessage.error(error.response.data.error)
     } else if (error.response?.data?.detail) {
       ElMessage.error(error.response.data.detail)
+    } else if (error.response?.data?.message) {
+      ElMessage.error(error.response.data.message)
     }
 
     return Promise.reject(error)
