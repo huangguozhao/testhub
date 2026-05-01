@@ -1,6 +1,7 @@
 package com.testhub.modules.api.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.service.IService;
 import com.testhub.modules.api.domain.ApiRequestHistory;
 import com.testhub.modules.api.dto.ApiRequestHistoryDTO;
 import com.testhub.modules.api.http.ApiResponse;
@@ -11,7 +12,7 @@ import java.util.Map;
 /**
  * API请求历史记录服务接口
  */
-public interface ApiRequestHistoryService {
+public interface ApiRequestHistoryService extends IService<ApiRequestHistory> {
 
     /**
      * 保存请求执行历史
