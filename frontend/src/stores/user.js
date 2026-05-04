@@ -59,9 +59,10 @@ export const useUserStore = defineStore('user', () => {
   const login = async (credentials) => {
     try {
       const response = await api.post('/auth/login', credentials)
-      // api interceptor已提取data: response.data = { accessToken, refreshToken, user }
-      accessToken.value = response.data.accessToken
-      refreshToken.value = response.data.refreshToken
+      // api interceptor已提取data: response.data = { access_token, refresh_token, user }
+      // 注意：后端返回的是下划线格式
+      accessToken.value = response.data.access_token
+      refreshToken.value = response.data.refresh_token
       user.value = response.data.user
 
       // 计算过期时间（当前时间 + 15分钟，与后端一致）
@@ -106,7 +107,7 @@ export const useUserStore = defineStore('user', () => {
     try {
       if (refreshToken.value && !isTokenExpired.value) {
         try {
-          await api.post('/auth/logout', { refreshToken: refreshToken.value })
+          await api.post('/auth/logout', { refresh_token: refreshToken.value })
         } catch (apiError) {
           console.error('Logout API调用失败:', apiError)
         }
@@ -132,23 +133,23 @@ export const useUserStore = defineStore('user', () => {
   const refreshAccessToken = async () => {
     try {
       const response = await api.post('/auth/refresh', {
-        refreshToken: refreshToken.value
+        refresh_token: refreshToken.value
       })
 
-      // api interceptor已提取data
-      accessToken.value = response.data.accessToken
+      // api interceptor已提取data，后端返回下划线格式
+      accessToken.value = response.data.access_token
       const expiresAt = Date.now() + 15 * 60 * 1000
       tokenExpiresAt.value = expiresAt
 
-      if (response.data.refreshToken) {
-        refreshToken.value = response.data.refreshToken
+      if (response.data.refresh_token) {
+        refreshToken.value = response.data.refresh_token
         localStorage.setItem('refresh_token', refreshToken.value)
       }
 
       localStorage.setItem('access_token', accessToken.value)
       localStorage.setItem('token_expires_at', expiresAt.toString())
 
-      return response.data.accessToken
+      return response.data.access_token
     } catch (error) {
       console.error('Token refresh failed:', error)
       await logout()

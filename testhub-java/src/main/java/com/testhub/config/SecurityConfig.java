@@ -54,8 +54,6 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",
                                 "/actuator/**"
                         ).permitAll()
-                        // ADMIN 接口需要管理员角色
-                        .requestMatchers("/api/users/**").hasAnyRole("ADMIN", "SUPERUSER")
                         // 其他请求需要认证
                         .anyRequest().authenticated())
                 // 添加 JWT 过滤器

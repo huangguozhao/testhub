@@ -273,14 +273,14 @@ const formatDate = (dateString) => {
 const loadProjects = async () => {
   loading.value = true
   try {
-    const response = await api.get('/api-projects/', {
+    const response = await api.get('/api-projects', {
       params: {
         page: currentPage.value,
         page_size: pageSize.value
       }
     })
-    projects.value = response.data.results
-    total.value = response.data.count
+    projects.value = response.data.records
+    total.value = response.data.total
   } catch (error) {
     ElMessage.error(t('apiTesting.messages.error.loadProjects'))
     console.error(error)
@@ -291,8 +291,8 @@ const loadProjects = async () => {
 
 const loadUsers = async () => {
   try {
-    const response = await api.get('/api/users/')
-    users.value = response.data.results || response.data
+    const response = await api.get('/users')
+    users.value = response.data.records || response.data
   } catch (error) {
     ElMessage.error(t('apiTesting.messages.error.loadUsers'))
     console.error(error)
@@ -340,7 +340,7 @@ const deleteProject = async (project) => {
       }
     )
 
-    await api.delete(`/api-projects/${project.id}/`)
+    await api.delete(`/api-projects/${project.id}`)
     ElMessage.success(t('apiTesting.messages.success.delete'))
     await loadProjects()
   } catch (error) {
@@ -368,10 +368,10 @@ const submitForm = async () => {
     }
     
     if (editingProject.value) {
-      await api.put(`/api-projects/${editingProject.value.id}/`, data)
+      await api.put(`/api-projects/${editingProject.value.id}`, data)
       ElMessage.success(t('apiTesting.messages.success.projectUpdated'))
     } else {
-      await api.post('/api-projects/', data)
+      await api.post('/api-projects', data)
       ElMessage.success(t('apiTesting.messages.success.projectCreated'))
     }
 

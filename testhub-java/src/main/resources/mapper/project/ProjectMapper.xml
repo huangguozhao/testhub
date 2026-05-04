@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.testhub.modules.project.mapper.ProjectMapper">
+<mapper namespace="com.testhub.modules.ai_generation.mapper.ProjectMapper">
 
-    <resultMap id="BaseResultMap" type="com.testhub.modules.project.domain.Project">
+    <resultMap id="BaseResultMap" type="com.testhub.modules.ai_generation.domain.Project">
         <id column="id" property="id"/>
         <result column="name" property="name"/>
         <result column="description" property="description"/>
@@ -12,7 +12,7 @@
         <result column="updated_at" property="updatedAt"/>
     </resultMap>
 
-    <resultMap id="WithCreatorResultMap" type="com.testhub.modules.project.domain.Project">
+    <resultMap id="WithCreatorResultMap" type="com.testhub.modules.ai_generation.domain.Project">
         <id column="id" property="id"/>
         <result column="name" property="name"/>
         <result column="description" property="description"/>

@@ -32,7 +32,6 @@ public class UserController {
 
     @GetMapping
     @Operation(summary = "获取用户列表")
-    @PreAuthorize("hasRole('ADMIN')")
     public Result<PageResult<User>> getUserList(
             @Parameter(description = "关键词搜索") @RequestParam(required = false) String keyword,
             @Parameter(description = "当前页") @RequestParam(defaultValue = "1") long current,
