@@ -1033,14 +1033,14 @@ const onSearch = async (value) => {
   }
 
   try {
-    const response = await api.get('/api-testing/collections/search', {
+    const response = await api.get('/api-collections', {
       params: {
-        project: selectedProject.value,
+        projectId: selectedProject.value,
         keyword: value
       }
     })
-    // 后端可能返回分页格式 { results: [...] } 或直接返回数组
-    filteredCollections.value = response.data.results || response.data || []
+    // 后端返回分页格式 { records: [...] }
+    filteredCollections.value = response.data.records || response.data || []
   } catch (error) {
     ElMessage.error('搜索失败')
     console.error('搜索失败:', error)
@@ -1067,9 +1067,9 @@ const onProjectChange = async (projectId) => {
 
 const loadProjects = async () => {
   try {
-    const response = await api.get('/api-testing/projects/')
-    // 后端可能返回分页格式 { results: [...] } 或直接返回数组
-    projects.value = response.data.results || response.data || []
+    const response = await api.get('/api-projects')
+    // 后端返回分页格式 { records: [...] }
+    projects.value = response.data.records || response.data || []
     if (projects.value.length > 0) {
       selectedProject.value = projects.value[0].id
       await loadCollections(selectedProject.value)
@@ -1083,13 +1083,13 @@ const loadProjects = async () => {
 
 const loadCollections = async (projectId) => {
   try {
-    const response = await api.get('/api-testing/collections/', {
+    const response = await api.get('/api-collections', {
       params: {
-        project: projectId
+        projectId: projectId
       }
     })
-    // 后端可能返回分页格式 { results: [...] } 或直接返回数组
-    const collectionsData = response.data.results || response.data || []
+    // 后端返回分页格式 { records: [...], total, current, size }
+    const collectionsData = response.data.records || response.data || []
 
     // 构建树形结构
     collections.value = buildTree(collectionsData)
@@ -1105,13 +1105,13 @@ const loadCollections = async (projectId) => {
 
 const loadEnvironments = async (projectId) => {
   try {
-    const response = await api.get('/api-testing/environments/', {
+    const response = await api.get('/api-environments', {
       params: {
-        project: projectId
+        projectId: projectId
       }
     })
-    // 后端可能返回分页格式 { results: [...] } 或直接返回数组
-    environments.value = response.data.results || response.data || []
+    // 后端返回分页格式 { records: [...], total, current, size }
+    environments.value = response.data.records || response.data || []
   } catch (error) {
     ElMessage.error('加载环境失败')
     console.error('加载环境失败:', error)
@@ -1165,8 +1165,8 @@ const loadRequests = async () => {
   if (!selectedProject.value) return
 
   try {
-    const response = await api.get('/api-testing/requests/')
-    const requests = response.data.results || response.data || []
+    const response = await api.get('/api-requests')
+    const requests = response.data.records || response.data || []
 
     // 清空所有集合的子节点（请求）
     collections.value.forEach(collection => {
@@ -1220,7 +1220,7 @@ const flattenCollections = (items, parent = null) => {
 const onNodeClick = async (data) => {
   if (data.type === 'request') {
     try {
-      const apiResponse = await api.get(`/api-testing/requests/${data.id}/`)
+      const apiResponse = await api.get(`/api-requests/${data.id}`)
       const requestData = apiResponse.data
 
       // 初始化currentHeaders
@@ -1449,9 +1449,9 @@ const deleteNode = () => {
   ).then(async () => {
     try {
       if (node.type === 'collection') {
-        await api.delete(`/api-testing/collections/${node.id}/`)
+        await api.delete(`/api-collections/${node.id}`)
       } else {
-        await api.delete(`/api-testing/requests/${node.id}/`)
+        await api.delete(`/api-requests/${node.id}`)
       }
       ElMessage.success('删除成功')
       await loadCollections(selectedProject.value)
@@ -1473,7 +1473,7 @@ const saveCollectionName = async () => {
   }
 
   try {
-    await api.put(`/api-testing/collections/${editingNodeId.value}/`, {
+    await api.put(`/api-collections/${editingNodeId.value}`, {
       name: editingNodeName.value.trim()
     })
     ElMessage.success('保存成功')
@@ -1688,7 +1688,7 @@ const sendRequest = async () => {
       requestData.body = bodyData
     }
 
-    const apiResponse = await api.post(`/api-testing/requests/${selectedRequest.value.id}/execute/`, requestData)
+    const apiResponse = await api.post(`/api-requests/${selectedRequest.value.id}/execute`, requestData)
     response.value = apiResponse.data
 
     ElMessage.success('请求成功')
@@ -1790,9 +1790,9 @@ const saveRequest = async () => {
 
     let response
     if (selectedRequest.value.id) {
-      response = await api.put(`/api-testing/requests/${selectedRequest.value.id}/`, requestData)
+      response = await api.put(`/api-requests/${selectedRequest.value.id}`, requestData)
     } else {
-      response = await api.post('/api-testing/requests/', requestData)
+      response = await api.post('/api-requests', requestData)
     }
 
     selectedRequest.value = response.data
@@ -1965,7 +1965,7 @@ const createCollection = async () => {
   }
 
   try {
-    const response = await api.post('/api-testing/collections/', {
+    const response = await api.post('/api-collections', {
       ...collectionForm,
       project: selectedProject.value
     })
@@ -1988,7 +1988,7 @@ const updateCollection = async () => {
   }
 
   try {
-    await api.put(`/api-testing/collections/${editCollectionForm.id}/`, editCollectionForm)
+    await api.put(`/api-collections/${editCollectionForm.id}`, editCollectionForm)
     ElMessage.success('更新成功')
     await loadCollections(selectedProject.value)
     showEditCollectionDialog.value = false
