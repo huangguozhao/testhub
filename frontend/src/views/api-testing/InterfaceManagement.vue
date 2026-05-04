@@ -50,10 +50,10 @@
           >
             <template #default="{ node, data }">
               <div class="tree-node">
-                <el-icon v-if="data.type === 'collection'">
+                <el-icon v-if="data.type === 'collection'" class="collection-icon">
                   <Folder />
                 </el-icon>
-                <el-icon v-else>
+                <el-icon v-else class="request-icon">
                   <Document />
                 </el-icon>
 
@@ -1131,9 +1131,9 @@ const buildTree = (items) => {
   })
 
   items.forEach(item => {
-    if (item.parent) {
-      if (map[item.parent]) {
-        map[item.parent].children.push(map[item.id])
+    if (item.parent_id) {
+      if (map[item.parent_id]) {
+        map[item.parent_id].children.push(map[item.id])
       }
     } else {
       roots.push(map[item.id])
@@ -1178,9 +1178,10 @@ const loadRequests = async () => {
 
     // 将请求添加到对应集合中或直接添加到根级别
     requests.forEach(request => {
-      if (request.collection) {
+      // 后端返回 collection_id，前端用 collection_id 关联
+      if (request.collection_id) {
         // 有关联集合的请求，添加到对应集合下
-        const collection = findCollectionById(collections.value, request.collection)
+        const collection = findCollectionById(collections.value, request.collection_id)
         if (collection) {
           if (!collection.children) collection.children = []
           collection.children.push({
@@ -2716,40 +2717,200 @@ const useLocalVariableCategories = () => {
 .collection-tree {
   flex: 1;
   overflow: auto;
-  padding: 10px;
+  padding: 8px 0;
 }
 
-/* 树节点样式 */
+/* ============================================
+   树形结构 - 文件夹式层级样式
+   ============================================ */
+
+/* 重置 el-tree 默认样式 */
+.el-tree {
+  background: transparent;
+  --el-tree-node-hover-bg-color: #f5f7fa;
+}
+
+.el-tree-node {
+  position: relative;
+}
+
+/* 节点内容容器 */
+.el-tree-node__content {
+  height: 34px;
+  border-radius: 6px;
+  margin: 1px 8px;
+  padding-left: 8px !important;
+  transition: all 0.2s ease;
+  background: #ffffff;
+  border: 1px solid #e4e7ed;
+  position: relative;
+}
+
+.el-tree-node__content:hover {
+  background: #f5f7fa;
+  border-color: #c0c4cc;
+}
+
+/* 当前选中节点 */
+.el-tree-node__content.is-current {
+  background: #ecf5ff !important;
+  border-color: #409eff !important;
+}
+
+/* 展开折叠图标 */
+.el-tree-node__expand-icon {
+  color: #909399;
+  font-size: 14px;
+  transition: transform 0.3s ease;
+  padding: 0 4px;
+}
+
+.el-tree-node__expand-icon.is-leaf {
+  color: transparent;
+  width: 16px;
+}
+
+/* 展开状态 - 箭头向右转 */
+.el-tree-node__expand-icon.expanded {
+  transform: rotate(90deg);
+}
+
+/* ============================================
+   层级缩进线条
+   ============================================ */
+.el-tree-node__children {
+  padding-left: 0;
+  position: relative;
+}
+
+/* 垂直连接线 - 第一级 */
+.el-tree-node__children::before {
+  content: '';
+  position: absolute;
+  left: 20px;
+  top: -8px;
+  height: calc(100% - 16px);
+  border-left: 1px dashed #d0d5dd;
+}
+
+/* 每个子节点的连接线 */
+.el-tree-node {
+  position: relative;
+  padding-left: 0;
+}
+
+.el-tree-node::before {
+  content: '';
+  position: absolute;
+  left: 20px;
+  top: 17px;
+  width: 12px;
+  border-top: 1px dashed #d0d5dd;
+}
+
+/* 移除叶节点的垂直线 */
+.el-tree-node.is-last-child::before {
+  display: none;
+}
+
+/* ============================================
+   集合（Collection）样式 - 文件夹风格
+   ============================================ */
+
+/* 顶级集合 */
+.el-tree > .el-tree-node > .el-tree-node__content {
+  background: linear-gradient(135deg, #f0f4f8 0%, #ffffff 100%);
+  border-left: 3px solid #409eff;
+  font-weight: 600;
+}
+
+.el-tree > .el-tree-node > .el-tree-node__content .node-label {
+  color: #1a1a1a;
+}
+
+/* 文件夹图标 - 橙色 */
+.collection-icon {
+  color: #fca130 !important;
+  font-size: 16px;
+}
+
+/* 子集合 */
+.el-tree-node__children .el-tree-node > .el-tree-node__content {
+  background: #fafafa;
+  margin-left: 16px;
+  border-left: 2px solid #909399;
+}
+
+.el-tree-node__children .el-tree-node > .el-tree-node__content .node-label {
+  color: #303133;
+}
+
+/* 孙子级集合 */
+.el-tree-node__children .el-tree-node__children .el-tree-node > .el-tree-node__content {
+  background: #ffffff;
+  margin-left: 32px;
+  border-left: 1px solid #d0d5dd;
+}
+
+/* ============================================
+   请求（Request）样式
+   ============================================ */
+
+/* 请求节点 */
+.el-tree-node:has(.method-tag) > .el-tree-node__content {
+  background: #ffffff;
+  border: 1px solid #e4e7ed;
+  margin-left: 16px;
+}
+
+.el-tree-node:has(.method-tag) > .el-tree-node__content:hover {
+  border-color: #409eff;
+  background: #ecf5ff;
+}
+
+/* 请求图标 - 蓝色 */
+.request-icon {
+  color: #409eff !important;
+  font-size: 14px;
+}
+
+/* ============================================
+   树节点内容布局
+   ============================================ */
 .tree-node {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   flex: 1;
-  padding: 4px 0;
+  padding: 0 4px;
+  height: 30px;
 }
 
 .tree-node .el-icon {
-  font-size: 16px;
-  color: #606266;
+  flex-shrink: 0;
 }
 
 .node-label {
   flex: 1;
-  font-size: 14px;
-  color: #303133;
+  font-size: 13px;
+  color: #606266;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   transition: color 0.2s;
-}
-
-.tree-node:hover .node-label {
-  color: #409eff;
 }
 
 .node-edit {
   flex: 1;
+  min-width: 0;
 }
 
 .node-edit .el-input {
-  font-size: 14px;
+  width: 100%;
+}
+
+.tree-node:hover .node-label {
+  color: #409eff;
 }
 
 /* 方法标签样式 */
