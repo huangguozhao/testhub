@@ -669,7 +669,7 @@
               </div>
             </div>
 
-            <el-tabs v-model="responseActiveTab">
+            <el-tabs v-model="responseActiveTab" class="response-tabs">
               <el-tab-pane label="Body" name="body">
                 <div class="response-body">
                   <div class="response-actions">
@@ -705,7 +705,7 @@
 
               <el-tab-pane label="Headers" name="headers">
                 <div class="response-headers">
-                  <div v-for="(value, key) in (response.response_data?.headers || {})" :key="key" class="header-row">
+                  <div v-for="(value, key) in (response.headers || {})" :key="key" class="header-row">
                     <strong>{{ key }}:</strong> {{ value }}
                   </div>
                 </div>
@@ -1571,16 +1571,16 @@ const hasBody = computed(() => {
 })
 
 const responseBody = computed(() => {
-  if (!response.value || !response.value.response_data) return ''
+  if (!response.value) return ''
 
   try {
-    if (response.value.response_data.json) {
-      return JSON.stringify(response.value.response_data.json, null, 2)
-    } else {
-      return response.value.response_data.body || ''
+    // 后端返回结构: { success, status_code, headers, body, response_time, error }
+    if (response.value.body) {
+      return response.value.body || ''
     }
+    return JSON.stringify(response.value, null, 2)
   } catch (e) {
-    return response.value.response_data?.body || ''
+    return ''
   }
 })
 
@@ -1893,11 +1893,13 @@ const onAssertionTypeChange = (assertion) => {
 }
 
 const formatResponse = () => {
-  if (!response.value || !response.value.response_data) return
+  if (!response.value || !response.value.body) return
 
   try {
-    if (response.value.response_data.json) {
-      response.value.response_data.json = JSON.parse(JSON.stringify(response.value.response_data.json))
+    // 尝试格式化 JSON
+    if (response.value.body) {
+      const parsed = JSON.parse(response.value.body)
+      response.value.body = JSON.stringify(parsed, null, 2)
     }
     ElMessage.success('格式化成功')
   } catch (e) {
@@ -1913,14 +1915,14 @@ const copyResponse = () => {
 }
 
 const evaluateJsonPath = () => {
-  if (!response.value || !response.value.response_data || !response.value.response_data.json || !jsonPathExpression.value) {
+  if (!response.value || !response.value.body || !jsonPathExpression.value) {
     jsonPathResult.value = null
     return
   }
 
   try {
-    // 简单的JSONPath实现
-    const json = response.value.response_data.json
+    // 解析 body 为 JSON
+    const json = JSON.parse(response.value.body)
     let result = json
 
     // 解析JSONPath表达式
@@ -3411,6 +3413,10 @@ const useLocalVariableCategories = () => {
   background: #e9ecef;
   padding: 4px 12px;
   border-radius: 16px;
+}
+
+.response-tabs {
+  padding: 0 20px;
 }
 
 /* 响应体 */

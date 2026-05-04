@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.testhub.modules.api_testing.domain.ApiEnvironment;
 import com.testhub.modules.api_testing.domain.ApiRequest;
@@ -126,7 +127,8 @@ public class ApiRequestServiceImpl extends ServiceImpl<ApiRequestMapper, ApiRequ
             ApiEnvironment env = apiEnvironmentService.getById(dto.getEnvironmentId());
             if (env != null && env.getVariables() != null) {
                 try {
-                    Map<String, String> envVars = objectMapper.readValue(env.getVariables(), Map.class);
+                    Map<String, String> envVars = objectMapper.readValue(env.getVariables(),
+                            new TypeReference<Map<String, String>>() {});
                     variables.putAll(envVars);
                 } catch (Exception e) {
                     log.warn("解析环境变量失败: {}", e.getMessage());
@@ -137,7 +139,8 @@ public class ApiRequestServiceImpl extends ServiceImpl<ApiRequestMapper, ApiRequ
         // 合并覆盖变量
         if (dto.getOverrideVariables() != null && !dto.getOverrideVariables().isBlank()) {
             try {
-                Map<String, String> overrideVars = objectMapper.readValue(dto.getOverrideVariables(), Map.class);
+                Map<String, String> overrideVars = objectMapper.readValue(dto.getOverrideVariables(),
+                        new TypeReference<Map<String, String>>() {});
                 variables.putAll(overrideVars);
             } catch (Exception e) {
                 log.warn("解析覆盖变量失败: {}", e.getMessage());

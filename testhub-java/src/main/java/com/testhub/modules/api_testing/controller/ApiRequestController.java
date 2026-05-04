@@ -76,6 +76,20 @@ public class ApiRequestController {
         return Result.success(response);
     }
 
+    @PostMapping("/{id}/execute")
+    @Operation(summary = "执行指定API请求")
+    public Result<ApiResponse> executeApiRequestById(
+            @PathVariable Long id,
+            @RequestParam(required = false) Long environmentId,
+            @RequestBody(required = false) String overrideVariables) {
+        ApiExecuteDTO dto = new ApiExecuteDTO();
+        dto.setRequestId(id);
+        dto.setEnvironmentId(environmentId);
+        dto.setOverrideVariables(overrideVariables);
+        ApiResponse response = apiRequestService.executeApiRequest(dto);
+        return Result.success(response);
+    }
+
     @GetMapping("/collection/{collectionId}")
     @Operation(summary = "获取集合下的所有请求")
     public Result<List<ApiRequest>> getRequestsByCollection(@PathVariable Long collectionId) {
