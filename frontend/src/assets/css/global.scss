@@ -481,9 +481,10 @@ body {
 .el-pagination {
   .el-pager li {
     border-radius: var(--th-radius-md);
-    
+
     &.is-active {
-      background: var(--th-accent);
+      background: var(--th-accent) !important;
+      color: #ffffff !important;
     }
   }
 }
