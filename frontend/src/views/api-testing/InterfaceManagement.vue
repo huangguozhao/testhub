@@ -2718,59 +2718,63 @@ const useLocalVariableCategories = () => {
   flex: 1;
   overflow: auto;
   padding: 8px 0;
+  background: #fafbfc;
 }
 
 /* ============================================
    树形结构 - 文件夹式层级样式
    ============================================ */
 
-/* 重置 el-tree 默认样式 */
 .el-tree {
   background: transparent;
-  --el-tree-node-hover-bg-color: #f5f7fa;
+  padding: 0 8px;
 }
 
 .el-tree-node {
   position: relative;
 }
 
-/* 节点内容容器 */
+/* 节点内容 */
 .el-tree-node__content {
-  height: 34px;
-  border-radius: 6px;
-  margin: 1px 8px;
-  padding-left: 8px !important;
-  transition: all 0.2s ease;
-  background: #ffffff;
-  border: 1px solid #e4e7ed;
-  position: relative;
+  height: 32px;
+  border-radius: 4px;
+  margin: 1px 0;
+  padding-left: 4px !important;
+  transition: all 0.15s ease;
+  border: none;
+  background: transparent;
 }
 
 .el-tree-node__content:hover {
-  background: #f5f7fa;
-  border-color: #c0c4cc;
+  background: rgba(64, 135, 255, 0.08);
 }
 
-/* 当前选中节点 */
+/* 选中态 */
 .el-tree-node__content.is-current {
-  background: #ecf5ff !important;
-  border-color: #409eff !important;
+  background: rgba(64, 135, 255, 0.15) !important;
 }
 
-/* 展开折叠图标 */
+/* 展开/折叠箭头 */
 .el-tree-node__expand-icon {
-  color: #909399;
-  font-size: 14px;
-  transition: transform 0.3s ease;
-  padding: 0 4px;
+  color: #b4bcc8;
+  font-size: 12px;
+  transition: transform 0.2s ease;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.el-tree-node__expand-icon:before {
+  content: '▶';
+  font-size: 10px;
 }
 
 .el-tree-node__expand-icon.is-leaf {
   color: transparent;
-  width: 16px;
 }
 
-/* 展开状态 - 箭头向右转 */
 .el-tree-node__expand-icon.expanded {
   transform: rotate(90deg);
 }
@@ -2779,88 +2783,70 @@ const useLocalVariableCategories = () => {
    层级缩进线条
    ============================================ */
 .el-tree-node__children {
-  padding-left: 0;
+  padding-left: 18px;
   position: relative;
 }
 
-/* 垂直连接线 - 第一级 */
 .el-tree-node__children::before {
   content: '';
   position: absolute;
-  left: 20px;
-  top: -8px;
-  height: calc(100% - 16px);
-  border-left: 1px dashed #d0d5dd;
+  left: 7px;
+  top: 0;
+  bottom: 18px;
+  border-left: 1px solid #e4eaed;
 }
 
-/* 每个子节点的连接线 */
-.el-tree-node {
+/* 每个节点的水平连接线 */
+.el-tree-node:not(.is-root) {
   position: relative;
-  padding-left: 0;
 }
 
-.el-tree-node::before {
+.el-tree-node:not(.is-root)::before {
   content: '';
   position: absolute;
-  left: 20px;
-  top: 17px;
-  width: 12px;
-  border-top: 1px dashed #d0d5dd;
+  left: 7px;
+  top: 15px;
+  width: 11px;
+  height: 1px;
+  background: #e4eaed;
 }
 
-/* 移除叶节点的垂直线 */
+/* 移除最后一个子节点的连接线 */
 .el-tree-node.is-last-child::before {
   display: none;
 }
 
 /* ============================================
-   集合（Collection）样式 - 文件夹风格
+   集合（Folder）样式
    ============================================ */
-
-/* 顶级集合 */
-.el-tree > .el-tree-node > .el-tree-node__content {
-  background: linear-gradient(135deg, #f0f4f8 0%, #ffffff 100%);
-  border-left: 3px solid #409eff;
-  font-weight: 600;
-}
-
-.el-tree > .el-tree-node > .el-tree-node__content .node-label {
-  color: #1a1a1a;
-}
-
-/* 文件夹图标 - 橙色 */
-.collection-icon {
-  color: #fca130 !important;
-  font-size: 16px;
-}
-
-/* 子集合 */
-.el-tree-node__children .el-tree-node > .el-tree-node__content {
-  background: #fafafa;
-  margin-left: 16px;
-  border-left: 2px solid #909399;
-}
-
-.el-tree-node__children .el-tree-node > .el-tree-node__content .node-label {
-  color: #303133;
-}
-
-/* 孙子级集合 */
-.el-tree-node__children .el-tree-node__children .el-tree-node > .el-tree-node__content {
+.el-tree-node:has(.collection-icon) > .el-tree-node__content {
   background: #ffffff;
-  margin-left: 32px;
-  border-left: 1px solid #d0d5dd;
+  border: 1px solid #e4eaed;
+  border-radius: 6px;
+  margin: 2px 0;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+
+.el-tree-node:has(.collection-icon) > .el-tree-node__content:hover {
+  border-color: #c0c4cc;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+/* 文件夹图标 - 橙色/琥珀色 */
+.collection-icon {
+  color: #f5a623 !important;
+  font-size: 14px;
 }
 
 /* ============================================
-   请求（Request）样式
+   请求（File/API）样式
    ============================================ */
-
-/* 请求节点 */
 .el-tree-node:has(.method-tag) > .el-tree-node__content {
   background: #ffffff;
-  border: 1px solid #e4e7ed;
-  margin-left: 16px;
+  border: 1px solid #e4eaed;
+  border-radius: 4px;
+  margin: 1px 0;
+  margin-left: 18px;
 }
 
 .el-tree-node:has(.method-tag) > .el-tree-node__content:hover {
@@ -2868,37 +2854,65 @@ const useLocalVariableCategories = () => {
   background: #ecf5ff;
 }
 
-/* 请求图标 - 蓝色 */
+/* 请求图标 - 蓝色文档 */
 .request-icon {
   color: #409eff !important;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 /* ============================================
-   树节点内容布局
+   节点内容布局
    ============================================ */
 .tree-node {
   display: flex;
   align-items: center;
   gap: 6px;
   flex: 1;
-  padding: 0 4px;
-  height: 30px;
+  padding: 0 6px;
+  height: 28px;
+  min-width: 0;
 }
 
 .tree-node .el-icon {
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
 }
 
 .node-label {
   flex: 1;
   font-size: 13px;
-  color: #606266;
+  color: #303133;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  transition: color 0.2s;
+  transition: color 0.15s;
 }
+
+.tree-node:hover .node-label {
+  color: #409eff;
+}
+
+/* ============================================
+   方法标签
+   ============================================ */
+.method-tag {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 3px;
+  color: #fff;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
+.method-tag.get { background: #61affe; }
+.method-tag.post { background: #49cc90; }
+.method-tag.put { background: #fca130; }
+.method-tag.delete { background: #f93e3e; }
+.method-tag.patch { background: #50e3c2; }
+.method-tag.head { background: #9013fe; }
+.method-tag.options { background: #0ebeff; }
 
 .node-edit {
   flex: 1;
@@ -2907,63 +2921,84 @@ const useLocalVariableCategories = () => {
 
 .node-edit .el-input {
   width: 100%;
+  font-size: 13px;
 }
 
-.tree-node:hover .node-label {
+/* ============================================
+   搜索结果
+   ============================================ */
+.search-results {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #e4e7ed;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  max-height: 400px;
+  overflow: auto;
+  margin-top: 8px;
+}
+
+.search-results-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid #e4e7ed;
+  background: #f8f9fa;
+  font-weight: 500;
+  color: #303133;
+}
+
+.search-results-list {
+  padding: 8px 0;
+}
+
+.search-result-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: background 0.2s;
+  border-bottom: 1px solid #f0f2f5;
+}
+
+.search-result-item:hover {
+  background: #ecf5ff;
+}
+
+.search-result-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.search-result-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: #303133;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.search-result-url {
+  font-size: 12px;
+  color: #909399;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.search-result-item .el-icon {
   color: #409eff;
+  font-size: 16px;
 }
 
-/* 方法标签样式 */
-.method-tag {
-  font-size: 10px;
-  padding: 2px 8px;
-  border-radius: 10px;
-  color: white;
-  font-weight: bold;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  display: inline-block;
-  min-width: 40px;
-  text-align: center;
-}
-
-.method-tag.get {
-  background-color: #61affe;
-}
-
-.method-tag.post {
-  background-color: #49cc90;
-}
-
-.method-tag.put {
-  background-color: #fca130;
-}
-
-.method-tag.delete {
-  background-color: #f93e3e;
-}
-
-.method-tag.patch {
-  background-color: #50e3c2;
-}
-
-.method-tag.head {
-  background-color: #9013fe;
-}
-
-.method-tag.options {
-  background-color: #0ebeff;
-}
-
-.method-tag.connect {
-  background-color: #7f8c8d;
-}
-
-.method-tag.trace {
-  background-color: #e67e22;
-}
-
-/* 搜索结果 */
+/* 右侧主内容 */
 .search-results {
   position: absolute;
   top: 100%;
