@@ -1830,7 +1830,9 @@ const sendRequest = async () => {
       body_type: bodyType.value,
       body_content: bodyType.value === 'none' ? '' : JSON.stringify(bodyData),
       pre_script: selectedRequest.value.pre_request_script || '',
-      post_script: selectedRequest.value.post_request_script || ''
+      post_script: selectedRequest.value.post_request_script || '',
+      assertions: selectedRequest.value.assertions && Array.isArray(selectedRequest.value.assertions)
+        ? JSON.stringify(selectedRequest.value.assertions) : '[]'
     }
 
     const apiResponse = await api.post('/api-requests/execute-temp', requestData)
