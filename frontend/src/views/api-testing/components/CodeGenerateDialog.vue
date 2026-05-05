@@ -109,3 +109,17 @@ const handleCopy = () => {
   ElMessage.success('复制成功')
 }
 </script>
+
+<style scoped>
+.code-generate {
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 14px;
+  line-height: 1.6;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 16px;
+  min-height: 300px;
+  resize: vertical;
+}
+</style>
