@@ -489,8 +489,10 @@ const getEnvironmentName = (environmentId) => {
 const loadProjects = async () => {
   try {
     const response = await api.get('/api-projects')
-    const data = response.data?.results || response.data || []
-    projects.value = Array.isArray(data) ? data : []
+    const data = response.data
+    // 处理分页格式 { records: [] } 或直接数组格式
+    const list = data?.records || data?.results || data || []
+    projects.value = Array.isArray(list) ? list : []
 
     // 过滤出HTTP项目
     const httpProjects = projects.value.filter(project => project.project_type !== 'WEBSOCKET')
@@ -512,7 +514,7 @@ const loadTestSuites = async () => {
 
   try {
     const response = await api.get('/api-test-suites', {
-      params: { project: selectedProject.value }
+      params: { projectId: selectedProject.value }
     })
     testSuites.value = response.data?.results || response.data || []
   } catch (error) {
@@ -546,11 +548,13 @@ const loadRequestTree = async () => {
     const collectionsRes = await api.get('/api-collections', {
       params: { project: selectedProject.value }
     })
-    const collections = collectionsRes.data.results || collectionsRes.data
+    const collections = collectionsRes.data?.records || collectionsRes.data?.results || collectionsRes.data || []
 
     // 加载请求
-    const requestsRes = await api.get('/api-requests')
-    const requests = requestsRes.data.results || requestsRes.data
+    const requestsRes = await api.get('/api-requests', {
+      params: { project: selectedProject.value }
+    })
+    const requests = requestsRes.data?.records || requestsRes.data?.results || requestsRes.data || []
 
     // 构建树形结构
     requestTree.value = buildRequestTree(collections, requests)

@@ -24,8 +24,13 @@ public class ApiEnvironmentController {
 
     @GetMapping
     @Operation(summary = "获取项目的所有环境")
-    public Result<List<ApiEnvironment>> getEnvironments(@RequestParam Long projectId) {
-        List<ApiEnvironment> environments = apiEnvironmentService.getEnvironmentsByProject(projectId);
+    public Result<List<ApiEnvironment>> getEnvironments(@RequestParam(required = false) Long projectId) {
+        List<ApiEnvironment> environments;
+        if (projectId != null) {
+            environments = apiEnvironmentService.getEnvironmentsByProject(projectId);
+        } else {
+            environments = apiEnvironmentService.list();
+        }
         return Result.success(environments);
     }
 
