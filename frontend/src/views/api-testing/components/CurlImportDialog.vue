@@ -6,10 +6,11 @@
     :close-on-click-modal="false"
   >
     <el-input
-      v-model="command"
+      :model-value="command"
       type="textarea"
       :rows="15"
       :placeholder="$t('apiTesting.interface.pasteCurlCommand')"
+      @input="emit('update:command', $event)"
     />
     <template #footer>
       <el-button @click="handleCancel">{{ $t('apiTesting.common.cancel') }}</el-button>

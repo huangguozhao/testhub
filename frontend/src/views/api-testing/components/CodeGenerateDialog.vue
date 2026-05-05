@@ -6,11 +6,11 @@
     :close-on-click-modal="false"
   >
     <el-select
-      v-model="language"
-      :placeholder="$t('apiTesting.interface.selectLanguage')"
-      style="width: 150px; margin-bottom: 10px"
-      @change="handleLanguageChange"
-    >
+        :model-value="language"
+        :placeholder="$t('apiTesting.interface.selectLanguage')"
+        style="width: 150px; margin-bottom: 10px"
+        @change="handleLanguageChange"
+      >
       <el-option label="JavaScript" value="javascript" />
       <el-option label="Python" value="python" />
       <el-option label="Java" value="java" />
@@ -42,11 +42,12 @@
       <el-option label="Wget" value="wget" />
     </el-select>
     <el-input
-      v-model="code"
+      :model-value="code"
       type="textarea"
       :rows="20"
       readonly
       class="code-generate"
+      @input="emit('update:code', $event)"
     />
     <template #footer>
       <el-button @click="handleCancel">{{ $t('apiTesting.common.cancel') }}</el-button>

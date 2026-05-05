@@ -672,206 +672,32 @@
           </el-tabs>
 
           <!-- 响应区域 -->
-          <div v-if="response" class="response-section">
-            <div class="response-header">
-              <h3>{{ $t('apiTesting.interface.response') }}</h3>
-              <div class="response-info">
-                <el-tag :type="getStatusType(response.status_code)">
-                  {{ response.status_code }}
-                </el-tag>
-                <span class="response-time">{{ response.response_time ? response.response_time.toFixed(0) : 0 }}ms</span>
-              </div>
-            </div>
-
-            <el-tabs v-model="responseActiveTab" class="response-tabs">
-              <el-tab-pane label="Body" name="body">
-                <div class="response-body">
-                  <div class="response-actions">
-                    <el-button-group>
-                      <el-button size="small" @click="formatResponse">{{ $t('apiTesting.interface.format') }}</el-button>
-                      <el-button size="small" @click="copyResponse">{{ $t('apiTesting.interface.copy') }}</el-button>
-                      <el-button size="small" @click="toggleJsonPathExtractor">
-                        {{ $t('apiTesting.interface.jsonPathExtract') }}
-                      </el-button>
-                    </el-button-group>
-                  </div>
-                  <div v-if="showJsonPathExtractor" class="jsonpath-extractor">
-                    <div class="jsonpath-input">
-                      <el-input
-                        v-model="jsonPathExpression"
-                        :placeholder="$t('apiTesting.interface.jsonPathExample')"
-                        size="small"
-                        @input="evaluateJsonPath"
-                      >
-                        <template #append>
-                          <el-button size="small" @click="copyJsonPathResult">{{ $t('apiTesting.interface.copyResult') }}</el-button>
-                        </template>
-                      </el-input>
-                    </div>
-                    <div v-if="jsonPathResult !== null" class="jsonpath-result">
-                      <strong>{{ $t('apiTesting.interface.extractResult') }}</strong>
-                      <pre>{{ jsonPathResult }}</pre>
-                    </div>
-                  </div>
-                  <div class="response-content" v-html="highlightedResponseBody"></div>
-                </div>
-              </el-tab-pane>
-
-              <el-tab-pane label="Headers" name="headers">
-                <div class="response-headers">
-                  <div v-for="(value, key) in (response.headers || {})" :key="key" class="header-row">
-                    <strong>{{ key }}:</strong> {{ value }}
-                  </div>
-                </div>
-              </el-tab-pane>
-
-              <el-tab-pane :label="$t('apiTesting.interface.assertionResults')" name="assertions" v-if="response.assertion_results && response.assertion_results.length > 0">
-                <div class="assertions-results">
-                  <div
-                    v-for="(result, index) in response.assertion_results"
-                    :key="index"
-                    class="assertion-result-item"
-                    :class="{ 'passed': result.passed, 'failed': !result.passed }"
-                  >
-                    <div class="assertion-result-header">
-                      <el-tag :type="result.passed ? 'success' : 'danger'" size="small">
-                        {{ result.passed ? $t('apiTesting.interface.passed') : $t('apiTesting.interface.failed') }}
-                      </el-tag>
-                      <span class="assertion-name">{{ result.name }}</span>
-                    </div>
-                    <div class="assertion-result-details">
-                      <div class="result-row">
-                        <span class="label">{{ $t('apiTesting.interface.expected') }}</span>
-                        <span class="value">{{ formatAssertionValue(result.expected) }}</span>
-                      </div>
-                      <div class="result-row">
-                        <span class="label">{{ $t('apiTesting.interface.actual') }}</span>
-                        <span class="value">{{ formatAssertionValue(result.actual) }}</span>
-                      </div>
-                      <div class="result-row" v-if="result.error">
-                        <span class="label">{{ $t('apiTesting.interface.error') }}</span>
-                        <span class="value error">{{ result.error }}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </el-tab-pane>
-
-              <!-- 脚本执行结果 -->
-              <el-tab-pane label="脚本结果" name="scripts" v-if="response.pre_script_result || response.post_script_result">
-                <div class="script-results">
-                  <!-- Pre-request Script 结果 -->
-                  <div v-if="response.pre_script_result" class="script-result-section">
-                    <h4>Pre-request Script</h4>
-                    <div class="script-status">
-                      <el-tag :type="response.pre_script_result.success ? 'success' : 'danger'" size="small">
-                        {{ response.pre_script_result.success ? '执行成功' : '执行失败' }}
-                      </el-tag>
-                      <span v-if="response.pre_script_result.error" class="script-error">
-                        {{ response.pre_script_result.error }}
-                      </span>
-                    </div>
-                    <div v-if="response.pre_script_result.logs && response.pre_script_result.logs.length > 0" class="script-logs">
-                      <h5>Console Output:</h5>
-                      <pre class="log-output">{{ response.pre_script_result.logs.join('\n') }}</pre>
-                    </div>
-                    <div v-if="response.pre_script_result.variables && Object.keys(response.pre_script_result.variables).length > 0" class="script-variables">
-                      <h5>更新变量:</h5>
-                      <pre class="variables-output">{{ formatVariables(response.pre_script_result.variables) }}</pre>
-                    </div>
-                  </div>
-
-                  <!-- Tests 结果 -->
-                  <div v-if="response.post_script_result" class="script-result-section">
-                    <h4>Tests</h4>
-                    <div class="script-status">
-                      <el-tag :type="response.post_script_result.success ? 'success' : 'danger'" size="small">
-                        {{ response.post_script_result.success ? '执行成功' : '执行失败' }}
-                      </el-tag>
-                      <span v-if="response.post_script_result.error" class="script-error">
-                        {{ response.post_script_result.error }}
-                      </span>
-                    </div>
-                    <div v-if="response.post_script_result.test_results && Object.keys(response.post_script_result.test_results).length > 0" class="test-results">
-                      <h5>测试结果:</h5>
-                      <div
-                        v-for="(passed, name) in response.post_script_result.test_results"
-                        :key="name"
-                        class="test-result-item"
-                        :class="{ 'passed': passed, 'failed': !passed }"
-                      >
-                        <el-tag :type="passed ? 'success' : 'danger'" size="small">
-                          {{ passed ? '通过' : '失败' }}
-                        </el-tag>
-                        <span class="test-name">{{ name }}</span>
-                      </div>
-                    </div>
-                    <div v-if="response.post_script_result.logs && response.post_script_result.logs.length > 0" class="script-logs">
-                      <h5>Console Output:</h5>
-                      <pre class="log-output">{{ response.post_script_result.logs.join('\n') }}</pre>
-                    </div>
-                  </div>
-                </div>
-              </el-tab-pane>
-            </el-tabs>
-          </div>
+          <ResponsePanel
+            v-if="response"
+            :response="response"
+            @format="formatResponse"
+            @copy="copyResponse"
+          />
         </div>
       </div>
     </div>
 
-    <!-- 创建集合对话框 -->
-    <el-dialog v-model="showCreateCollectionDialog" :title="$t('apiTesting.interface.createCollection')" :close-on-click-modal="false" :close-on-press-escape="false" :modal="true" :destroy-on-close="false" width="500px">
-      <el-form ref="collectionFormRef" :model="collectionForm" :rules="collectionRules" label-width="100px">
-        <el-form-item :label="$t('apiTesting.interface.collectionName')" prop="name">
-          <el-input v-model="collectionForm.name" :placeholder="$t('apiTesting.interface.inputCollectionName')" />
-        </el-form-item>
-        <el-form-item :label="$t('apiTesting.common.description')" prop="description">
-          <el-input v-model="collectionForm.description" type="textarea" :rows="3" :placeholder="`${$t('apiTesting.common.pleaseInput')}${$t('apiTesting.common.description')}`" />
-        </el-form-item>
-        <el-form-item :label="$t('apiTesting.interface.parentCollection')" prop="parent">
-          <el-select v-model="collectionForm.parent" :placeholder="$t('apiTesting.interface.selectParentCollection')" clearable>
-            <el-option
-              v-for="collection in flatCollections"
-              :key="collection.id"
-              :label="collection.name"
-              :value="collection.id"
-            />
-          </el-select>
-        </el-form-item>
-      </el-form>
-
-      <template #footer>
-        <el-button @click="closeCreateCollectionDialog">{{ $t('apiTesting.common.cancel') }}</el-button>
-        <el-button type="primary" @click="createCollection">{{ $t('apiTesting.common.create') }}</el-button>
-      </template>
-    </el-dialog>
-
-    <!-- 编辑集合对话框 -->
-    <el-dialog v-model="showEditCollectionDialog" :title="$t('apiTesting.interface.editCollection')" :close-on-click-modal="false" width="500px">
-      <el-form ref="editCollectionFormRef" :model="editCollectionForm" :rules="collectionRules" label-width="100px">
-        <el-form-item :label="$t('apiTesting.interface.collectionName')" prop="name">
-          <el-input v-model="editCollectionForm.name" :placeholder="$t('apiTesting.interface.inputCollectionName')" />
-        </el-form-item>
-        <el-form-item :label="$t('apiTesting.common.description')" prop="description">
-          <el-input v-model="editCollectionForm.description" type="textarea" :rows="3" :placeholder="`${$t('apiTesting.common.pleaseInput')}${$t('apiTesting.common.description')}`" />
-        </el-form-item>
-        <el-form-item :label="$t('apiTesting.interface.parentCollection')" prop="parent">
-          <el-select v-model="editCollectionForm.parent" :placeholder="$t('apiTesting.interface.selectParentCollection')" clearable>
-            <el-option
-              v-for="collection in flatCollections.filter(c => c.id !== editCollectionForm.id)"
-              :key="collection.id"
-              :label="collection.name"
-              :value="collection.id"
-            />
-          </el-select>
-        </el-form-item>
-      </el-form>
-
-      <template #footer>
-        <el-button @click="closeEditCollectionDialog">{{ $t('apiTesting.common.cancel') }}</el-button>
-        <el-button type="primary" @click="editCollection">{{ $t('apiTesting.common.save') }}</el-button>
-      </template>
-    </el-dialog>
+    <!-- 创建/编辑集合对话框 -->
+    <CollectionDialog
+      v-model="showCreateCollectionDialog"
+      mode="create"
+      :collections="flatCollections"
+      @confirm="handleCreateCollection"
+      @cancel="closeCreateCollectionDialog"
+    />
+    <CollectionDialog
+      v-model="showEditCollectionDialog"
+      mode="edit"
+      :collections="flatCollections"
+      :collection="editingCollection"
+      @confirm="handleEditCollection"
+      @cancel="closeEditCollectionDialog"
+    />
 
     <!-- 右键菜单 -->
     <ul v-show="showContextMenu" class="context-menu" :style="{ left: contextMenuX + 'px', top: contextMenuY + 'px' }">
@@ -888,115 +714,30 @@
     />
 
     <!-- 变量助手对话框 -->
-    <el-dialog
-      :close-on-press-escape="false"
-      :modal="true"
-      :destroy-on-close="false"
+    <VariableHelperDialog
       v-model="showVariableHelper"
-      :title="$t('apiTesting.interface.variableHelper') + ' (点击插入)'"
-      :close-on-click-modal="false"
-      width="900px"
-    >
-      <div v-if="variableCategories.length === 0" style="padding: 20px; text-align: center; color: #999;">
-        <p>{{ $t('apiTesting.interface.variableCategoriesLoading') }}</p>
-        <p>{{ $t('apiTesting.interface.variableCategoriesCount', { count: variableCategories.length }) }}</p>
-      </div>
-      <el-tabs v-else tab-position="left" style="height: 450px">
-        <el-tab-pane
-          v-for="(category, index) in variableCategories"
-          :key="index"
-          :label="category.label"
-        >
-          <div style="height: 450px; overflow-y: auto; padding: 10px;">
-            <el-table :data="category.variables" style="width: 100%" @row-click="insertVariable" highlight-current-row>
-              <el-table-column prop="name" :label="$t('apiTesting.interface.functionName')" width="150">
-                <template #default="{ row }">
-                  <el-tag size="small">{{ row.name }}</el-tag>
-                </template>
-              </el-table-column>
-              <el-table-column prop="desc" :label="$t('apiTesting.interface.description')" min-width="150" />
-              <el-table-column prop="syntax" :label="$t('apiTesting.interface.syntax')" min-width="200" show-overflow-tooltip />
-              <el-table-column prop="example" :label="$t('apiTesting.interface.example')" min-width="200" show-overflow-tooltip />
-              <el-table-column :label="$t('apiTesting.interface.operation')" width="80" fixed="right">
-                <template #default="{ row }">
-                  <el-button link type="primary" size="small">{{ $t('apiTesting.interface.insert') }}</el-button>
-                </template>
-              </el-table-column>
-            </el-table>
-          </div>
-        </el-tab-pane>
-      </el-tabs>
-    </el-dialog>
+      :variable-categories="variableCategories"
+      @select="insertVariable"
+    />
 
     <!-- CURL导入对话框 -->
-    <el-dialog
+    <CurlImportDialog
       v-model="showCurlImportDialog"
-      :title="$t('apiTesting.interface.importCurlCommand')"
-      width="800px"
-      :close-on-click-modal="false"
-    >
-      <el-input
-        v-model="curlCommand"
-        type="textarea"
-        :rows="15"
-        :placeholder="$t('apiTesting.interface.pasteCurlCommand')"
-      />
-      <template #footer>
-        <el-button @click="closeCurlImportDialog">{{ $t('apiTesting.common.cancel') }}</el-button>
-        <el-button type="primary" @click="parseAndImportCurl">{{ $t('apiTesting.interface.parseAndImport') }}</el-button>
-      </template>
-    </el-dialog>
+      v-model:command="curlCommand"
+      @confirm="handleCurlImport"
+      @cancel="closeCurlImportDialog"
+    />
 
     <!-- 代码生成对话框 -->
-    <el-dialog
+    <!-- 代码生成对话框 -->
+    <CodeGenerateDialog
       v-model="showCodeGenerateDialog"
-      :title="$t('apiTesting.interface.generateCode')"
-      width="900px"
-      :close-on-click-modal="false"
-    >
-      <el-select v-model="codeLanguage" :placeholder="$t('apiTesting.interface.selectLanguage')" style="width: 150px; margin-bottom: 10px" @change="generateCode(codeLanguage)">
-        <el-option label="JavaScript" value="javascript" />
-        <el-option label="Python" value="python" />
-        <el-option label="Java" value="java" />
-        <el-option label="Node.js" value="node" />
-        <el-option label="cURL" value="curl" />
-        <el-option label="PHP" value="php" />
-        <el-option label="Go" value="go" />
-        <el-option label="C#" value="csharp" />
-        <el-option label="Ruby" value="ruby" />
-        <el-option label="Swift" value="swift" />
-        <el-option label="Kotlin" value="kotlin" />
-        <el-option label="Rust" value="rust" />
-        <el-option label="Dart" value="dart" />
-        <el-option label="Objective-C" value="objc" />
-        <el-option label="PowerShell" value="powershell" />
-        <el-option label="MATLAB" value="matlab" />
-        <el-option label="R" value="r" />
-        <el-option label="Ansible" value="ansible" />
-        <el-option label="C" value="c" />
-        <el-option label="CFML" value="cfml" />
-        <el-option label="Clojure" value="clojure" />
-        <el-option label="Elixir" value="elixir" />
-        <el-option label="HTTP" value="http" />
-        <el-option label="HTTPie" value="httpie" />
-        <el-option label="Julia" value="julia" />
-        <el-option label="Lua" value="lua" />
-        <el-option label="OCaml" value="ocaml" />
-        <el-option label="Perl" value="perl" />
-        <el-option label="Wget" value="wget" />
-      </el-select>
-      <el-input
-        v-model="generatedCode"
-        type="textarea"
-        :rows="20"
-        readonly
-        class="code-generate"
-      />
-      <template #footer>
-        <el-button @click="closeCodeGenerateDialog">{{ $t('apiTesting.common.cancel') }}</el-button>
-        <el-button type="primary" @click="copyGeneratedCode">{{ $t('apiTesting.common.copy') }}</el-button>
-      </template>
-    </el-dialog>
+      v-model:language="codeLanguage"
+      v-model:code="generatedCode"
+      @generate="generateCode"
+      @cancel="closeCodeGenerateDialog"
+      @copy="copyGeneratedCode"
+    />
   </div>
 </template>
 
@@ -1010,6 +751,10 @@ import DataFactorySelector from '@/components/DataFactorySelector.vue'
 import { RequestModelParser } from '@/utils/requestModel'
 import { getVariableFunctions } from '@/api/data-factory'
 import { CodeGenerator } from '@/utils/codeGenerator'
+import ResponsePanel from './components/ResponsePanel.vue'
+import CollectionDialog from './components/CollectionDialog.vue'
+import CurlImportDialog from './components/CurlImportDialog.vue'
+import CodeGenerateDialog from './components/CodeGenerateDialog.vue'
 import { debounce } from 'lodash-es'
 import { useI18n } from 'vue-i18n'
 
@@ -2227,6 +1972,23 @@ const createCollection = async () => {
   }
 }
 
+// 新增：处理 CollectionDialog 的创建确认
+const handleCreateCollection = (data) => {
+  collectionForm.name = data.name
+  collectionForm.description = data.description
+  collectionForm.parent = data.parent
+  createCollection()
+}
+
+// 新增：处理 CollectionDialog 的编辑确认
+const handleEditCollection = (data) => {
+  editCollectionForm.id = data.id
+  editCollectionForm.name = data.name
+  editCollectionForm.description = data.description
+  editCollectionForm.parent = data.parent
+  updateCollection()
+}
+
 const updateCollection = async () => {
   if (!editCollectionForm.name.trim()) {
     ElMessage.warning('请输入集合名称')
@@ -2252,6 +2014,11 @@ const importCurl = () => {
   // 清空上次的 curl 命令
   curlCommand.value = ''
   showCurlImportDialog.value = true
+}
+
+// 处理 CurlImportDialog 的确认
+const handleCurlImport = () => {
+  parseAndImportCurl()
 }
 
 const parseAndImportCurl = async () => {
