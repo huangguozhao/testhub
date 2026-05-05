@@ -31,13 +31,27 @@ export const useUserStore = defineStore('user', () => {
   const startAutoRefresh = () => {
     // 清除现有定时器
     if (refreshTimer) {
-      clearInterval(refreshTimer)
+      clearTimeout(refreshTimer)
     }
 
-    // 每2分钟检查一次token是否需要刷新
-    refreshTimer = setInterval(async () => {
-      if (refreshToken.value && isTokenExpiringSoon.value && accessToken.value) {
-        console.log('自动刷新token...')
+    const checkAndRefresh = async () => {
+      if (!refreshToken.value || !accessToken.value) {
+        return
+      }
+
+      // 如果token已过期，立即刷新
+      if (isTokenExpired.value) {
+        console.log('Token已过期，自动刷新...')
+        try {
+          await refreshAccessToken()
+          console.log('自动刷新token成功')
+        } catch (error) {
+          console.error('自动刷新token失败:', error)
+          return
+        }
+      } else if (isTokenExpiringSoon.value) {
+        // 如果token即将过期（5分钟内），刷新
+        console.log('Token即将过期，自动刷新...')
         try {
           await refreshAccessToken()
           console.log('自动刷新token成功')
@@ -45,7 +59,13 @@ export const useUserStore = defineStore('user', () => {
           console.error('自动刷新token失败:', error)
         }
       }
-    }, 2 * 60 * 1000) // 2分钟检查一次
+
+      // 继续调度下一次检查（每30秒检查一次）
+      refreshTimer = setTimeout(checkAndRefresh, 30 * 1000)
+    }
+
+    // 立即执行一次检查
+    checkAndRefresh()
   }
 
   // 停止自动刷新定时器

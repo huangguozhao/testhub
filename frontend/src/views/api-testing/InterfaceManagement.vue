@@ -187,6 +187,20 @@
                 size="small"
                 class="name-input"
               />
+              <el-select
+                v-model="selectedRequest.collection_id"
+                :placeholder="$t('apiTesting.interface.selectCollection')"
+                size="small"
+                clearable
+                class="collection-select"
+              >
+                <el-option
+                  v-for="collection in flatCollections.filter(c => c.type === 'collection')"
+                  :key="collection.id"
+                  :label="collection.name"
+                  :value="collection.id"
+                />
+              </el-select>
               <div class="action-buttons">
                 <el-button size="small" @click="saveRequest" :loading="saving" ref="saveButtonRef">
                   {{ $t('apiTesting.common.save') }}
@@ -1092,7 +1106,8 @@ const loadCollections = async (projectId) => {
 
     // 构建树形结构
     collections.value = buildTree(collectionsData)
-    flatCollections.value = collectionsData
+    // 确保每个集合都有 type 字段
+    flatCollections.value = collectionsData.map(c => ({ ...c, type: 'collection' }))
 
     // 加载请求
     await loadRequests()
@@ -1371,14 +1386,13 @@ const createEmptyRequest = () => {
 
   const newRequest = {
     id: null,
-    collection: null,
+    collection_id: null,
     name: '未命名接口',
     url: '',
     method: 'GET',
     params: {},
-    headers: {},
-    pre_request_script: '',
-    post_request_script: '',
+    headers: [],
+    body_type: 'none',
     assertions: [],
     request_type: 'HTTP'
   }
@@ -1681,6 +1695,12 @@ const sendRequest = async () => {
     return
   }
 
+  // 新建的接口还没保存，不允许发送
+  if (!selectedRequest.value.id) {
+    ElMessage.warning('请先保存接口后再发送')
+    return
+  }
+
   try {
     sending.value = true
 
@@ -1767,6 +1787,11 @@ const saveRequest = async () => {
     return
   }
 
+  if (!selectedRequest.value.collection_id) {
+    ElMessage.warning('请选择所属集合')
+    return
+  }
+
   try {
     saving.value = true
 
@@ -1832,9 +1857,16 @@ const saveRequest = async () => {
     }
 
     const requestData = {
-      ...selectedRequest.value,
+      name: selectedRequest.value.name || '未命名接口',
+      url: selectedRequest.value.url || '',
+      method: selectedRequest.value.method || 'GET',
+      collection_id: selectedRequest.value.collection_id || null,
       params: typeof selectedRequest.value.params === 'object' ? JSON.stringify(selectedRequest.value.params || {}) : selectedRequest.value.params,
-      headers: JSON.stringify(finalHeaders)
+      headers: JSON.stringify(finalHeaders),
+      body_type: selectedRequest.value.body_type || 'none',
+      body_content: selectedRequest.value.body_content || '',
+      assertions: selectedRequest.value.assertions && Array.isArray(selectedRequest.value.assertions) ? JSON.stringify(selectedRequest.value.assertions) : '[]',
+      extractors: selectedRequest.value.extractors && Array.isArray(selectedRequest.value.extractors) ? JSON.stringify(selectedRequest.value.extractors) : '[]'
     }
     
     // 对于GET请求，不包含body字段

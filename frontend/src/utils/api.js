@@ -40,12 +40,12 @@ api.interceptors.request.use(
 
     // 如果有access token
     if (userStore.accessToken) {
-      // 检查token是否即将过期（5分钟内）
-      if (userStore.isTokenExpiringSoon && !userStore.isTokenExpired) {
+      // 检查token是否已过期或即将过期，需要刷新
+      if (userStore.isTokenExpired || userStore.isTokenExpiringSoon) {
         // 如果没有正在刷新，开始刷新
         if (!isRefreshing) {
           isRefreshing = true
-          console.log('Token即将过期，开始刷新...')
+          console.log('Token已过期或即将过期，开始刷新...')
 
           try {
             const newToken = await userStore.refreshAccessToken()
@@ -74,10 +74,10 @@ api.interceptors.request.use(
             return Promise.reject(err)
           })
         }
+      } else {
+        // token仍然有效，直接使用
+        config.headers.Authorization = `Bearer ${userStore.accessToken}`
       }
-
-      // 使用Bearer token格式
-      config.headers.Authorization = `Bearer ${userStore.accessToken}`
     }
 
     return config
