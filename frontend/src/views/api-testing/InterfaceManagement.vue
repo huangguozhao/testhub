@@ -755,6 +755,7 @@ import ResponsePanel from './components/ResponsePanel.vue'
 import CollectionDialog from './components/CollectionDialog.vue'
 import CurlImportDialog from './components/CurlImportDialog.vue'
 import CodeGenerateDialog from './components/CodeGenerateDialog.vue'
+import VariableHelperDialog from './components/VariableHelperDialog.vue'
 import { debounce } from 'lodash-es'
 import { useI18n } from 'vue-i18n'
 
