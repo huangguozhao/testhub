@@ -24,10 +24,9 @@ public class ScriptEngine {
     /**
      * 执行Pre-request Script (请求前脚本)
      */
-    public ScriptExecutionResult executePreScript(String script, ApiRequest request,
-                                                   Map<String, String> variables) {
+    public ScriptResult executePreScript(String script, ApiRequest request, Map<String, String> variables) {
         if (script == null || script.isBlank()) {
-            return ScriptExecutionResult.success();
+            return ScriptResult.success();
         }
 
         Map<String, Object> requestObj = buildRequestObject(request);
@@ -35,34 +34,38 @@ public class ScriptEngine {
         if (variables != null) {
             currentVars.putAll(variables);
         }
+        ScriptResult result = ScriptResult.success();
 
         try {
             Map<String, Object> env = new HashMap<>();
             env.put("request", requestObj);
             env.put("variables", currentVars);
+            env.put("scriptResult", result);
 
-            Boolean abort = executeScript(script, env);
+            Boolean abort = executeScript(script, env, result);
 
             // 从variables中获取更新后的值
             @SuppressWarnings("unchecked")
             Map<String, String> updatedVars = (Map<String, String>) env.get("variables");
-            return ScriptExecutionResult.success()
-                    .setVariables(updatedVars != null ? updatedVars : variables)
-                    .setAbort(abort != null && abort);
+            result.setVariables(updatedVars != null ? updatedVars : variables);
+            result.setAbort(abort != null && abort);
 
         } catch (Exception e) {
             log.error("Pre-request Script执行失败: {}", e.getMessage());
-            return ScriptExecutionResult.fail(e.getMessage());
+            result.setSuccess(false);
+            result.setError(e.getMessage());
         }
+
+        return result;
     }
 
     /**
      * 执行Tests (请求后脚本)
      */
-    public ScriptExecutionResult executeTests(String script, ApiRequest request, ApiResponse response,
-                                               Map<String, String> variables) {
+    public ScriptResult executeTests(String script, ApiRequest request, ApiResponse response,
+                                    Map<String, String> variables) {
         if (script == null || script.isBlank()) {
-            return ScriptExecutionResult.success();
+            return ScriptResult.success();
         }
 
         Map<String, Object> requestObj = buildRequestObject(request);
@@ -71,31 +74,33 @@ public class ScriptEngine {
         if (variables != null) {
             currentVars.putAll(variables);
         }
-        Map<String, Object> testsObj = new HashMap<>(); // 用于存储测试结果
+        ScriptResult result = ScriptResult.success();
 
         try {
             Map<String, Object> env = new HashMap<>();
             env.put("request", requestObj);
             env.put("response", responseObj);
             env.put("variables", currentVars);
-            env.put("tests", testsObj);
+            env.put("scriptResult", result);
 
-            Boolean abort = executeScript(script, env);
+            Boolean abort = executeScript(script, env, result);
 
             // 从variables中获取更新后的值
             @SuppressWarnings("unchecked")
             Map<String, String> updatedVars = (Map<String, String>) env.get("variables");
-            return ScriptExecutionResult.success()
-                    .setVariables(updatedVars != null ? updatedVars : variables)
-                    .setAbort(abort != null && abort);
+            result.setVariables(updatedVars != null ? updatedVars : variables);
+            result.setAbort(abort != null && abort);
 
         } catch (Exception e) {
             log.error("Tests执行失败: {}", e.getMessage());
-            return ScriptExecutionResult.fail(e.getMessage());
+            result.setSuccess(false);
+            result.setError(e.getMessage());
         }
+
+        return result;
     }
 
-    private Boolean executeScript(String script, Map<String, Object> env) throws Exception {
+    private Boolean executeScript(String script, Map<String, Object> env, ScriptResult result) throws Exception {
         Context cx = Context.enter();
         try {
             Scriptable scope = cx.initStandardObjects();
@@ -103,10 +108,10 @@ public class ScriptEngine {
             // 创建console对象
             Scriptable consoleObj = cx.newObject(scope);
             consoleObj.setPrototype(getGlobalPrototype(cx, scope, "console"));
-            consoleObj.put("log", consoleObj, new ConsolFunction("log"));
-            consoleObj.put("info", consoleObj, new ConsolFunction("info"));
-            consoleObj.put("warn", consoleObj, new ConsolFunction("warn"));
-            consoleObj.put("error", consoleObj, new ConsolFunction("error"));
+            consoleObj.put("log", consoleObj, new ConsoleFunction("log", result));
+            consoleObj.put("info", consoleObj, new ConsoleFunction("info", result));
+            consoleObj.put("warn", consoleObj, new ConsoleFunction("warn", result));
+            consoleObj.put("error", consoleObj, new ConsoleFunction("error", result));
             scope.put("console", scope, consoleObj);
 
             // 注入request
@@ -125,7 +130,7 @@ public class ScriptEngine {
                 }
             }
 
-            // 注入variables (使用NativeObject使其属性可修改)
+            // 注入variables (使用Scriptable使其可修改)
             NativeObject variablesObj = new NativeObject();
             if (env.containsKey("variables")) {
                 @SuppressWarnings("unchecked")
@@ -136,19 +141,12 @@ public class ScriptEngine {
             }
             scope.put("variables", scope, variablesObj);
 
-            // 注入tests (仅Tests脚本需要)
-            if (env.containsKey("tests")) {
-                @SuppressWarnings("unchecked")
-                Map<String, Object> tests = (Map<String, Object>) env.get("tests");
-                NativeObject testsObj = new NativeObject();
-                for (Map.Entry<String, Object> entry : tests.entrySet()) {
-                    testsObj.put(entry.getKey(), testsObj, entry.getValue());
-                }
-                scope.put("tests", scope, testsObj);
-            }
+            // 注入tests对象
+            NativeObject testsObj = new NativeObject();
+            scope.put("tests", scope, testsObj);
 
             // 执行脚本
-            Object result = cx.evaluateString(scope, script, "<cmd>", 1, null);
+            Object evalResult = cx.evaluateString(scope, script, "<cmd>", 1, null);
 
             // 从variables中提取更新后的值
             if (scope.has("variables", scope)) {
@@ -165,9 +163,22 @@ public class ScriptEngine {
                 }
             }
 
+            // 从tests中提取测试结果
+            if (scope.has("tests", scope)) {
+                Object testsResultObj = scope.get("tests", scope);
+                if (testsResultObj instanceof NativeObject) {
+                    Object[] ids = ((NativeObject) testsResultObj).getIds();
+                    for (Object id : ids) {
+                        String key = String.valueOf(id);
+                        Object value = ((NativeObject) testsResultObj).get(key, (Scriptable) testsResultObj);
+                        result.setTestResult(key, Boolean.TRUE.equals(value));
+                    }
+                }
+            }
+
             // 检查是否有abort属性
-            if (result instanceof Scriptable) {
-                Object abort = ((Scriptable) result).get("abort", (Scriptable) result);
+            if (evalResult instanceof Scriptable) {
+                Object abort = ((Scriptable) evalResult).get("abort", (Scriptable) evalResult);
                 if (abort instanceof Boolean) {
                     return (Boolean) abort;
                 }
@@ -246,13 +257,15 @@ public class ScriptEngine {
     }
 
     /**
-     * Console函数
+     * Console函数 - 将日志输出到ScriptResult中
      */
-    private static class ConsolFunction extends BaseFunction {
+    private static class ConsoleFunction extends BaseFunction {
         private final String level;
+        private final ScriptResult result;
 
-        public ConsolFunction(String level) {
+        public ConsoleFunction(String level, ScriptResult result) {
             this.level = level;
+            this.result = result;
         }
 
         @Override
@@ -262,46 +275,21 @@ public class ScriptEngine {
                 if (i > 0) sb.append(" ");
                 sb.append(Context.toString(args[i]));
             }
+            String logMessage = sb.toString();
+
+            // 同时输出到后端日志
             if ("error".equals(level)) {
-                log.error("[JS Console] {}", sb);
+                log.error("[JS Console] {}", logMessage);
             } else if ("warn".equals(level)) {
-                log.warn("[JS Console] {}", sb);
+                log.warn("[JS Console] {}", logMessage);
             } else {
-                log.info("[JS Console] {}", sb);
+                log.info("[JS Console] {}", logMessage);
             }
+
+            // 添加到ScriptResult的日志列表
+            result.addLog("[" + level.toUpperCase() + "] " + logMessage);
+
             return null;
-        }
-    }
-
-    /**
-     * 脚本执行结果
-     */
-    @lombok.Data
-    @lombok.Builder
-    @lombok.NoArgsConstructor
-    @lombok.AllArgsConstructor
-    public static class ScriptExecutionResult {
-        private boolean success;
-        private String error;
-        private Map<String, String> variables;
-        private boolean abort;
-
-        public static ScriptExecutionResult success() {
-            return ScriptExecutionResult.builder().success(true).build();
-        }
-
-        public static ScriptExecutionResult fail(String error) {
-            return ScriptExecutionResult.builder().success(false).error(error).build();
-        }
-
-        public ScriptExecutionResult setVariables(Map<String, String> variables) {
-            this.variables = variables;
-            return this;
-        }
-
-        public ScriptExecutionResult setAbort(boolean abort) {
-            this.abort = abort;
-            return this;
         }
     }
 }

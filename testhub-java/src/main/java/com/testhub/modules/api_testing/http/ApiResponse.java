@@ -21,4 +21,8 @@ public class ApiResponse {
     private boolean abort;      // Tests脚本是否中止请求
     private String abortReason; // 中止原因
     private List<AssertionEngine.AssertionResult> assertionResults; // 断言结果
+
+    // 脚本执行结果
+    private ScriptResult preScriptResult;  // 前置脚本执行结果
+    private ScriptResult postScriptResult; // 后置脚本执行结果
 }

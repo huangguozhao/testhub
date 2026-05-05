@@ -56,26 +56,29 @@ public class ApiExecutor {
         log.info("========== 临时API请求开始 ==========");
         log.info("请求信息: name={}, url={}, method={}", request.getName(), request.getUrl(), request.getMethod());
 
+        ScriptResult preScriptResult = null;
+        ScriptResult postScriptResult = null;
+
         try {
             // 执行Pre-request Script
             if (request.getPreScript() != null && !request.getPreScript().isBlank()) {
                 log.info("【Pre-request Script】开始执行, 内容长度={}", request.getPreScript().length());
-                ScriptEngine.ScriptExecutionResult preResult = scriptEngine.executePreScript(
-                        request.getPreScript(), request, currentVars);
-                log.info("【Pre-request Script】执行结果: success={}, abort={}, error={}",
-                        preResult.isSuccess(), preResult.isAbort(), preResult.getError());
-                if (preResult.getVariables() != null && !preResult.getVariables().isEmpty()) {
-                    log.info("【Pre-request Script】更新变量: {}", preResult.getVariables());
-                    currentVars.putAll(preResult.getVariables());
+                preScriptResult = scriptEngine.executePreScript(request.getPreScript(), request, currentVars);
+                log.info("【Pre-request Script】执行结果: success={}, abort={}, error={}, logs={}",
+                        preScriptResult.isSuccess(), preScriptResult.isAbort(), preScriptResult.getError(), preScriptResult.getLogs());
+                if (preScriptResult.getVariables() != null && !preScriptResult.getVariables().isEmpty()) {
+                    log.info("【Pre-request Script】更新变量: {}", preScriptResult.getVariables());
+                    currentVars.putAll(preScriptResult.getVariables());
                 }
-                if (!preResult.isSuccess()) {
-                    log.warn("【Pre-request Script】执行失败: {}", preResult.getError());
+                if (!preScriptResult.isSuccess()) {
+                    log.warn("【Pre-request Script】执行失败: {}", preScriptResult.getError());
                 }
-                if (preResult.isAbort()) {
+                if (preScriptResult.isAbort()) {
                     log.warn("【Pre-request Script】中止请求");
                     return ApiResponse.builder()
                             .success(false)
                             .error("Pre-request Script中止了请求")
+                            .preScriptResult(preScriptResult)
                             .responseTime(System.currentTimeMillis() - startTime)
                             .build();
                 }
@@ -118,26 +121,28 @@ public class ApiExecutor {
                     .headers(httpResponse.getHeaders().toSingleValueMap())
                     .body(httpResponse.getBody())
                     .responseTime(duration)
+                    .preScriptResult(preScriptResult)
                     .build();
 
             // 执行Tests脚本
             if (request.getPostScript() != null && !request.getPostScript().isBlank()) {
                 log.info("【Tests脚本】开始执行, 内容长度={}", request.getPostScript().length());
-                ScriptEngine.ScriptExecutionResult testResult = scriptEngine.executeTests(
-                        request.getPostScript(), request, response, currentVars);
-                log.info("【Tests脚本】执行结果: success={}, abort={}, error={}",
-                        testResult.isSuccess(), testResult.isAbort(), testResult.getError());
-                if (testResult.getVariables() != null && !testResult.getVariables().isEmpty()) {
-                    log.info("【Tests脚本】更新变量: {}", testResult.getVariables());
-                    currentVars.putAll(testResult.getVariables());
+                postScriptResult = scriptEngine.executeTests(request.getPostScript(), request, response, currentVars);
+                log.info("【Tests脚本】执行结果: success={}, abort={}, error={}, logs={}, testResults={}",
+                        postScriptResult.isSuccess(), postScriptResult.isAbort(), postScriptResult.getError(),
+                        postScriptResult.getLogs(), postScriptResult.getTestResults());
+                if (postScriptResult.getVariables() != null && !postScriptResult.getVariables().isEmpty()) {
+                    log.info("【Tests脚本】更新变量: {}", postScriptResult.getVariables());
+                    currentVars.putAll(postScriptResult.getVariables());
                 }
-                if (!testResult.isSuccess()) {
-                    log.warn("【Tests脚本】执行失败: {}", testResult.getError());
+                if (!postScriptResult.isSuccess()) {
+                    log.warn("【Tests脚本】执行失败: {}", postScriptResult.getError());
                 }
-                if (testResult.isAbort()) {
+                if (postScriptResult.isAbort()) {
                     response.setAbort(true);
                     response.setAbortReason("Tests脚本中止了请求");
                 }
+                response.setPostScriptResult(postScriptResult);
             } else {
                 log.info("【Tests脚本】无");
             }
@@ -208,26 +213,29 @@ public class ApiExecutor {
         log.info("========== API请求开始 ==========");
         log.info("请求信息: name={}, url={}, method={}", request.getName(), request.getUrl(), request.getMethod());
 
+        ScriptResult preScriptResult = null;
+        ScriptResult postScriptResult = null;
+
         try {
             // 执行Pre-request Script
             if (request.getPreScript() != null && !request.getPreScript().isBlank()) {
                 log.info("【Pre-request Script】开始执行, 内容长度={}", request.getPreScript().length());
-                ScriptEngine.ScriptExecutionResult preResult = scriptEngine.executePreScript(
-                        request.getPreScript(), request, currentVars);
-                log.info("【Pre-request Script】执行结果: success={}, abort={}, error={}",
-                        preResult.isSuccess(), preResult.isAbort(), preResult.getError());
-                if (preResult.getVariables() != null && !preResult.getVariables().isEmpty()) {
-                    log.info("【Pre-request Script】更新变量: {}", preResult.getVariables());
-                    currentVars.putAll(preResult.getVariables());
+                preScriptResult = scriptEngine.executePreScript(request.getPreScript(), request, currentVars);
+                log.info("【Pre-request Script】执行结果: success={}, abort={}, error={}, logs={}",
+                        preScriptResult.isSuccess(), preScriptResult.isAbort(), preScriptResult.getError(), preScriptResult.getLogs());
+                if (preScriptResult.getVariables() != null && !preScriptResult.getVariables().isEmpty()) {
+                    log.info("【Pre-request Script】更新变量: {}", preScriptResult.getVariables());
+                    currentVars.putAll(preScriptResult.getVariables());
                 }
-                if (!preResult.isSuccess()) {
-                    log.warn("【Pre-request Script】执行失败: {}", preResult.getError());
+                if (!preScriptResult.isSuccess()) {
+                    log.warn("【Pre-request Script】执行失败: {}", preScriptResult.getError());
                 }
-                if (preResult.isAbort()) {
+                if (preScriptResult.isAbort()) {
                     log.warn("【Pre-request Script】中止请求");
                     return ApiResponse.builder()
                             .success(false)
                             .error("Pre-request Script中止了请求")
+                            .preScriptResult(preScriptResult)
                             .responseTime(System.currentTimeMillis() - startTime)
                             .build();
                 }
@@ -270,26 +278,28 @@ public class ApiExecutor {
                     .headers(httpResponse.getHeaders().toSingleValueMap())
                     .body(httpResponse.getBody())
                     .responseTime(duration)
+                    .preScriptResult(preScriptResult)
                     .build();
 
             // 执行Tests脚本
             if (request.getPostScript() != null && !request.getPostScript().isBlank()) {
                 log.info("【Tests脚本】开始执行, 内容长度={}", request.getPostScript().length());
-                ScriptEngine.ScriptExecutionResult testResult = scriptEngine.executeTests(
-                        request.getPostScript(), request, response, currentVars);
-                log.info("【Tests脚本】执行结果: success={}, abort={}, error={}",
-                        testResult.isSuccess(), testResult.isAbort(), testResult.getError());
-                if (testResult.getVariables() != null && !testResult.getVariables().isEmpty()) {
-                    log.info("【Tests脚本】更新变量: {}", testResult.getVariables());
-                    currentVars.putAll(testResult.getVariables());
+                postScriptResult = scriptEngine.executeTests(request.getPostScript(), request, response, currentVars);
+                log.info("【Tests脚本】执行结果: success={}, abort={}, error={}, logs={}, testResults={}",
+                        postScriptResult.isSuccess(), postScriptResult.isAbort(), postScriptResult.getError(),
+                        postScriptResult.getLogs(), postScriptResult.getTestResults());
+                if (postScriptResult.getVariables() != null && !postScriptResult.getVariables().isEmpty()) {
+                    log.info("【Tests脚本】更新变量: {}", postScriptResult.getVariables());
+                    currentVars.putAll(postScriptResult.getVariables());
                 }
-                if (!testResult.isSuccess()) {
-                    log.warn("【Tests脚本】执行失败: {}", testResult.getError());
+                if (!postScriptResult.isSuccess()) {
+                    log.warn("【Tests脚本】执行失败: {}", postScriptResult.getError());
                 }
-                if (testResult.isAbort()) {
+                if (postScriptResult.isAbort()) {
                     response.setAbort(true);
                     response.setAbortReason("Tests脚本中止了请求");
                 }
+                response.setPostScriptResult(postScriptResult);
             } else {
                 log.info("【Tests脚本】无");
             }
