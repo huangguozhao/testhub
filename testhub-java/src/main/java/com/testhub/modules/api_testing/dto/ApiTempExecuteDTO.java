@@ -8,6 +8,11 @@ import lombok.Data;
 @Data
 public class ApiTempExecuteDTO {
 
+    /**
+     * 请求ID（如果只有id，从数据库查询完整数据）
+     */
+    private Long id;
+
     private String url;
 
     private String method;

@@ -180,19 +180,30 @@ public class ApiRequestServiceImpl extends ServiceImpl<ApiRequestMapper, ApiRequ
             }
         }
 
-        // 构建临时请求对象
-        ApiRequest tempRequest = new ApiRequest();
-        tempRequest.setUrl(dto.getUrl());
-        tempRequest.setMethod(dto.getMethod() != null ? dto.getMethod() : "GET");
-        tempRequest.setParams(dto.getParams());
-        tempRequest.setHeaders(dto.getHeaders());
-        tempRequest.setBodyType(dto.getBodyType());
-        tempRequest.setBodyContent(dto.getBodyContent());
-        tempRequest.setPreScript(dto.getPreScript());
-        tempRequest.setPostScript(dto.getPostScript());
-        tempRequest.setAssertions(dto.getAssertions());
+        ApiRequest tempRequest;
 
-        log.info("执行临时API请求: url={}, method={}", dto.getUrl(), dto.getMethod());
+        // 如果只发送了id（无url），从数据库查询完整数据
+        if (dto.getId() != null && dto.getUrl() == null) {
+            log.info("执行已保存API请求: id={}", dto.getId());
+            tempRequest = this.getById(dto.getId());
+            if (tempRequest == null) {
+                throw new RuntimeException("API请求不存在: " + dto.getId());
+            }
+        } else {
+            // 构建临时请求对象
+            log.info("执行临时API请求: url={}, method={}", dto.getUrl(), dto.getMethod());
+            tempRequest = new ApiRequest();
+            tempRequest.setUrl(dto.getUrl());
+            tempRequest.setMethod(dto.getMethod() != null ? dto.getMethod() : "GET");
+            tempRequest.setParams(dto.getParams());
+            tempRequest.setHeaders(dto.getHeaders());
+            tempRequest.setBodyType(dto.getBodyType());
+            tempRequest.setBodyContent(dto.getBodyContent());
+            tempRequest.setPreScript(dto.getPreScript());
+            tempRequest.setPostScript(dto.getPostScript());
+            tempRequest.setAssertions(dto.getAssertions());
+        }
+
         // 临时请求不保存历史记录，传入 null 作为 requestId
         return apiExecutor.executeWithoutHistory(tempRequest, variables);
     }

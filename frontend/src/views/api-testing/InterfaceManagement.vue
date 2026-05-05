@@ -1029,6 +1029,7 @@ const sending = ref(false)
 const saving = ref(false)
 const activeTab = ref('params')
 const responseActiveTab = ref('body')
+const hasUnsavedChanges = ref(false) // 是否存在未保存的修改
 const showCreateCollectionDialog = ref(false)
 const showEditCollectionDialog = ref(false)
 const showContextMenu = ref(false)
@@ -1049,6 +1050,13 @@ const treeProps = {
   children: 'children',
   label: 'name'
 }
+
+// 监听 selectedRequest 的变化，标记为未保存状态
+watch(selectedRequest, () => {
+  if (selectedRequest.value && selectedRequest.value.id) {
+    hasUnsavedChanges.value = true
+  }
+}, { deep: true })
 
 // 数据工厂选择器相关
 const showDataFactorySelector = ref(false)
@@ -1763,79 +1771,94 @@ const sendRequest = async () => {
   try {
     sending.value = true
 
-    // 准备请求体数据
-    let bodyData = {}
-    if (hasBody.value) {
-      if (bodyType.value === 'none') {
-        bodyData = {}
-      } else if (bodyType.value === 'raw' && rawBody.value) {
-        if (rawType.value === 'json') {
-          try {
-            bodyData = {
-              type: 'json',
-              data: JSON.parse(rawBody.value)
+    let apiResponse
+
+    // 判断是否需要发送完整数据：有未保存的修改，或者请求从未保存过（没有id）
+    const needsFullData = hasUnsavedChanges.value || !selectedRequest.value.id
+
+    if (needsFullData) {
+      // 有未保存的修改或从未保存，使用完整数据
+      // 准备请求体数据
+      let bodyData = {}
+      if (hasBody.value) {
+        if (bodyType.value === 'none') {
+          bodyData = {}
+        } else if (bodyType.value === 'raw' && rawBody.value) {
+          if (rawType.value === 'json') {
+            try {
+              bodyData = {
+                type: 'json',
+                data: JSON.parse(rawBody.value)
+              }
+            } catch (e) {
+              bodyData = {
+                type: 'raw',
+                data: rawBody.value
+              }
             }
-          } catch (e) {
+          } else {
             bodyData = {
               type: 'raw',
               data: rawBody.value
             }
           }
-        } else {
+        } else if (bodyType.value === 'form-data') {
           bodyData = {
-            type: 'raw',
-            data: rawBody.value
+            type: 'form-data',
+            data: formData.value || []
+          }
+        } else if (bodyType.value === 'x-www-form-urlencoded') {
+          bodyData = {
+            type: 'x-www-form-urlencoded',
+            data: formUrlEncoded.value || []
+          }
+        } else if (bodyType.value === 'binary') {
+          bodyData = {
+            type: 'binary',
+            data: null
           }
         }
-      } else if (bodyType.value === 'form-data') {
-        bodyData = {
-          type: 'form-data',
-          data: formData.value || []
-        }
-      } else if (bodyType.value === 'x-www-form-urlencoded') {
-        bodyData = {
-          type: 'x-www-form-urlencoded',
-          data: formUrlEncoded.value || []
-        }
-      } else if (bodyType.value === 'binary') {
-        bodyData = {
-          type: 'binary',
-          data: null
-        }
       }
+
+      // 获取headers（从KeyValueEditor组件或从selectedRequest）
+      let finalHeaders = []
+      if (headersEditorRef.value) {
+        const rows = headersEditorRef.value.rows || []
+        finalHeaders = rows
+          .filter(row => row.enabled && row.key && row.key.trim())
+          .map(row => ({
+            key: row.key.trim(),
+            value: row.value || '',
+            description: row.description || '',
+            enabled: row.enabled !== false
+          }))
+      } else if (selectedRequest.value.headers && Array.isArray(selectedRequest.value.headers)) {
+        finalHeaders = selectedRequest.value.headers.filter(item => item.enabled && item.key)
+      }
+
+      const requestData = {
+        url: selectedRequest.value.url,
+        method: selectedRequest.value.method || 'GET',
+        params: JSON.stringify(convertKeyValueArrayToObject(selectedRequest.value.params || [])),
+        headers: JSON.stringify(finalHeaders),
+        environment_id: selectedEnvironment.value,
+        body_type: bodyType.value,
+        body_content: bodyType.value === 'none' ? '' : JSON.stringify(bodyData),
+        pre_script: selectedRequest.value.pre_request_script || '',
+        post_script: selectedRequest.value.post_request_script || '',
+        assertions: selectedRequest.value.assertions && Array.isArray(selectedRequest.value.assertions)
+          ? JSON.stringify(selectedRequest.value.assertions) : '[]'
+      }
+
+      apiResponse = await api.post('/api-requests/execute-temp', requestData)
+    } else {
+      // 已保存且无修改，只发送id让后端查询
+      apiResponse = await api.post('/api-requests/execute-temp', {
+        id: selectedRequest.value.id,
+        environment_id: selectedEnvironment.value
+      })
     }
 
-    // 获取headers（从KeyValueEditor组件或从selectedRequest）
-    let finalHeaders = []
-    if (headersEditorRef.value) {
-      const rows = headersEditorRef.value.rows || []
-      finalHeaders = rows
-        .filter(row => row.enabled && row.key && row.key.trim())
-        .map(row => ({
-          key: row.key.trim(),
-          value: row.value || '',
-          description: row.description || '',
-          enabled: row.enabled !== false
-        }))
-    } else if (selectedRequest.value.headers && Array.isArray(selectedRequest.value.headers)) {
-      finalHeaders = selectedRequest.value.headers.filter(item => item.enabled && item.key)
-    }
-
-    const requestData = {
-      url: selectedRequest.value.url,
-      method: selectedRequest.value.method || 'GET',
-      params: JSON.stringify(convertKeyValueArrayToObject(selectedRequest.value.params || [])),
-      headers: JSON.stringify(finalHeaders),
-      environment_id: selectedEnvironment.value,
-      body_type: bodyType.value,
-      body_content: bodyType.value === 'none' ? '' : JSON.stringify(bodyData),
-      pre_script: selectedRequest.value.pre_request_script || '',
-      post_script: selectedRequest.value.post_request_script || '',
-      assertions: selectedRequest.value.assertions && Array.isArray(selectedRequest.value.assertions)
-        ? JSON.stringify(selectedRequest.value.assertions) : '[]'
-    }
-
-    const apiResponse = await api.post('/api-requests/execute-temp', requestData)
     response.value = apiResponse.data
 
     ElMessage.success('请求成功')
@@ -2004,6 +2027,7 @@ const saveRequest = async () => {
 
     await loadCollections(selectedProject.value)
     ElMessage.success('保存成功')
+    hasUnsavedChanges.value = false // 重置未保存状态
   } catch (error) {
     ElMessage.error('保存失败')
     console.error('保存失败:', error)
