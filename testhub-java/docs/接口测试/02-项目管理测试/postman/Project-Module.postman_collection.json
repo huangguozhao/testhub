@@ -1,0 +1,466 @@
+{
+  "info": {
+    "name": "TestHub - 项目管理模块",
+    "description": "TestHub Java版本项目管理接口测试",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://127.0.0.1:8080/api"
+    },
+    {
+      "key": "accessToken",
+      "value": ""
+    },
+    {
+      "key": "projectId",
+      "value": ""
+    },
+    {
+      "key": "memberId",
+      "value": ""
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "1. 登录获取Token",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code === 200) {",
+              "    var jsonData = pm.response.json();",
+              "    if (jsonData.data && jsonData.data.accessToken) {",
+              "        pm.collectionVariables.set('accessToken', jsonData.data.accessToken);",
+              "    }",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"username\": \"test_admin\",\n    \"password\": \"Test123456\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/auth/login",
+          "host": ["{{baseUrl}}"],
+          "path": ["auth", "login"]
+        }
+      }
+    },
+    {
+      "name": "2. 创建项目",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code === 200) {",
+              "    var jsonData = pm.response.json();",
+              "    if (jsonData.data && jsonData.data.id) {",
+              "        pm.collectionVariables.set('projectId', jsonData.data.id);",
+              "        pm.test('项目创建成功，ID已保存', true);",
+              "    }",
+              "}",
+              "pm.test('响应状态码200', function() {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"name\": \"TEST_项目_{{timestamp}}\",\n    \"description\": \"接口测试专用项目\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/projects",
+          "host": ["{{baseUrl}}"],
+          "path": ["projects"]
+        }
+      }
+    },
+    {
+      "name": "3. 获取项目列表",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('响应状态码200', function() {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test('返回项目列表', function() {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.data).to.be.an('array');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/projects",
+          "host": ["{{baseUrl}}"],
+          "path": ["projects"]
+        }
+      }
+    },
+    {
+      "name": "4. 获取项目详情",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('响应状态码200', function() {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test('返回项目详情', function() {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.data).to.have.property('id');",
+              "    pm.expect(jsonData.data).to.have.property('name');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/projects/{{projectId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["projects", "{{projectId}}"]
+        }
+      }
+    },
+    {
+      "name": "5. 更新项目",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('响应状态码200', function() {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test('项目更新成功', function() {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.data.name).to.include('更新');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"name\": \"TEST_项目_更新_{{timestamp}}\",\n    \"description\": \"更新后的描述\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/projects/{{projectId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["projects", "{{projectId}}"]
+        }
+      }
+    },
+    {
+      "name": "6. 获取项目成员列表",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('响应状态码200', function() {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test('返回成员列表', function() {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.data).to.be.an('array');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/projects/{{projectId}}/members",
+          "host": ["{{baseUrl}}"],
+          "path": ["projects", "{{projectId}}", "members"]
+        }
+      }
+    },
+    {
+      "name": "7. 获取当前用户角色",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('响应状态码200', function() {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test('返回用户角色', function() {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.data).to.be.a('string');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/projects/{{projectId}}/members/role",
+          "host": ["{{baseUrl}}"],
+          "path": ["projects", "{{projectId}}", "members", "role"]
+        }
+      }
+    },
+    {
+      "name": "8. 获取项目环境列表",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('响应状态码200', function() {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test('返回环境列表', function() {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.data).to.be.an('array');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/projects/{{projectId}}/environments",
+          "host": ["{{baseUrl}}"],
+          "path": ["projects", "{{projectId}}", "environments"]
+        }
+      }
+    },
+    {
+      "name": "9. 创建项目环境",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('响应状态码200', function() {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test('环境创建成功', function() {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.data).to.have.property('id');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"name\": \"测试环境\",\n    \"description\": \"测试环境描述\",\n    \"variables\": {\n        \"baseUrl\": \"https://api.test.com\",\n        \"version\": \"v1\"\n    }\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/projects/{{projectId}}/environments",
+          "host": ["{{baseUrl}}"],
+          "path": ["projects", "{{projectId}}", "environments"]
+        }
+      }
+    },
+    {
+      "name": "10. 搜索项目",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('响应状态码200', function() {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test('返回搜索结果', function() {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.data).to.be.an('array');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/projects/search?keyword=TEST",
+          "host": ["{{baseUrl}}"],
+          "path": ["projects", "search"]
+        }
+      }
+    },
+    {
+      "name": "11. 分页查询项目",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('响应状态码200', function() {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test('返回分页结果', function() {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.data).to.have.property('records');",
+              "    pm.expect(jsonData.data).to.have.property('total');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/projects/page?current=1&size=10",
+          "host": ["{{baseUrl}}"],
+          "path": ["projects", "page"]
+        }
+      }
+    },
+    {
+      "name": "12. 删除项目",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('响应状态码200', function() {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/projects/{{projectId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["projects", "{{projectId}}"]
+        }
+      }
+    },
+    {
+      "name": "13. 获取不存在的项目",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('项目不存在应返回404', function() {",
+              "    pm.response.to.have.status(404);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/projects/999999",
+          "host": ["{{baseUrl}}"],
+          "path": ["projects", "999999"]
+        }
+      }
+    },
+    {
+      "name": "14. 无Token创建项目",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('无Token应返回401', function() {",
+              "    pm.response.to.have.status(401);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"name\": \"无权限项目\",\n    \"description\": \"测试\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/projects",
+          "host": ["{{baseUrl}}"],
+          "path": ["projects"]
+        }
+      }
+    }
+  ]
+}

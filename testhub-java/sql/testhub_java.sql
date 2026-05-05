@@ -11,7 +11,7 @@
  Target Server Version : 80046 (8.0.46)
  File Encoding         : 65001
 
- Date: 30/04/2026 18:55:50
+ Date: 05/05/2026 22:03:27
 */
 
 SET NAMES utf8mb4;
@@ -38,7 +38,7 @@ CREATE TABLE `api_collection`  (
   INDEX `idx_project_id`(`project_id` ASC) USING BTREE,
   INDEX `idx_parent_id`(`parent_id` ASC) USING BTREE,
   INDEX `idx_name`(`name` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'API集合表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'API集合表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of api_collection
@@ -64,7 +64,7 @@ CREATE TABLE `api_environment`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_project_id`(`project_id` ASC) USING BTREE,
   INDEX `idx_is_default`(`is_default` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'API环境表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'API环境表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of api_environment
@@ -96,7 +96,7 @@ CREATE TABLE `api_execution_record`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_suite_id`(`suite_id` ASC) USING BTREE,
   INDEX `idx_executed_at`(`executed_at` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of api_execution_record
@@ -124,12 +124,32 @@ CREATE TABLE `api_project`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_project_id`(`project_id` ASC) USING BTREE,
   INDEX `idx_name`(`name` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'API项目表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'API项目表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of api_project
 -- ----------------------------
 INSERT INTO `api_project` VALUES (1, 7, 'UserServiceAPI', 'User service API collection', 'https://httpbin.org', 0, '2026-04-30 09:49:29', '2026-04-30 09:49:29', 4, 4);
+
+-- ----------------------------
+-- Table structure for api_project_member
+-- ----------------------------
+DROP TABLE IF EXISTS `api_project_member`;
+CREATE TABLE `api_project_member`  (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `project_id` bigint NOT NULL COMMENT 'API项目ID',
+  `user_id` bigint NOT NULL COMMENT '用户ID',
+  `role` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT 'member' COMMENT '角色: owner, admin, member',
+  `joined_at` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '加入时间',
+  `is_deleted` tinyint NULL DEFAULT 0 COMMENT '是否删除',
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE INDEX `uk_project_user`(`project_id` ASC, `user_id` ASC) USING BTREE,
+  INDEX `idx_user_id`(`user_id` ASC) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'API项目成员表' ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of api_project_member
+-- ----------------------------
 
 -- ----------------------------
 -- Table structure for api_request
@@ -161,7 +181,7 @@ CREATE TABLE `api_request`  (
   INDEX `idx_collection_id`(`collection_id` ASC) USING BTREE,
   INDEX `idx_method`(`method` ASC) USING BTREE,
   INDEX `idx_name`(`name` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 10 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'API请求表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 10 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'API请求表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of api_request
@@ -208,7 +228,7 @@ CREATE TABLE `api_request_history`  (
   INDEX `idx_request_id`(`request_id` ASC) USING BTREE,
   INDEX `idx_suite_id`(`suite_id` ASC) USING BTREE,
   INDEX `idx_executed_at`(`executed_at` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'API请求历史表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'API请求历史表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of api_request_history
@@ -242,7 +262,7 @@ CREATE TABLE `api_scheduled_task`  (
   INDEX `idx_suite_id`(`suite_id` ASC) USING BTREE,
   INDEX `idx_is_enabled`(`is_enabled` ASC) USING BTREE,
   INDEX `idx_trigger_type`(`trigger_type` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'API定时任务表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'API定时任务表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of api_scheduled_task
@@ -269,7 +289,7 @@ CREATE TABLE `api_test_suite`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_project_id`(`project_id` ASC) USING BTREE,
   INDEX `idx_name`(`name` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'API测试套件表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'API测试套件表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of api_test_suite
@@ -294,7 +314,7 @@ CREATE TABLE `api_test_suite_request`  (
   UNIQUE INDEX `uk_suite_request`(`suite_id` ASC, `request_id` ASC) USING BTREE,
   INDEX `idx_suite_id`(`suite_id` ASC) USING BTREE,
   INDEX `idx_request_id`(`request_id` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '套件请求关联表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '套件请求关联表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of api_test_suite_request
@@ -319,7 +339,7 @@ CREATE TABLE `app_component`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_project_id`(`project_id` ASC) USING BTREE,
   INDEX `idx_name`(`name` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'APP UI组件表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'APP UI组件表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of app_component
@@ -349,7 +369,7 @@ CREATE TABLE `app_device`  (
   INDEX `idx_project_id`(`project_id` ASC) USING BTREE,
   INDEX `idx_status`(`status` ASC) USING BTREE,
   INDEX `idx_device_id`(`device_id` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'APP设备表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'APP设备表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of app_device
@@ -377,7 +397,7 @@ CREATE TABLE `app_element`  (
   INDEX `idx_project_id`(`project_id` ASC) USING BTREE,
   INDEX `idx_locator_type`(`locator_type` ASC) USING BTREE,
   INDEX `idx_name`(`name` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'APP元素表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'APP元素表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of app_element
@@ -401,7 +421,7 @@ CREATE TABLE `app_package`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_project_id`(`project_id` ASC) USING BTREE,
   INDEX `idx_package_name`(`package_name` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'APP包名管理表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'APP包名管理表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of app_package
@@ -425,7 +445,7 @@ CREATE TABLE `app_project`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_project_id`(`project_id` ASC) USING BTREE,
   INDEX `idx_name`(`name` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'APP自动化项目表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'APP自动化项目表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of app_project
@@ -458,7 +478,7 @@ CREATE TABLE `app_scheduled_task`  (
   INDEX `idx_suite_id`(`suite_id` ASC) USING BTREE,
   INDEX `idx_is_enabled`(`is_enabled` ASC) USING BTREE,
   INDEX `idx_trigger_type`(`trigger_type` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'APP定时任务表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'APP定时任务表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of app_scheduled_task
@@ -482,7 +502,7 @@ CREATE TABLE `app_test_case`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_project_id`(`project_id` ASC) USING BTREE,
   INDEX `idx_name`(`name` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'APP测试用例表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'APP测试用例表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of app_test_case
@@ -514,7 +534,7 @@ CREATE TABLE `app_test_execution`  (
   INDEX `idx_device_id`(`device_id` ASC) USING BTREE,
   INDEX `idx_status`(`status` ASC) USING BTREE,
   INDEX `idx_executor_id`(`executor_id` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'APP执行记录表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'APP执行记录表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of app_test_execution
@@ -537,7 +557,7 @@ CREATE TABLE `app_test_suite`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_project_id`(`project_id` ASC) USING BTREE,
   INDEX `idx_name`(`name` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'APP测试套件表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'APP测试套件表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of app_test_suite
@@ -558,7 +578,7 @@ CREATE TABLE `app_test_suite_case`  (
   UNIQUE INDEX `uk_suite_case`(`suite_id` ASC, `case_id` ASC) USING BTREE,
   INDEX `idx_suite_id`(`suite_id` ASC) USING BTREE,
   INDEX `idx_case_id`(`case_id` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'APP套件用例关联表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'APP套件用例关联表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of app_test_suite_case
@@ -579,7 +599,7 @@ CREATE TABLE `ast_assistant_session`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_user_id`(`user_id` ASC) USING BTREE,
   INDEX `idx_last_message_at`(`last_message_at` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'AI助手会话表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'AI助手会话表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of ast_assistant_session
@@ -599,7 +619,7 @@ CREATE TABLE `ast_chat_message`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_session_id`(`session_id` ASC) USING BTREE,
   INDEX `idx_role`(`role` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'AI助手消息表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'AI助手消息表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of ast_chat_message
@@ -625,7 +645,7 @@ CREATE TABLE `ast_dify_config`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_is_enabled`(`is_enabled` ASC) USING BTREE,
   INDEX `idx_is_default`(`is_default` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'Dify配置表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'Dify配置表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of ast_dify_config
@@ -654,7 +674,7 @@ CREATE TABLE `cfg_ai_model_config`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_provider`(`provider` ASC) USING BTREE,
   INDEX `idx_role`(`role` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'AI模型配置表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'AI模型配置表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of cfg_ai_model_config
@@ -679,7 +699,7 @@ CREATE TABLE `cfg_notification_config`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_type`(`type` ASC) USING BTREE,
   INDEX `idx_is_enabled`(`is_enabled` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '通知配置表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '通知配置表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of cfg_notification_config
@@ -709,7 +729,7 @@ CREATE TABLE `df_data_record`  (
   INDEX `idx_tool_category`(`tool_category` ASC) USING BTREE,
   INDEX `idx_tool_scenario`(`tool_scenario` ASC) USING BTREE,
   INDEX `idx_is_saved`(`is_saved` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '数据工厂记录表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '数据工厂记录表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of df_data_record
@@ -737,7 +757,7 @@ CREATE TABLE `exec_test_plan`  (
   INDEX `idx_project_id`(`project_id` ASC) USING BTREE,
   INDEX `idx_assignee_id`(`assignee_id` ASC) USING BTREE,
   INDEX `idx_status`(`status` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '测试计划表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '测试计划表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of exec_test_plan
@@ -766,7 +786,7 @@ CREATE TABLE `exec_test_run`  (
   INDEX `idx_suite_id`(`suite_id` ASC) USING BTREE,
   INDEX `idx_executor_id`(`executor_id` ASC) USING BTREE,
   INDEX `idx_status`(`status` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '测试执行记录表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '测试执行记录表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of exec_test_run
@@ -795,7 +815,7 @@ CREATE TABLE `exec_test_run_case`  (
   INDEX `idx_run_id`(`run_id` ASC) USING BTREE,
   INDEX `idx_test_case_id`(`test_case_id` ASC) USING BTREE,
   INDEX `idx_status`(`status` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '执行用例记录表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '执行用例记录表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of exec_test_run_case
@@ -818,7 +838,7 @@ CREATE TABLE `lbl_label`  (
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `uk_project_label`(`project_id` ASC, `name` ASC) USING BTREE,
   INDEX `idx_project_id`(`project_id` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '标签表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '标签表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of lbl_label
@@ -845,7 +865,7 @@ CREATE TABLE `notification_config`  (
   INDEX `idx_config_type`(`config_type` ASC) USING BTREE,
   INDEX `idx_is_default`(`is_default` ASC) USING BTREE,
   INDEX `idx_is_active`(`is_active` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '通知配置表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '通知配置表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of notification_config
@@ -880,12 +900,44 @@ CREATE TABLE `notification_log`  (
   INDEX `idx_channel`(`channel` ASC) USING BTREE,
   INDEX `idx_status`(`status` ASC) USING BTREE,
   INDEX `idx_created_at`(`created_at` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '通知日志表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '通知日志表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of notification_log
 -- ----------------------------
 INSERT INTO `notification_log` VALUES (1, NULL, NULL, 'manual', 'feishu', 'success', 1, NULL, '{\"title\":\"Test Notification\",\"content\":\"This is a test notification from TestHub\"}', NULL, 0, '2026-04-30 18:43:26', '2026-04-30 18:43:26', '2026-04-30 18:43:26', 5, 5, 0);
+
+-- ----------------------------
+-- Table structure for operation_log
+-- ----------------------------
+DROP TABLE IF EXISTS `operation_log`;
+CREATE TABLE `operation_log`  (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `operation_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '操作类型: create, edit, delete, execute, run, save',
+  `resource_type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '资源类型: project, collection, request, suite, environment, task, execution',
+  `resource_id` bigint NULL DEFAULT NULL COMMENT '资源ID',
+  `resource_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '资源名称',
+  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL COMMENT '操作描述',
+  `user_id` bigint NULL DEFAULT NULL COMMENT '操作用户ID',
+  `username` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '操作用户名',
+  `ip_address` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT 'IP地址',
+  `user_agent` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '用户代理',
+  `created_at` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `updated_at` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `created_by` bigint NULL DEFAULT NULL COMMENT '创建人',
+  `updated_by` bigint NULL DEFAULT NULL COMMENT '更新人',
+  `is_deleted` tinyint(1) NULL DEFAULT 0 COMMENT '是否删除',
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_operation_type`(`operation_type` ASC) USING BTREE,
+  INDEX `idx_resource_type`(`resource_type` ASC) USING BTREE,
+  INDEX `idx_resource_id`(`resource_id` ASC) USING BTREE,
+  INDEX `idx_user_id`(`user_id` ASC) USING BTREE,
+  INDEX `idx_created_at`(`created_at` ASC) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '操作日志表' ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of operation_log
+-- ----------------------------
 
 -- ----------------------------
 -- Table structure for prj_project
@@ -910,7 +962,7 @@ CREATE TABLE `prj_project`  (
   INDEX `idx_owner_id`(`owner_id` ASC) USING BTREE,
   INDEX `idx_status`(`status` ASC) USING BTREE,
   INDEX `idx_name`(`name` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 8 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '项目表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 8 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '项目表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of prj_project
@@ -941,7 +993,7 @@ CREATE TABLE `prj_project_environment`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_project_id`(`project_id` ASC) USING BTREE,
   INDEX `idx_name`(`name` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '项目环境表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '项目环境表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of prj_project_environment
@@ -972,7 +1024,7 @@ CREATE TABLE `prj_project_member`  (
   INDEX `idx_project_id`(`project_id` ASC) USING BTREE,
   INDEX `idx_user_id`(`user_id` ASC) USING BTREE,
   INDEX `idx_role`(`role` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '项目成员表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '项目成员表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of prj_project_member
@@ -1003,7 +1055,7 @@ CREATE TABLE `prj_version`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_project_id`(`project_id` ASC) USING BTREE,
   INDEX `idx_status`(`status` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '版本表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '版本表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of prj_version
@@ -1027,7 +1079,7 @@ CREATE TABLE `req_analysis`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_document_id`(`document_id` ASC) USING BTREE,
   INDEX `idx_status`(`status` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '需求分析记录表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '需求分析记录表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of req_analysis
@@ -1054,7 +1106,7 @@ CREATE TABLE `req_business_requirement`  (
   INDEX `idx_analysis_id`(`analysis_id` ASC) USING BTREE,
   INDEX `idx_parent_id`(`parent_id` ASC) USING BTREE,
   INDEX `idx_priority`(`priority` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '业务需求表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '业务需求表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of req_business_requirement
@@ -1081,7 +1133,7 @@ CREATE TABLE `req_document`  (
   INDEX `idx_project_id`(`project_id` ASC) USING BTREE,
   INDEX `idx_status`(`status` ASC) USING BTREE,
   INDEX `idx_file_type`(`file_type` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '需求文档表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '需求文档表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of req_document
@@ -1111,7 +1163,7 @@ CREATE TABLE `req_generated_test_case`  (
   INDEX `idx_requirement_id`(`requirement_id` ASC) USING BTREE,
   INDEX `idx_status`(`status` ASC) USING BTREE,
   INDEX `idx_test_case_id`(`test_case_id` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '生成的测试用例表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '生成的测试用例表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of req_generated_test_case
@@ -1134,7 +1186,7 @@ CREATE TABLE `rpt_test_report`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_project_id`(`project_id` ASC) USING BTREE,
   INDEX `idx_generated_by`(`generated_by` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '测试报告表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '测试报告表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of rpt_test_report
@@ -1158,7 +1210,7 @@ CREATE TABLE `rv_review_assignment`  (
   INDEX `idx_review_id`(`review_id` ASC) USING BTREE,
   INDEX `idx_test_case_id`(`test_case_id` ASC) USING BTREE,
   INDEX `idx_reviewer_id`(`reviewer_id` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '评审分配表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '评审分配表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of rv_review_assignment
@@ -1182,7 +1234,7 @@ CREATE TABLE `rv_review_comment`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_assignment_id`(`assignment_id` ASC) USING BTREE,
   INDEX `idx_test_case_step_id`(`test_case_step_id` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '评审意见表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '评审意见表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of rv_review_comment
@@ -1205,7 +1257,7 @@ CREATE TABLE `rv_review_template`  (
   `updated_by` bigint NULL DEFAULT NULL COMMENT '更新人',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_name`(`name` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '评审模板表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '评审模板表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of rv_review_template
@@ -1233,7 +1285,7 @@ CREATE TABLE `rv_test_case_review`  (
   INDEX `idx_project_id`(`project_id` ASC) USING BTREE,
   INDEX `idx_status`(`status` ASC) USING BTREE,
   INDEX `idx_assignee_id`(`assignee_id` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '测试用例评审表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '测试用例评审表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of rv_test_case_review
@@ -1255,7 +1307,7 @@ CREATE TABLE `sys_token_blacklist`  (
   INDEX `idx_token_id`(`token_id` ASC) USING BTREE,
   INDEX `idx_user_id`(`user_id` ASC) USING BTREE,
   INDEX `idx_expire_time`(`expire_time` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'Token黑名单表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'Token黑名单表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_token_blacklist
@@ -1294,7 +1346,7 @@ CREATE TABLE `sys_user`  (
   INDEX `idx_username`(`username` ASC) USING BTREE,
   INDEX `idx_email`(`email` ASC) USING BTREE,
   INDEX `idx_status`(`status` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '用户表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '用户表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_user
@@ -1320,7 +1372,7 @@ CREATE TABLE `sys_user_profile`  (
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `user_id`(`user_id` ASC) USING BTREE,
   INDEX `idx_user_id`(`user_id` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '用户配置表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '用户配置表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_user_profile
@@ -1355,7 +1407,7 @@ CREATE TABLE `tc_test_case`  (
   INDEX `idx_type`(`type` ASC) USING BTREE,
   INDEX `idx_status`(`status` ASC) USING BTREE,
   INDEX `idx_title`(`title` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '测试用例表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '测试用例表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of tc_test_case
@@ -1382,7 +1434,7 @@ CREATE TABLE `tc_test_case_attachment`  (
   `updated_by` bigint NULL DEFAULT NULL COMMENT '更新人',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_test_case_id`(`test_case_id` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '用例附件表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '用例附件表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of tc_test_case_attachment
@@ -1405,7 +1457,7 @@ CREATE TABLE `tc_test_case_comment`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_test_case_id`(`test_case_id` ASC) USING BTREE,
   INDEX `idx_parent_id`(`parent_id` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '用例评论表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '用例评论表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of tc_test_case_comment
@@ -1424,7 +1476,7 @@ CREATE TABLE `tc_test_case_label`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_test_case_id`(`test_case_id` ASC) USING BTREE,
   INDEX `idx_label_id`(`label_id` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '用例标签关联表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '用例标签关联表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of tc_test_case_label
@@ -1448,7 +1500,7 @@ CREATE TABLE `tc_test_case_step`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_test_case_id`(`test_case_id` ASC) USING BTREE,
   INDEX `idx_step_number`(`step_number` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '用例步骤表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '用例步骤表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of tc_test_case_step
@@ -1478,7 +1530,7 @@ CREATE TABLE `ts_test_suite`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_project_id`(`project_id` ASC) USING BTREE,
   INDEX `idx_name`(`name` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '测试套件表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '测试套件表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of ts_test_suite
@@ -1501,7 +1553,7 @@ CREATE TABLE `ts_test_suite_case`  (
   UNIQUE INDEX `uk_suite_case`(`suite_id` ASC, `test_case_id` ASC) USING BTREE,
   INDEX `idx_suite_id`(`suite_id` ASC) USING BTREE,
   INDEX `idx_test_case_id`(`test_case_id` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '套件用例关联表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '套件用例关联表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of ts_test_suite_case
@@ -1527,7 +1579,7 @@ CREATE TABLE `ui_ai_config`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_project_id`(`project_id` ASC) USING BTREE,
   INDEX `idx_is_enabled`(`is_enabled` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'UI AI智能模式配置表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'UI AI智能模式配置表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of ui_ai_config
@@ -1552,7 +1604,7 @@ CREATE TABLE `ui_ai_execution`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_config_id`(`config_id` ASC) USING BTREE,
   INDEX `idx_status`(`status` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'UI AI执行记录表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'UI AI执行记录表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of ui_ai_execution
@@ -1581,7 +1633,7 @@ CREATE TABLE `ui_element`  (
   INDEX `idx_project_id`(`project_id` ASC) USING BTREE,
   INDEX `idx_locator_strategy`(`locator_strategy` ASC) USING BTREE,
   INDEX `idx_name`(`name` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'UI元素表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'UI元素表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of ui_element
@@ -1602,7 +1654,7 @@ CREATE TABLE `ui_element_backup`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_element_id`(`element_id` ASC) USING BTREE,
   INDEX `idx_priority`(`priority` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'UI元素备用定位器表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'UI元素备用定位器表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of ui_element_backup
@@ -1626,7 +1678,7 @@ CREATE TABLE `ui_element_group`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_project_id`(`project_id` ASC) USING BTREE,
   INDEX `idx_parent_id`(`parent_id` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'UI元素分组表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'UI元素分组表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of ui_element_group
@@ -1651,7 +1703,7 @@ CREATE TABLE `ui_page_object`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_project_id`(`project_id` ASC) USING BTREE,
   INDEX `idx_name`(`name` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'UI页面对象表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'UI页面对象表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of ui_page_object
@@ -1675,7 +1727,7 @@ CREATE TABLE `ui_project`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_project_id`(`project_id` ASC) USING BTREE,
   INDEX `idx_name`(`name` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'UI自动化项目表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'UI自动化项目表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of ui_project
@@ -1709,7 +1761,7 @@ CREATE TABLE `ui_scheduled_task`  (
   INDEX `idx_suite_id`(`suite_id` ASC) USING BTREE,
   INDEX `idx_is_enabled`(`is_enabled` ASC) USING BTREE,
   INDEX `idx_trigger_type`(`trigger_type` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'UI定时任务表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'UI定时任务表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of ui_scheduled_task
@@ -1741,7 +1793,7 @@ CREATE TABLE `ui_test_execution`  (
   INDEX `idx_suite_id`(`suite_id` ASC) USING BTREE,
   INDEX `idx_status`(`status` ASC) USING BTREE,
   INDEX `idx_executor_id`(`executor_id` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'UI测试执行记录表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'UI测试执行记录表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of ui_test_execution
@@ -1766,7 +1818,7 @@ CREATE TABLE `ui_test_script`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_project_id`(`project_id` ASC) USING BTREE,
   INDEX `idx_name`(`name` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'UI测试脚本表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'UI测试脚本表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of ui_test_script
@@ -1791,7 +1843,7 @@ CREATE TABLE `ui_test_suite`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_project_id`(`project_id` ASC) USING BTREE,
   INDEX `idx_name`(`name` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'UI测试套件表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'UI测试套件表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of ui_test_suite
@@ -1812,7 +1864,7 @@ CREATE TABLE `ui_test_suite_script`  (
   UNIQUE INDEX `uk_suite_script`(`suite_id` ASC, `script_id` ASC) USING BTREE,
   INDEX `idx_suite_id`(`suite_id` ASC) USING BTREE,
   INDEX `idx_script_id`(`script_id` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'UI套件脚本关联表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'UI套件脚本关联表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of ui_test_suite_script

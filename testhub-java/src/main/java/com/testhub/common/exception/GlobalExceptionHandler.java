@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.stream.Collectors;
 
@@ -64,11 +65,19 @@ public class GlobalExceptionHandler {
         return Result.noPermission();
     }
 
-    // 404异常
+    // 404异常 - Spring MVC未找到处理器
     @ExceptionHandler(NoHandlerFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public Result<?> handleNoHandlerFoundException(NoHandlerFoundException e) {
         log.warn("No handler found: {}", e.getRequestURL());
+        return Result.notFound("请求的资源不存在");
+    }
+
+    // 404异常 - 静态资源未找到(Spring 6+)
+    @ExceptionHandler(NoResourceFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public Result<?> handleNoResourceFoundException(NoResourceFoundException e) {
+        log.warn("No resource found: {}", e.getResourcePath());
         return Result.notFound("请求的资源不存在");
     }
 

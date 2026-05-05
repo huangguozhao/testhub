@@ -1,0 +1,990 @@
+{
+  "info": {
+    "name": "TestHub - APITesting模块",
+    "description": "TestHub Java版本APITesting模块接口测试",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://127.0.0.1:8080/api"
+    },
+    {
+      "key": "accessToken",
+      "value": ""
+    },
+    {
+      "key": "apiProjectId",
+      "value": ""
+    },
+    {
+      "key": "apiEnvironmentId",
+      "value": ""
+    },
+    {
+      "key": "apiCollectionId",
+      "value": ""
+    },
+    {
+      "key": "apiRequestId",
+      "value": ""
+    },
+    {
+      "key": "apiSuiteId",
+      "value": ""
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "1. 认证",
+      "item": [
+        {
+          "name": "1.1 登录",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.data && jsonData.data.accessToken) {",
+                  "        pm.collectionVariables.set('accessToken', jsonData.data.accessToken);",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"username\": \"test_admin\",\n    \"password\": \"Test123456\"\n}",
+              "options": {"raw": {"language": "json"}}
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. API项目",
+      "item": [
+        {
+          "name": "2.1 创建API项目",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.data && jsonData.data.id) {",
+                  "        pm.collectionVariables.set('apiProjectId', jsonData.data.id);",
+                  "    }",
+                  "}",
+                  "pm.test('响应200', function() { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"TEST_API项目_{{timestamp}}\",\n    \"description\": \"API测试项目\",\n    \"projectId\": 1\n}",
+              "options": {"raw": {"language": "json"}}
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api-projects",
+              "host": ["{{baseUrl}}"],
+              "path": ["api-projects"]
+            }
+          }
+        },
+        {
+          "name": "2.2 获取API项目列表",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('响应200', function() { pm.response.to.have.status(200); });",
+                  "pm.test('返回分页数据', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('records');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api-projects?current=1&size=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api-projects"]
+            }
+          }
+        },
+        {
+          "name": "2.3 获取API项目详情",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('响应200', function() { pm.response.to.have.status(200); });",
+                  "pm.test('返回项目详情', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('id');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api-projects/{{apiProjectId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api-projects", "{{apiProjectId}}"]
+            }
+          }
+        },
+        {
+          "name": "2.4 更新API项目",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('响应200', function() { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"TEST_API项目_更新_{{timestamp}}\",\n    \"description\": \"更新后的描述\"\n}",
+              "options": {"raw": {"language": "json"}}
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api-projects/{{apiProjectId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api-projects", "{{apiProjectId}}"]
+            }
+          }
+        },
+        {
+          "name": "2.5 删除API项目",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('响应200', function() { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api-projects/{{apiProjectId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api-projects", "{{apiProjectId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. API环境",
+      "item": [
+        {
+          "name": "3.1 创建API环境",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.data && jsonData.data.id) {",
+                  "        pm.collectionVariables.set('apiEnvironmentId', jsonData.data.id);",
+                  "    }",
+                  "}",
+                  "pm.test('响应200', function() { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"测试环境\",\n    \"description\": \"环境描述\",\n    \"projectId\": 1,\n    \"variables\": {\n        \"baseUrl\": \"https://httpbin.org\",\n        \"apiKey\": \"test-key\"\n    },\n    \"globalParams\": {\n        \"Content-Type\": \"application/json\"\n    },\n    \"isDefault\": true\n}",
+              "options": {"raw": {"language": "json"}}
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api-environments",
+              "host": ["{{baseUrl}}"],
+              "path": ["api-environments"]
+            }
+          }
+        },
+        {
+          "name": "3.2 获取环境列表",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('响应200', function() { pm.response.to.have.status(200); });",
+                  "pm.test('返回环境列表', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api-environments?projectId=1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api-environments"]
+            }
+          }
+        },
+        {
+          "name": "3.3 获取默认环境",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('响应200', function() { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api-environments/default?projectId=1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api-environments", "default"]
+            }
+          }
+        },
+        {
+          "name": "3.4 更新API环境",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('响应200', function() { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"更新后的环境\",\n    \"description\": \"更新描述\",\n    \"variables\": {\n        \"baseUrl\": \"https://api.example.com\"\n    }\n}",
+              "options": {"raw": {"language": "json"}}
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api-environments/{{apiEnvironmentId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api-environments", "{{apiEnvironmentId}}"]
+            }
+          }
+        },
+        {
+          "name": "3.5 删除API环境",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('响应200', function() { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api-environments/{{apiEnvironmentId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api-environments", "{{apiEnvironmentId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. API集合",
+      "item": [
+        {
+          "name": "4.1 创建API集合",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.data && jsonData.data.id) {",
+                  "        pm.collectionVariables.set('apiCollectionId', jsonData.data.id);",
+                  "    }",
+                  "}",
+                  "pm.test('响应200', function() { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"TEST_集合_{{timestamp}}\",\n    \"description\": \"测试集合\",\n    \"projectId\": 1\n}",
+              "options": {"raw": {"language": "json"}}
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api-collections",
+              "host": ["{{baseUrl}}"],
+              "path": ["api-collections"]
+            }
+          }
+        },
+        {
+          "name": "4.2 获取集合树形结构",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('响应200', function() { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api-collections/tree?projectId=1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api-collections", "tree"]
+            }
+          }
+        },
+        {
+          "name": "4.3 分页查询集合",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('响应200', function() { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api-collections?projectId=1&current=1&size=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api-collections"]
+            }
+          }
+        },
+        {
+          "name": "4.4 更新集合",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('响应200', function() { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"更新后的集合\",\n    \"description\": \"更新描述\"\n}",
+              "options": {"raw": {"language": "json"}}
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api-collections/{{apiCollectionId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api-collections", "{{apiCollectionId}}"]
+            }
+          }
+        },
+        {
+          "name": "4.5 删除集合",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('响应200', function() { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api-collections/{{apiCollectionId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api-collections", "{{apiCollectionId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. API请求",
+      "item": [
+        {
+          "name": "5.1 创建API请求-GET",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.data && jsonData.data.id) {",
+                  "        pm.collectionVariables.set('apiRequestId', jsonData.data.id);",
+                  "    }",
+                  "}",
+                  "pm.test('响应200', function() { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"TEST_GET请求\",\n    \"method\": \"GET\",\n    \"url\": \"https://httpbin.org/get\",\n    \"collectionId\": 1,\n    \"headers\": {\n        \"Content-Type\": \"application/json\"\n    },\n    \"description\": \"测试GET请求\"\n}",
+              "options": {"raw": {"language": "json"}}
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api-requests",
+              "host": ["{{baseUrl}}"],
+              "path": ["api-requests"]
+            }
+          }
+        },
+        {
+          "name": "5.2 创建API请求-POST",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('响应200', function() { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"TEST_POST请求\",\n    \"method\": \"POST\",\n    \"url\": \"https://httpbin.org/post\",\n    \"collectionId\": 1,\n    \"headers\": {\n        \"Content-Type\": \"application/json\"\n    },\n    \"body\": \"{\\\"name\\\": \\\"test\\\", \\\"value\\\": 123}\",\n    \"bodyType\": \"json\",\n    \"description\": \"测试POST请求\"\n}",
+              "options": {"raw": {"language": "json"}}
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api-requests",
+              "host": ["{{baseUrl}}"],
+              "path": ["api-requests"]
+            }
+          }
+        },
+        {
+          "name": "5.3 执行GET请求",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('响应200', function() { pm.response.to.have.status(200); });",
+                  "pm.test('返回执行结果', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('statusCode');",
+                  "    pm.expect(jsonData.data).to.have.property('responseTime');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"requestId\": 1,\n    \"environmentId\": 1\n}",
+              "options": {"raw": {"language": "json"}}
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api-requests/execute",
+              "host": ["{{baseUrl}}"],
+              "path": ["api-requests", "execute"]
+            }
+          }
+        },
+        {
+          "name": "5.4 执行POST请求",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('响应200', function() { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"url\": \"https://httpbin.org/post\",\n    \"method\": \"POST\",\n    \"headers\": {\n        \"Content-Type\": \"application/json\"\n    },\n    \"body\": \"{\\\"name\\\": \\\"test\\\", \\\"value\\\": 123}\",\n    \"environmentId\": 1\n}",
+              "options": {"raw": {"language": "json"}}
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api-requests/execute",
+              "host": ["{{baseUrl}}"],
+              "path": ["api-requests", "execute"]
+            }
+          }
+        },
+        {
+          "name": "5.5 获取请求详情",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('响应200', function() { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api-requests/{{apiRequestId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api-requests", "{{apiRequestId}}"]
+            }
+          }
+        },
+        {
+          "name": "5.6 更新API请求",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('响应200', function() { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"更新后的请求\",\n    \"method\": \"PUT\",\n    \"url\": \"https://httpbin.org/put\",\n    \"description\": \"更新描述\"\n}",
+              "options": {"raw": {"language": "json"}}
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api-requests/{{apiRequestId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api-requests", "{{apiRequestId}}"]
+            }
+          }
+        },
+        {
+          "name": "5.7 删除API请求",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('响应200', function() { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api-requests/{{apiRequestId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api-requests", "{{apiRequestId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. API测试套件",
+      "item": [
+        {
+          "name": "6.1 创建测试套件",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.data && jsonData.data.id) {",
+                  "        pm.collectionVariables.set('apiSuiteId', jsonData.data.id);",
+                  "    }",
+                  "}",
+                  "pm.test('响应200', function() { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"TEST_测试套件\",\n    \"description\": \"测试套件描述\",\n    \"projectId\": 1,\n    \"environmentId\": 1,\n    \"requestIds\": []\n}",
+              "options": {"raw": {"language": "json"}}
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api-test-suites",
+              "host": ["{{baseUrl}}"],
+              "path": ["api-test-suites"]
+            }
+          }
+        },
+        {
+          "name": "6.2 获取套件列表",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('响应200', function() { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api-test-suites?projectId=1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api-test-suites"]
+            }
+          }
+        },
+        {
+          "name": "6.3 执行测试套件",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('响应200', function() { pm.response.to.have.status(200); });",
+                  "pm.test('返回执行结果', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('total');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api-test-suites/{{apiSuiteId}}/execute",
+              "host": ["{{baseUrl}}"],
+              "path": ["api-test-suites", "{{apiSuiteId}}", "execute"]
+            }
+          }
+        },
+        {
+          "name": "6.4 更新测试套件",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('响应200', function() { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"更新后的测试套件\",\n    \"description\": \"更新描述\"\n}",
+              "options": {"raw": {"language": "json"}}
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api-test-suites/{{apiSuiteId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api-test-suites", "{{apiSuiteId}}"]
+            }
+          }
+        },
+        {
+          "name": "6.5 删除测试套件",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('响应200', function() { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api-test-suites/{{apiSuiteId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api-test-suites", "{{apiSuiteId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. 请求历史",
+      "item": [
+        {
+          "name": "7.1 分页查询历史",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('响应200', function() { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api-request-histories?current=1&size=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api-request-histories"]
+            }
+          }
+        },
+        {
+          "name": "7.2 按请求ID查询历史",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('响应200', function() { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api-request-histories/request/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api-request-histories", "request", "1"]
+            }
+          }
+        },
+        {
+          "name": "7.3 清理指定请求的历史",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('响应200', function() { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api-request-histories/request/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api-request-histories", "request", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "8. 定时任务",
+      "item": [
+        {
+          "name": "8.1 创建定时任务",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('响应200', function() { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"TEST_定时任务\",\n    \"description\": \"测试定时任务\",\n    \"projectId\": 1,\n    \"suiteId\": 1,\n    \"cronExpression\": \"0 0 * * * ?\",\n    \"isEnabled\": true\n}",
+              "options": {"raw": {"language": "json"}}
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api-scheduled-tasks",
+              "host": ["{{baseUrl}}"],
+              "path": ["api-scheduled-tasks"]
+            }
+          }
+        },
+        {
+          "name": "8.2 获取定时任务列表",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('响应200', function() { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api-scheduled-tasks?projectId=1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api-scheduled-tasks"]
+            }
+          }
+        },
+        {
+          "name": "8.3 启用任务",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('响应200', function() { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api-scheduled-tasks/1/enable",
+              "host": ["{{baseUrl}}"],
+              "path": ["api-scheduled-tasks", "1", "enable"]
+            }
+          }
+        },
+        {
+          "name": "8.4 禁用任务",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('响应200', function() { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api-scheduled-tasks/1/disable",
+              "host": ["{{baseUrl}}"],
+              "path": ["api-scheduled-tasks", "1", "disable"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,179 @@
+{
+  "info": {
+    "name": "TestHub - 通知系统模块",
+    "description": "TestHub Java版本通知系统接口测试",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {"key": "baseUrl", "value": "http://127.0.0.1:8080/api"},
+    {"key": "accessToken", "value": ""},
+    {"key": "configId", "value": ""}
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [{"key": "token", "value": "{{accessToken}}", "type": "string"}]
+  },
+  "item": [
+    {
+      "name": "1. 认证",
+      "item": [
+        {
+          "name": "1.1 登录",
+          "event": [{"listen": "test", "script": {"exec": ["if (pm.response.code === 200) {", "    var jsonData = pm.response.json();", "    if (jsonData.data && jsonData.data.accessToken) {", "        pm.collectionVariables.set('accessToken', jsonData.data.accessToken);", "    }", "}"]}}],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {"mode": "raw", "raw": "{\"username\": \"test_admin\", \"password\": \"Test123456\"}", "options": {"raw": {"language": "json"}}},
+            "url": {"raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. 通知配置",
+      "item": [
+        {
+          "name": "2.1 创建飞书配置",
+          "event": [
+            {"listen": "test", "script": {"exec": ["if (pm.response.code === 200) {", "    var jsonData = pm.response.json();", "    if (jsonData.data && jsonData.data.id) {", "        pm.collectionVariables.set('configId', jsonData.data.id);", "    }", "}", "pm.test('响应200', function() { pm.response.to.have.status(200); });"]}}]
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {"mode": "raw", "raw": "{\n    \"name\": \"测试飞书配置\",\n    \"configType\": \"feishu\",\n    \"webhookUrl\": \"https://open.feishu.cn/open-apis/bot/v2/hook/test-webhook\",\n    \"template\": \"{ \\\"msg_type\\\": \\\"text\\\", \\\"content\\\": { \\\"text\\\": \\\"{{content}}\\\" } }\",\n    \"isActive\": true\n}", "options": {"raw": {"language": "json"}}},
+            "url": {"raw": "{{baseUrl}}/notification-configs", "host": ["{{baseUrl}}"], "path": ["notification-configs"]}
+          }
+        },
+        {
+          "name": "2.2 创建企业微信配置",
+          "event": [
+            {"listen": "test", "script": {"exec": ["pm.test('响应200', function() { pm.response.to.have.status(200); });"]}}]
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {"mode": "raw", "raw": "{\n    \"name\": \"测试企业微信配置\",\n    \"configType\": \"wecom\",\n    \"webhookUrl\": \"https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=test-key\",\n    \"isActive\": true\n}", "options": {"raw": {"language": "json"}}},
+            "url": {"raw": "{{baseUrl}}/notification-configs", "host": ["{{baseUrl}}"], "path": ["notification-configs"]}
+          }
+        },
+        {
+          "name": "2.3 创建钉钉配置",
+          "event": [
+            {"listen": "test", "script": {"exec": ["pm.test('响应200', function() { pm.response.to.have.status(200); });"]}}]
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {"mode": "raw", "raw": "{\n    \"name\": \"测试钉钉配置\",\n    \"configType\": \"dingtalk\",\n    \"webhookUrl\": \"https://oapi.dingtalk.com/robot/send?access_token=test-token\",\n    \"isActive\": true\n}", "options": {"raw": {"language": "json"}}},
+            "url": {"raw": "{{baseUrl}}/notification-configs", "host": ["{{baseUrl}}"], "path": ["notification-configs"]}
+          }
+        },
+        {
+          "name": "2.4 获取配置列表",
+          "event": [
+            {"listen": "test", "script": {"exec": ["pm.test('响应200', function() { pm.response.to.have.status(200); });"]}}]
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/notification-configs?current=1&size=10", "host": ["{{baseUrl}}"], "path": ["notification-configs"]}
+          }
+        },
+        {
+          "name": "2.5 获取启用配置",
+          "event": [
+            {"listen": "test", "script": {"exec": ["pm.test('响应200', function() { pm.response.to.have.status(200); });"]}}]
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/notification-configs/active", "host": ["{{baseUrl}}"], "path": ["notification-configs", "active"]}
+          }
+        },
+        {
+          "name": "2.6 获取配置详情",
+          "event": [
+            {"listen": "test", "script": {"exec": ["pm.test('响应200', function() { pm.response.to.have.status(200); });"]}}]
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/notification-configs/{{configId}}", "host": ["{{baseUrl}}"], "path": ["notification-configs", "{{configId}}"]}
+          }
+        },
+        {
+          "name": "2.7 设为默认配置",
+          "event": [
+            {"listen": "test", "script": {"exec": ["pm.test('响应200', function() { pm.response.to.have.status(200); });"]}}]
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/notification-configs/{{configId}}/set-default", "host": ["{{baseUrl}}"], "path": ["notification-configs", "{{configId}}", "set-default"]}
+          }
+        },
+        {
+          "name": "2.8 启用/禁用配置",
+          "event": [
+            {"listen": "test", "script": {"exec": ["pm.test('响应200', function() { pm.response.to.have.status(200); });"]}}]
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/notification-configs/{{configId}}/toggle?isActive=false", "host": ["{{baseUrl}}"], "path": ["notification-configs", "{{configId}}", "toggle"]}
+          }
+        },
+        {
+          "name": "2.9 删除配置",
+          "event": [
+            {"listen": "test", "script": {"exec": ["pm.test('响应200', function() { pm.response.to.have.status(200); });"]}}]
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/notification-configs/{{configId}}", "host": ["{{baseUrl}}"], "path": ["notification-configs", "{{configId}}"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. 通知发送",
+      "item": [
+        {
+          "name": "3.1 发送通知",
+          "event": [
+            {"listen": "test", "script": {"exec": ["pm.test('响应200', function() { pm.response.to.have.status(200); });"]}}]
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {"mode": "raw", "raw": "{\n    \"configId\": 1,\n    \"title\": \"测试通知\",\n    \"content\": \"这是一条测试通知消息\",\n    \"taskType\": \"api_test\",\n    \"taskId\": 1\n}", "options": {"raw": {"language": "json"}}},
+            "url": {"raw": "{{baseUrl}}/notifications/send", "host": ["{{baseUrl}}"], "path": ["notifications", "send"]}
+          }
+        },
+        {
+          "name": "3.2 获取通知日志",
+          "event": [
+            {"listen": "test", "script": {"exec": ["pm.test('响应200', function() { pm.response.to.have.status(200); });"]}}]
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/notifications/logs?current=1&size=10", "host": ["{{baseUrl}}"], "path": ["notifications", "logs"]}
+          }
+        },
+        {
+          "name": "3.3 获取日志详情",
+          "event": [
+            {"listen": "test", "script": {"exec": ["pm.test('响应200', function() { pm.response.to.have.status(200); });"]}}]
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/notifications/logs/1", "host": ["{{baseUrl}}"], "path": ["notifications", "logs", "1"]}
+          }
+        }
+      ]
+    }
+  ]
+}

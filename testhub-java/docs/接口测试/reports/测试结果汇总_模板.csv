@@ -1,0 +1,53 @@
+模块,用例ID,用例名称,接口路径,请求方法,测试步骤,预期结果,实际结果,状态,严重程度,缺陷ID,备注,测试日期,测试人员
+认证模块,AUTH-LOGIN-001,正常登录,POST /api/auth/login,POST,"1. 输入正确账号密码
+2. 点击登录","返回Token和用户信息","","","","","","",""
+认证模块,AUTH-LOGIN-002,用户名不存在,POST /api/auth/login,POST,"1. 输入不存在的用户名
+2. 输入正确密码
+3. 点击登录","返回用户名或密码错误","","","","","","",""
+认证模块,AUTH-LOGIN-003,密码错误,POST /api/auth/login,POST,"1. 输入正确用户名
+2. 输入错误密码
+3. 点击登录","返回用户名或密码错误","","","","","","",""
+认证模块,AUTH-REG-001,正常注册,POST /api/auth/register,POST,"1. 填写注册信息
+2. 点击注册","注册成功，返回Token","","","","","","",""
+认证模块,AUTH-REF-001,正常刷新Token,POST /api/auth/refresh,POST,"1. 使用refreshToken刷新","返回新的accessToken","","","","","","",""
+认证模块,AUTH-LOGOUT-001,正常登出,POST /api/auth/logout,POST,"1. 携带Token点击登出","Token加入黑名单","","","","","","",""
+项目管理,PROJ-CRUD-001,创建项目,POST /api/projects,POST,"1. 填写项目信息
+2. 点击创建","项目创建成功","","","","","","",""
+项目管理,PROJ-CRUD-002,获取项目列表,GET /api/projects,GET,"1. 进入项目列表页","显示当前用户项目","","","","","","",""
+项目管理,PROJ-CRUD-003,更新项目,PUT /api/projects/{id},PUT,"1. 选择项目
+2. 修改信息
+3. 保存","项目更新成功","","","","","","",""
+项目管理,PROJ-CRUD-004,删除项目,DELETE /api/projects/{id},DELETE,"1. 选择项目
+2. 确认删除","项目删除成功","","","","","","",""
+项目管理,PROJ-MEMBER-001,添加成员,POST /api/projects/{id}/members,POST,"1. 选择项目
+2. 添加成员
+3. 设置角色","成员添加成功","","","","","","",""
+项目管理,PROJ-ENV-001,创建环境,POST /api/projects/{id}/environments,POST,"1. 选择项目
+2. 创建环境
+3. 配置变量","环境创建成功","","","","","","",""
+APITesting,API-PROJ-001,创建API项目,POST /api/api-projects,POST,"1. 填写API项目信息
+2. 创建","API项目创建成功","","","","","","",""
+APITesting,API-ENV-001,创建环境,POST /api/api-environments,POST,"1. 填写环境信息
+2. 配置变量
+3. 创建","环境创建成功","","","","","","",""
+APITesting,API-COL-001,创建集合,POST /api/api-collections,POST,"1. 填写集合信息
+2. 创建","集合创建成功","","","","","","",""
+APITesting,API-REQ-001,创建请求,POST /api/api-requests,POST,"1. 填写请求信息
+2. 选择方法
+3. 配置URL
+4. 创建","请求创建成功","","","","","","",""
+APITesting,API-EXEC-001,执行GET请求,POST /api/api-requests/execute,POST,"1. 配置GET请求
+2. 执行","返回响应状态码200","","","","","","",""
+APITesting,API-EXEC-002,执行POST请求,POST /api/api-requests/execute,POST,"1. 配置POST请求
+2. 配置JSON Body
+3. 执行","返回响应状态码200","","","","","","",""
+通知系统,NOTI-CONFIG-001,创建飞书配置,POST /api/notification-configs,POST,"1. 选择飞书类型
+2. 配置Webhook
+3. 创建","配置创建成功","","","","","","",""
+通知系统,NOTI-SEND-001,发送通知,POST /api/notifications/send,POST,"1. 选择配置
+2. 填写内容
+3. 发送","通知发送成功","","","","","","",""
+操作日志,LOG-QUERY-001,分页查询日志,GET /api/operation-logs,GET,"1. 进入日志页面
+2. 查看分页列表","显示分页日志","","","","","","",""
+操作日志,LOG-MANAGE-001,删除日志,DELETE /api/operation-logs/{id},DELETE,"1. 选择日志
+2. 删除","日志删除成功","","","","","","",""

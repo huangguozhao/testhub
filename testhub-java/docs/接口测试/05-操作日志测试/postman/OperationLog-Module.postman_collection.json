@@ -1,0 +1,164 @@
+{
+  "info": {
+    "name": "TestHub - 操作日志模块",
+    "description": "TestHub Java版本操作日志接口测试",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {"key": "baseUrl", "value": "http://127.0.0.1:8080/api"},
+    {"key": "accessToken", "value": ""},
+    {"key": "logId", "value": ""}
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [{"key": "token", "value": "{{accessToken}}", "type": "string"}]
+  },
+  "item": [
+    {
+      "name": "1. 认证",
+      "item": [
+        {
+          "name": "1.1 登录",
+          "event": [{"listen": "test", "script": {"exec": ["if (pm.response.code === 200) {", "    var jsonData = pm.response.json();", "    if (jsonData.data && jsonData.data.accessToken) {", "        pm.collectionVariables.set('accessToken', jsonData.data.accessToken);", "    }", "}"]}}],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {"mode": "raw", "raw": "{\"username\": \"test_admin\", \"password\": \"Test123456\"}", "options": {"raw": {"language": "json"}}},
+            "url": {"raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. 日志查询",
+      "item": [
+        {
+          "name": "2.1 分页查询日志",
+          "event": [
+            {"listen": "test", "script": {"exec": ["pm.test('响应200', function() { pm.response.to.have.status(200); });", "pm.test('返回分页数据', function() {", "    var jsonData = pm.response.json();", "    pm.expect(jsonData.data).to.have.property('records');", "});"]}}]
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/operation-logs?current=1&size=20", "host": ["{{baseUrl}}"], "path": ["operation-logs"]}
+          }
+        },
+        {
+          "name": "2.2 按操作类型筛选",
+          "event": [
+            {"listen": "test", "script": {"exec": ["pm.test('响应200', function() { pm.response.to.have.status(200); });"]}}]
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/operation-logs?operationType=create", "host": ["{{baseUrl}}"], "path": ["operation-logs"]}
+          }
+        },
+        {
+          "name": "2.3 按资源类型筛选",
+          "event": [
+            {"listen": "test", "script": {"exec": ["pm.test('响应200', function() { pm.response.to.have.status(200); });"]}}]
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/operation-logs?resourceType=project", "host": ["{{baseUrl}}"], "path": ["operation-logs"]}
+          }
+        },
+        {
+          "name": "2.4 按用户ID筛选",
+          "event": [
+            {"listen": "test", "script": {"exec": ["pm.test('响应200', function() { pm.response.to.have.status(200); });"]}}]
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/operation-logs?userId=1", "host": ["{{baseUrl}}"], "path": ["operation-logs"]}
+          }
+        },
+        {
+          "name": "2.5 按资源ID筛选",
+          "event": [
+            {"listen": "test", "script": {"exec": ["pm.test('响应200', function() { pm.response.to.have.status(200); });"]}}]
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/operation-logs?resourceId=1", "host": ["{{baseUrl}}"], "path": ["operation-logs"]}
+          }
+        },
+        {
+          "name": "2.6 获取日志详情",
+          "event": [
+            {"listen": "test", "script": {"exec": ["pm.test('响应200', function() { pm.response.to.have.status(200); });"]}}]
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/operation-logs/1", "host": ["{{baseUrl}}"], "path": ["operation-logs", "1"]}
+          }
+        },
+        {
+          "name": "2.7 按资源查询",
+          "event": [
+            {"listen": "test", "script": {"exec": ["pm.test('响应200', function() { pm.response.to.have.status(200); });"]}}]
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/operation-logs/resource/project/1", "host": ["{{baseUrl}}"], "path": ["operation-logs", "resource", "project", "1"]}
+          }
+        },
+        {
+          "name": "2.8 按用户查询",
+          "event": [
+            {"listen": "test", "script": {"exec": ["pm.test('响应200', function() { pm.response.to.have.status(200); });"]}}]
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/operation-logs/user/1?limit=20", "host": ["{{baseUrl}}"], "path": ["operation-logs", "user", "1"]}
+          }
+        },
+        {
+          "name": "2.9 获取不存在的日志",
+          "event": [
+            {"listen": "test", "script": {"exec": ["pm.test('返回404', function() { pm.response.to.have.status(404); });"]}}]
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/operation-logs/999999", "host": ["{{baseUrl}}"], "path": ["operation-logs", "999999"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. 日志管理",
+      "item": [
+        {
+          "name": "3.1 删除日志",
+          "event": [
+            {"listen": "test", "script": {"exec": ["pm.test('响应200', function() { pm.response.to.have.status(200); });"]}}]
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/operation-logs/1", "host": ["{{baseUrl}}"], "path": ["operation-logs", "1"]}
+          }
+        },
+        {
+          "name": "3.2 清理30天前日志",
+          "event": [
+            {"listen": "test", "script": {"exec": ["pm.test('响应200', function() { pm.response.to.have.status(200); });"]}}]
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/operation-logs/clean?days=30", "host": ["{{baseUrl}}"], "path": ["operation-logs", "clean"]}
+          }
+        }
+      ]
+    }
+  ]
+}
