@@ -47,7 +47,7 @@ public class ApiExecutor {
         Map<String, String> currentVars = new HashMap<>(variables != null ? variables : new HashMap<>());
 
         log.info("========== API请求开始 ==========");
-        log.info("请求信息: name=%s, url=%s, method=%s", request.getName(), request.getUrl(), request.getMethod());
+        log.info("请求信息: name={}, url={}, method={}", request.getName(), request.getUrl(), request.getMethod());
 
         ScriptResult preScriptResult = null;
         ScriptResult postScriptResult = null;
@@ -55,16 +55,16 @@ public class ApiExecutor {
         try {
             // 执行Pre-request Script
             if (request.getPreScript() != null && !request.getPreScript().isBlank()) {
-                log.info("【Pre-request Script】开始执行, 内容长度=%d", request.getPreScript().length());
+                log.info("【Pre-request Script】开始执行, 内容长度={}", request.getPreScript().length());
                 preScriptResult = scriptEngine.executePreScript(request.getPreScript(), request, currentVars);
-                log.info("【Pre-request Script】执行结果: success=%s, abort=%s, error=%s, logs=%s",
+                log.info("【Pre-request Script】执行结果: success={}, abort={}, error={}, logs={}",
                         preScriptResult.isSuccess(), preScriptResult.isAbort(), preScriptResult.getError(), preScriptResult.getLogs());
                 if (preScriptResult.getVariables() != null && !preScriptResult.getVariables().isEmpty()) {
-                    log.info("【Pre-request Script】更新变量: %s", preScriptResult.getVariables());
+                    log.info("【Pre-request Script】更新变量: {}", preScriptResult.getVariables());
                     currentVars.putAll(preScriptResult.getVariables());
                 }
                 if (!preScriptResult.isSuccess()) {
-                    log.warn("【Pre-request Script】执行失败: %s", preScriptResult.getError());
+                    log.warn("【Pre-request Script】执行失败: {}", preScriptResult.getError());
                 }
                 if (preScriptResult.isAbort()) {
                     log.warn("【Pre-request Script】中止请求");
@@ -86,7 +86,7 @@ public class ApiExecutor {
             // 构建完整的URL（包含query参数）
             url = buildUrlWithParams(url, request.getParams(), currentVars);
 
-            log.info("【构建请求】url=%s, body=%s", url, body != null && body.length() > 200 ? body.substring(0, 200) + "..." : body);
+            log.info("【构建请求】url={}, body={}", url, body != null && body.length() > 200 ? body.substring(0, 200) + "..." : body);
 
             // 构建HTTP请求
             HttpHeaders headers = buildHeaders(request.getHeaders(), currentVars);
@@ -104,7 +104,7 @@ public class ApiExecutor {
 
             long duration = System.currentTimeMillis() - startTime;
 
-            log.info("【HTTP响应】status=%d, duration=%dms, body长度=%d",
+            log.info("【HTTP响应】status={}, duration={}ms, body长度={}",
                     httpResponse.getStatusCode().value(), duration,
                     httpResponse.getBody() != null ? httpResponse.getBody().length() : 0);
 
@@ -119,17 +119,17 @@ public class ApiExecutor {
 
             // 执行Tests脚本
             if (request.getPostScript() != null && !request.getPostScript().isBlank()) {
-                log.info("【Tests脚本】开始执行, 内容长度=%d", request.getPostScript().length());
+                log.info("【Tests脚本】开始执行, 内容长度={}", request.getPostScript().length());
                 postScriptResult = scriptEngine.executeTests(request.getPostScript(), request, response, currentVars);
-                log.info("【Tests脚本】执行结果: success=%s, abort=%s, error=%s, logs=%s, testResults=%s",
+                log.info("【Tests脚本】执行结果: success={}, abort={}, error={}, logs={}, testResults={}",
                         postScriptResult.isSuccess(), postScriptResult.isAbort(), postScriptResult.getError(),
                         postScriptResult.getLogs(), postScriptResult.getTestResults());
                 if (postScriptResult.getVariables() != null && !postScriptResult.getVariables().isEmpty()) {
-                    log.info("【Tests脚本】更新变量: %s", postScriptResult.getVariables());
+                    log.info("【Tests脚本】更新变量: {}", postScriptResult.getVariables());
                     currentVars.putAll(postScriptResult.getVariables());
                 }
                 if (!postScriptResult.isSuccess()) {
-                    log.warn("【Tests脚本】执行失败: %s", postScriptResult.getError());
+                    log.warn("【Tests脚本】执行失败: {}", postScriptResult.getError());
                 }
                 if (postScriptResult.isAbort()) {
                     response.setAbort(true);
@@ -142,12 +142,12 @@ public class ApiExecutor {
 
             // 执行断言
             if (request.getAssertions() != null && !request.getAssertions().isBlank()) {
-                log.info("【断言】开始执行, 内容长度=%d", request.getAssertions().length());
+                log.info("【断言】开始执行, 内容长度={}", request.getAssertions().length());
                 List<AssertionEngine.AssertionResult> assertionResults = assertionEngine.executeAssertions(
                         request.getAssertions(), response);
-                log.info("【断言】执行完成, 结果数=%d", assertionResults.size());
+                log.info("【断言】执行完成, 结果数={}", assertionResults.size());
                 for (AssertionEngine.AssertionResult ar : assertionResults) {
-                    log.info("  断言结果: name=%s, passed=%s, expected=%s, actual=%s",
+                    log.info("  断言结果: name={}, passed={}, expected={}, actual={}",
                             ar.getName(), ar.isPassed(), ar.getExpected(), ar.getActual());
                 }
                 response.setAssertionResults(assertionResults);
@@ -159,7 +159,7 @@ public class ApiExecutor {
 
         } catch (Exception e) {
             long duration = System.currentTimeMillis() - startTime;
-            log.error("API执行失败: %s", e.getMessage(), e);
+            log.error("API执行失败: {}", e.getMessage(), e);
 
             response = ApiResponse.builder()
                     .success(false)
