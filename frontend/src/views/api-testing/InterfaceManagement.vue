@@ -725,10 +725,10 @@
                 </div>
               </el-tab-pane>
 
-              <el-tab-pane :label="$t('apiTesting.interface.assertionResults')" name="assertions" v-if="response.assertions_results && response.assertions_results.length > 0">
+              <el-tab-pane :label="$t('apiTesting.interface.assertionResults')" name="assertions" v-if="response.assertion_results && response.assertion_results.length > 0">
                 <div class="assertions-results">
                   <div
-                    v-for="(result, index) in response.assertions_results"
+                    v-for="(result, index) in response.assertion_results"
                     :key="index"
                     class="assertion-result-item"
                     :class="{ 'passed': result.passed, 'failed': !result.passed }"
