@@ -331,3 +331,324 @@ watch(() => props.response, (newResp) => {
   }
 }, { immediate: true })
 </script>
+
+<style scoped>
+/* 响应区域 - 从InterfaceManagement.vue迁移 */
+.response-section {
+  background: white;
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  transition: box-shadow 0.2s ease;
+}
+
+.response-section:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.response-header {
+  padding: 20px 24px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.response-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #303133;
+}
+
+.response-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.response-time {
+  font-size: 14px;
+  color: #606266;
+  font-weight: 500;
+  background: #e9ecef;
+  padding: 4px 12px;
+  border-radius: 16px;
+}
+
+.response-tabs {
+  padding: 0 20px;
+}
+
+/* 响应体 */
+.response-body {
+  padding: 24px;
+  min-height: 400px;
+  max-height: 600px;
+  overflow: auto;
+  background: #f8f9fa;
+  border-radius: 10px;
+  margin: 20px;
+  border: 1px solid #e9ecef;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.response-actions {
+  margin-bottom: 16px;
+}
+
+.response-actions .el-button-group {
+  border-radius: 8px;
+  overflow: hidden;
+  background: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.response-actions .el-button {
+  border-radius: 0;
+  transition: all 0.2s ease;
+  background: transparent;
+  border: none;
+  color: var(--th-text-secondary, #666);
+}
+
+.response-actions .el-button:hover {
+  background: #f5f7fa;
+  color: #5046e5;
+}
+
+.response-content {
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #303133;
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+/* 响应头 */
+.response-headers {
+  padding: 24px;
+  background: #f8f9fa;
+  border-radius: 10px;
+  margin: 20px;
+  border: 1px solid #e9ecef;
+  max-height: 80vh;
+  overflow: auto;
+}
+
+.header-row {
+  padding: 8px 0;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.header-row:last-child {
+  border-bottom: none;
+}
+
+/* JSONPath提取器 */
+.jsonpath-extractor {
+  margin-bottom: 16px;
+  padding: 16px;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.jsonpath-input {
+  margin-bottom: 12px;
+}
+
+.jsonpath-input .el-input {
+  width: 100%;
+}
+
+.jsonpath-result {
+  background: #f8f9fa;
+  padding: 12px;
+  border-radius: 6px;
+  border: 1px solid #e9ecef;
+}
+
+.jsonpath-result strong {
+  display: block;
+  margin-bottom: 8px;
+  color: #303133;
+}
+
+.jsonpath-result pre {
+  margin: 0;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 13px;
+}
+
+/* 断言结果 */
+.assertions-results {
+  padding: 20px;
+}
+
+.assertion-result-item {
+  background: white;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 12px;
+}
+
+.assertion-result-item.passed {
+  border-left: 4px solid #67c23a;
+}
+
+.assertion-result-item.failed {
+  border-left: 4px solid #f56c6c;
+}
+
+.assertion-result-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.assertion-name {
+  font-weight: 600;
+  color: #303133;
+}
+
+.assertion-result-details .result-row {
+  display: flex;
+  margin-bottom: 8px;
+}
+
+.assertion-result-details .label {
+  width: 80px;
+  color: #909399;
+  font-size: 13px;
+}
+
+.assertion-result-details .value {
+  flex: 1;
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 13px;
+  color: #303133;
+  background: #f8f9fa;
+  padding: 4px 8px;
+  border-radius: 4px;
+  word-break: break-all;
+}
+
+.assertion-result-details .value.error {
+  color: #f56c6c;
+  background: #fef0f0;
+}
+
+/* 脚本结果 */
+.script-results {
+  padding: 20px;
+}
+
+.script-result-section {
+  background: white;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.script-result-section h4 {
+  margin: 0 0 12px 0;
+  color: #303133;
+  font-size: 15px;
+}
+
+.script-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.script-error {
+  color: #f56c6c;
+  font-size: 13px;
+}
+
+.script-logs,
+.script-variables {
+  margin-top: 12px;
+}
+
+.script-logs h5,
+.script-variables h5 {
+  margin: 0 0 8px 0;
+  color: #606266;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.log-output,
+.variables-output {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+  padding: 12px;
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 13px;
+  margin: 0;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  max-height: 200px;
+  overflow: auto;
+}
+
+.test-results {
+  margin-top: 12px;
+}
+
+.test-result-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.test-result-item:last-child {
+  border-bottom: none;
+}
+
+.test-name {
+  color: #303133;
+  font-size: 14px;
+}
+
+/* JSON语法高亮 */
+:deep(.json-key) {
+  color: #881391;
+}
+
+:deep(.json-string) {
+  color: #0b7500;
+}
+
+:deep(.json-number) {
+  color: #00f;
+}
+
+:deep(.json-boolean) {
+  color: #d73a49;
+}
+
+:deep(.json-null) {
+  color: #808080;
+}
+</style>
