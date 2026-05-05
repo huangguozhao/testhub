@@ -1088,7 +1088,6 @@ const loadCollections = async (projectId) => {
         projectId: projectId
       }
     })
-    // 后端返回分页格式 { records: [...], total, current, size }
     const collectionsData = response.data.records || response.data || []
 
     // 构建树形结构
@@ -1438,6 +1437,7 @@ const deleteNode = () => {
   }
 
   const nodeName = node.name
+  const parentId = node.parent_id
 
   ElMessageBox.confirm(
     `确定要删除${node.type === 'collection' ? '集合' : '接口'}「${nodeName}」吗？`,
@@ -1455,6 +1455,8 @@ const deleteNode = () => {
         await api.delete(`/api-requests/${node.id}`)
       }
       ElMessage.success('删除成功')
+      // 清空展开状态，只保留父节点
+      expandedKeys.value = parentId ? [parentId] : []
       await loadCollections(selectedProject.value)
       showContextMenu.value = false
     } catch (error) {
@@ -1781,7 +1783,7 @@ const saveRequest = async () => {
     const requestData = {
       ...selectedRequest.value,
       params: Array.isArray(selectedRequest.value.params) ? convertKeyValueArrayToObject(selectedRequest.value.params || []) : selectedRequest.value.params,
-      headers: finalHeaders
+      headers: JSON.stringify(finalHeaders)
     }
     
     // 对于GET请求，不包含body字段
@@ -1969,15 +1971,22 @@ const createCollection = async () => {
 
   try {
     const response = await api.post('/api-collections', {
-      ...collectionForm,
-      project: selectedProject.value
+      name: collectionForm.name,
+      description: collectionForm.description,
+      parent_id: collectionForm.parent,
+      project_id: selectedProject.value
     })
     ElMessage.success('创建成功')
+    const parentIdToExpand = collectionForm.parent
     await loadCollections(selectedProject.value)
     showCreateCollectionDialog.value = false
     collectionForm.name = ''
     collectionForm.description = ''
     collectionForm.parent = null
+    // 确保父节点展开
+    if (parentIdToExpand && !expandedKeys.value.includes(parentIdToExpand)) {
+      expandedKeys.value = [...expandedKeys.value, parentIdToExpand]
+    }
   } catch (error) {
     ElMessage.error('创建失败')
     console.error('创建失败:', error)
@@ -1991,7 +2000,11 @@ const updateCollection = async () => {
   }
 
   try {
-    await api.put(`/api-collections/${editCollectionForm.id}`, editCollectionForm)
+    await api.put(`/api-collections/${editCollectionForm.id}`, {
+      name: editCollectionForm.name,
+      description: editCollectionForm.description,
+      parent_id: editCollectionForm.parent
+    })
     ElMessage.success('更新成功')
     await loadCollections(selectedProject.value)
     showEditCollectionDialog.value = false
