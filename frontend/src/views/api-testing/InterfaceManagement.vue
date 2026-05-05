@@ -756,6 +756,63 @@
                   </div>
                 </div>
               </el-tab-pane>
+
+              <!-- 脚本执行结果 -->
+              <el-tab-pane label="脚本结果" name="scripts" v-if="response.pre_script_result || response.post_script_result">
+                <div class="script-results">
+                  <!-- Pre-request Script 结果 -->
+                  <div v-if="response.pre_script_result" class="script-result-section">
+                    <h4>Pre-request Script</h4>
+                    <div class="script-status">
+                      <el-tag :type="response.pre_script_result.success ? 'success' : 'danger'" size="small">
+                        {{ response.pre_script_result.success ? '执行成功' : '执行失败' }}
+                      </el-tag>
+                      <span v-if="response.pre_script_result.error" class="script-error">
+                        {{ response.pre_script_result.error }}
+                      </span>
+                    </div>
+                    <div v-if="response.pre_script_result.logs && response.pre_script_result.logs.length > 0" class="script-logs">
+                      <h5>Console Output:</h5>
+                      <pre class="log-output">{{ response.pre_script_result.logs.join('\n') }}</pre>
+                    </div>
+                    <div v-if="response.pre_script_result.variables && Object.keys(response.pre_script_result.variables).length > 0" class="script-variables">
+                      <h5>更新变量:</h5>
+                      <pre class="variables-output">{{ formatVariables(response.pre_script_result.variables) }}</pre>
+                    </div>
+                  </div>
+
+                  <!-- Tests 结果 -->
+                  <div v-if="response.post_script_result" class="script-result-section">
+                    <h4>Tests</h4>
+                    <div class="script-status">
+                      <el-tag :type="response.post_script_result.success ? 'success' : 'danger'" size="small">
+                        {{ response.post_script_result.success ? '执行成功' : '执行失败' }}
+                      </el-tag>
+                      <span v-if="response.post_script_result.error" class="script-error">
+                        {{ response.post_script_result.error }}
+                      </span>
+                    </div>
+                    <div v-if="response.post_script_result.test_results && Object.keys(response.post_script_result.test_results).length > 0" class="test-results">
+                      <h5>测试结果:</h5>
+                      <div
+                        v-for="(passed, name) in response.post_script_result.test_results"
+                        :key="name"
+                        class="test-result-item"
+                        :class="{ 'passed': passed, 'failed': !passed }"
+                      >
+                        <el-tag :type="passed ? 'success' : 'danger'" size="small">
+                          {{ passed ? '通过' : '失败' }}
+                        </el-tag>
+                        <span class="test-name">{{ name }}</span>
+                      </div>
+                    </div>
+                    <div v-if="response.post_script_result.logs && response.post_script_result.logs.length > 0" class="script-logs">
+                      <h5>Console Output:</h5>
+                      <pre class="log-output">{{ response.post_script_result.logs.join('\n') }}</pre>
+                    </div>
+                  </div>
+                </div>
+              </el-tab-pane>
             </el-tabs>
           </div>
         </div>
@@ -2105,6 +2162,13 @@ const formatAssertionValue = (value) => {
     return JSON.stringify(value, null, 2)
   }
   return value
+}
+
+const formatVariables = (variables) => {
+  if (!variables) return ''
+  return Object.entries(variables)
+    .map(([key, value]) => `${key} = ${value}`)
+    .join('\n')
 }
 
 const createCollection = async () => {
@@ -4256,6 +4320,116 @@ const useLocalVariableCategories = () => {
 
 .result-row .value.error {
   color: #f56c6c;
+}
+
+/* 脚本结果 */
+.script-results {
+  padding: 16px;
+}
+
+.script-result-section {
+  background: white;
+  border: 1px solid #e4e7ed;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.script-result-section h4 {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  color: #303133;
+}
+
+.script-status {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.script-error {
+  color: #f56c6c;
+  font-size: 14px;
+}
+
+.script-logs {
+  margin-top: 12px;
+}
+
+.script-logs h5 {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  color: #606266;
+}
+
+.log-output {
+  background: #1e1e1e;
+  color: #d4d4d4;
+  padding: 12px;
+  border-radius: 6px;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 13px;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.script-variables {
+  margin-top: 12px;
+}
+
+.script-variables h5 {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  color: #606266;
+}
+
+.variables-output {
+  background: #f8f9fa;
+  color: #303133;
+  padding: 12px;
+  border-radius: 6px;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 13px;
+  overflow-x: auto;
+  white-space: pre-wrap;
+}
+
+.test-results {
+  margin-top: 12px;
+}
+
+.test-results h5 {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  color: #606266;
+}
+
+.test-result-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+
+.test-result-item.passed {
+  border-left: 3px solid #67c23a;
+}
+
+.test-result-item.failed {
+  border-left: 3px solid #f56c6c;
+}
+
+.test-name {
+  font-size: 14px;
+  color: #303133;
 }
 
 /* WebSocket 相关 */
