@@ -53,7 +53,7 @@ public class ApiExecutor {
         ApiResponse response;
         Map<String, String> currentVars = new HashMap<>(variables != null ? variables : new HashMap<>());
 
-        log.info("========== 临时API请求开始 ==========");
+        log.info("========== API请求开始 ==========");
         log.info("请求信息: name={}, url={}, method={}", request.getName(), request.getUrl(), request.getMethod());
 
         ScriptResult preScriptResult = null;
@@ -147,7 +147,22 @@ public class ApiExecutor {
                 log.info("【Tests脚本】无");
             }
 
-            log.info("========== 临时API请求结束 ==========");
+            // 执行断言
+            if (request.getAssertions() != null && !request.getAssertions().isBlank()) {
+                log.info("【断言】开始执行, 内容长度={}", request.getAssertions().length());
+                List<AssertionEngine.AssertionResult> assertionResults = assertionEngine.executeAssertions(
+                        request.getAssertions(), response);
+                log.info("【断言】执行完成, 结果数={}", assertionResults.size());
+                for (AssertionEngine.AssertionResult ar : assertionResults) {
+                    log.info("  断言结果: name={}, passed={}, expected={}, actual={}",
+                            ar.getName(), ar.isPassed(), ar.getExpected(), ar.getActual());
+                }
+                response.setAssertionResults(assertionResults);
+            } else {
+                log.info("【断言】无");
+            }
+
+            log.info("========== API请求结束 ==========");
 
         } catch (Exception e) {
             long duration = System.currentTimeMillis() - startTime;
