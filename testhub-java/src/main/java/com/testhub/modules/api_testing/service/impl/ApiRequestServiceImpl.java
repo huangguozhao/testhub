@@ -113,6 +113,16 @@ public class ApiRequestServiceImpl extends ServiceImpl<ApiRequestMapper, ApiRequ
     }
 
     @Override
+    public void deleteRequestsByCollectionIds(List<Long> collectionIds) {
+        if (collectionIds == null || collectionIds.isEmpty()) {
+            return;
+        }
+        this.remove(new LambdaQueryWrapper<ApiRequest>()
+                .in(ApiRequest::getCollectionId, collectionIds));
+        log.info("删除集合下的API请求: collectionIds={}, 共删除{}个集合", collectionIds.size());
+    }
+
+    @Override
     public ApiResponse executeApiRequest(ApiExecuteDTO dto) {
         ApiRequest request = this.getById(dto.getRequestId());
         if (request == null) {

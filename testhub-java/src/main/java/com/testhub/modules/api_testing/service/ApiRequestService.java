@@ -22,6 +22,8 @@ public interface ApiRequestService extends IService<ApiRequest> {
 
     void deleteApiRequest(Long id);
 
+    void deleteRequestsByCollectionIds(List<Long> collectionIds);
+
     ApiResponse executeApiRequest(ApiExecuteDTO dto);
 
     List<ApiRequest> getRequestsByCollection(Long collectionId);
