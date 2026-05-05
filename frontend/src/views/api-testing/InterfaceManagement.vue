@@ -1771,7 +1771,9 @@ const sendRequest = async () => {
       headers: JSON.stringify(finalHeaders),
       environment_id: selectedEnvironment.value,
       body_type: bodyType.value,
-      body_content: bodyType.value === 'none' ? '' : JSON.stringify(bodyData)
+      body_content: bodyType.value === 'none' ? '' : JSON.stringify(bodyData),
+      pre_script: selectedRequest.value.pre_request_script || '',
+      post_script: selectedRequest.value.post_request_script || ''
     }
 
     const apiResponse = await api.post('/api-requests/execute-temp', requestData)

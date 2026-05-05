@@ -36,4 +36,14 @@ public class ApiTempExecuteDTO {
      * 请求体内容 (JSON格式)
      */
     private String bodyContent;
+
+    /**
+     * 前置脚本 (JavaScript)
+     */
+    private String preScript;
+
+    /**
+     * 后置脚本 (JavaScript)
+     */
+    private String postScript;
 }

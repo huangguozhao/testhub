@@ -4,9 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.testhub.modules.api_testing.domain.ApiRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.mozilla.javascript.Context;
-import org.mozilla.javascript.RhinoException;
-import org.mozilla.javascript.Scriptable;
+import org.mozilla.javascript.*;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -33,7 +31,10 @@ public class ScriptEngine {
         }
 
         Map<String, Object> requestObj = buildRequestObject(request);
-        Map<String, String> currentVars = new HashMap<>(variables != null ? variables : new HashMap<>());
+        Map<String, Object> currentVars = new HashMap<>();
+        if (variables != null) {
+            currentVars.putAll(variables);
+        }
 
         try {
             Map<String, Object> env = new HashMap<>();
@@ -42,9 +43,11 @@ public class ScriptEngine {
 
             Boolean abort = executeScript(script, env);
 
-            Map<String, String> updatedVars = extractVariables(env, currentVars);
+            // 从variables中获取更新后的值
+            @SuppressWarnings("unchecked")
+            Map<String, String> updatedVars = (Map<String, String>) env.get("variables");
             return ScriptExecutionResult.success()
-                    .setVariables(updatedVars)
+                    .setVariables(updatedVars != null ? updatedVars : variables)
                     .setAbort(abort != null && abort);
 
         } catch (Exception e) {
@@ -64,19 +67,26 @@ public class ScriptEngine {
 
         Map<String, Object> requestObj = buildRequestObject(request);
         Map<String, Object> responseObj = buildResponseObject(response);
-        Map<String, String> currentVars = new HashMap<>(variables != null ? variables : new HashMap<>());
+        Map<String, Object> currentVars = new HashMap<>();
+        if (variables != null) {
+            currentVars.putAll(variables);
+        }
+        Map<String, Object> testsObj = new HashMap<>(); // 用于存储测试结果
 
         try {
             Map<String, Object> env = new HashMap<>();
             env.put("request", requestObj);
             env.put("response", responseObj);
             env.put("variables", currentVars);
+            env.put("tests", testsObj);
 
             Boolean abort = executeScript(script, env);
 
-            Map<String, String> updatedVars = extractVariables(env, currentVars);
+            // 从variables中获取更新后的值
+            @SuppressWarnings("unchecked")
+            Map<String, String> updatedVars = (Map<String, String>) env.get("variables");
             return ScriptExecutionResult.success()
-                    .setVariables(updatedVars)
+                    .setVariables(updatedVars != null ? updatedVars : variables)
                     .setAbort(abort != null && abort);
 
         } catch (Exception e) {
@@ -90,26 +100,70 @@ public class ScriptEngine {
         try {
             Scriptable scope = cx.initStandardObjects();
 
+            // 创建console对象
+            Scriptable consoleObj = cx.newObject(scope);
+            consoleObj.setPrototype(getGlobalPrototype(cx, scope, "console"));
+            consoleObj.put("log", consoleObj, new ConsolFunction("log"));
+            consoleObj.put("info", consoleObj, new ConsolFunction("info"));
+            consoleObj.put("warn", consoleObj, new ConsolFunction("warn"));
+            consoleObj.put("error", consoleObj, new ConsolFunction("error"));
+            scope.put("console", scope, consoleObj);
+
             // 注入request
             if (env.containsKey("request")) {
-                Object requestObj = toRhinoObject(cx, scope, env.get("request"));
-                scope.put("request", scope, requestObj);
+                Object requestObj = env.get("request");
+                if (requestObj instanceof Map) {
+                    scope.put("request", scope, toRhinoObject(cx, scope, (Map<?, ?>) requestObj));
+                }
             }
 
             // 注入response
             if (env.containsKey("response")) {
-                Object responseObj = toRhinoObject(cx, scope, env.get("response"));
-                scope.put("response", scope, responseObj);
+                Object responseObj = env.get("response");
+                if (responseObj instanceof Map) {
+                    scope.put("response", scope, toRhinoObject(cx, scope, (Map<?, ?>) responseObj));
+                }
             }
 
-            // 注入variables
+            // 注入variables (使用NativeObject使其属性可修改)
+            NativeObject variablesObj = new NativeObject();
             if (env.containsKey("variables")) {
-                Object varsObj = toRhinoObject(cx, scope, env.get("variables"));
-                scope.put("variables", scope, varsObj);
+                @SuppressWarnings("unchecked")
+                Map<String, Object> vars = (Map<String, Object>) env.get("variables");
+                for (Map.Entry<String, Object> entry : vars.entrySet()) {
+                    variablesObj.put(entry.getKey(), variablesObj, entry.getValue());
+                }
+            }
+            scope.put("variables", scope, variablesObj);
+
+            // 注入tests (仅Tests脚本需要)
+            if (env.containsKey("tests")) {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> tests = (Map<String, Object>) env.get("tests");
+                NativeObject testsObj = new NativeObject();
+                for (Map.Entry<String, Object> entry : tests.entrySet()) {
+                    testsObj.put(entry.getKey(), testsObj, entry.getValue());
+                }
+                scope.put("tests", scope, testsObj);
             }
 
             // 执行脚本
             Object result = cx.evaluateString(scope, script, "<cmd>", 1, null);
+
+            // 从variables中提取更新后的值
+            if (scope.has("variables", scope)) {
+                Object varsObj = scope.get("variables", scope);
+                if (varsObj instanceof NativeObject) {
+                    Object[] ids = ((NativeObject) varsObj).getIds();
+                    Map<String, String> updatedVars = new HashMap<>();
+                    for (Object id : ids) {
+                        String key = String.valueOf(id);
+                        Object value = ((NativeObject) varsObj).get(key, (Scriptable) varsObj);
+                        updatedVars.put(key, value != null ? String.valueOf(value) : "");
+                    }
+                    env.put("variables", updatedVars);
+                }
+            }
 
             // 检查是否有abort属性
             if (result instanceof Scriptable) {
@@ -129,19 +183,24 @@ public class ScriptEngine {
         }
     }
 
-    private Object toRhinoObject(Context cx, Scriptable scope, Object value) {
-        if (value instanceof Map) {
-            Scriptable obj = cx.newObject(scope);
-            for (Map.Entry<?, ?> entry : ((Map<?, ?>) value).entrySet()) {
-                Object nestedValue = toRhinoObject(cx, scope, entry.getValue());
-                obj.put(String.valueOf(entry.getKey()), obj, nestedValue);
+    private Scriptable getGlobalPrototype(Context cx, Scriptable scope, String name) {
+        return cx.newObject(scope);
+    }
+
+    private Object toRhinoObject(Context cx, Scriptable scope, Map<?, ?> map) {
+        NativeObject obj = new NativeObject();
+        for (Map.Entry<?, ?> entry : map.entrySet()) {
+            String key = String.valueOf(entry.getKey());
+            Object value = entry.getValue();
+            if (value instanceof Map) {
+                obj.put(key, obj, toRhinoObject(cx, scope, (Map<?, ?>) value));
+            } else if (value instanceof Iterable) {
+                obj.put(key, obj, Context.javaToJS(value, scope));
+            } else {
+                obj.put(key, obj, value);
             }
-            return obj;
-        } else if (value instanceof Iterable) {
-            return Context.javaToJS(value, scope);
-        } else {
-            return Context.javaToJS(value, scope);
         }
+        return obj;
     }
 
     @SuppressWarnings("unchecked")
@@ -186,16 +245,32 @@ public class ScriptEngine {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    private Map<String, String> extractVariables(Map<String, Object> env, Map<String, String> defaultVars) {
-        Object variablesObj = env.get("variables");
-        if (variablesObj instanceof Map) {
-            Map<String, Object> map = (Map<String, Object>) variablesObj;
-            Map<String, String> result = new HashMap<>(defaultVars);
-            map.forEach((k, v) -> result.put(k, v != null ? String.valueOf(v) : ""));
-            return result;
+    /**
+     * Console函数
+     */
+    private static class ConsolFunction extends BaseFunction {
+        private final String level;
+
+        public ConsolFunction(String level) {
+            this.level = level;
         }
-        return defaultVars;
+
+        @Override
+        public Object call(Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < args.length; i++) {
+                if (i > 0) sb.append(" ");
+                sb.append(Context.toString(args[i]));
+            }
+            if ("error".equals(level)) {
+                log.error("[JS Console] {}", sb);
+            } else if ("warn".equals(level)) {
+                log.warn("[JS Console] {}", sb);
+            } else {
+                log.info("[JS Console] {}", sb);
+            }
+            return null;
+        }
     }
 
     /**

@@ -188,6 +188,8 @@ public class ApiRequestServiceImpl extends ServiceImpl<ApiRequestMapper, ApiRequ
         tempRequest.setHeaders(dto.getHeaders());
         tempRequest.setBodyType(dto.getBodyType());
         tempRequest.setBodyContent(dto.getBodyContent());
+        tempRequest.setPreScript(dto.getPreScript());
+        tempRequest.setPostScript(dto.getPostScript());
 
         log.info("执行临时API请求: url={}, method={}", dto.getUrl(), dto.getMethod());
         // 临时请求不保存历史记录，传入 null 作为 requestId

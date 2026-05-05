@@ -3,6 +3,7 @@ package com.testhub.modules.api_testing.http;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -19,4 +20,5 @@ public class ApiResponse {
     private String error;
     private boolean abort;      // Tests脚本是否中止请求
     private String abortReason; // 中止原因
+    private List<AssertionEngine.AssertionResult> assertionResults; // 断言结果
 }
