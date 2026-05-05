@@ -1833,7 +1833,7 @@ const saveRequest = async () => {
 
     const requestData = {
       ...selectedRequest.value,
-      params: Array.isArray(selectedRequest.value.params) ? convertKeyValueArrayToObject(selectedRequest.value.params || []) : selectedRequest.value.params,
+      params: typeof selectedRequest.value.params === 'object' ? JSON.stringify(selectedRequest.value.params || {}) : selectedRequest.value.params,
       headers: JSON.stringify(finalHeaders)
     }
     
