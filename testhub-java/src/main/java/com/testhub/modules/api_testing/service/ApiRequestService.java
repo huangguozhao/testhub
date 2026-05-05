@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.testhub.modules.api_testing.domain.ApiRequest;
 import com.testhub.modules.api_testing.dto.ApiExecuteDTO;
 import com.testhub.modules.api_testing.dto.ApiRequestDTO;
+import com.testhub.modules.api_testing.dto.ApiTempExecuteDTO;
 import com.testhub.modules.api_testing.http.ApiResponse;
 
 import java.util.List;
@@ -25,6 +26,8 @@ public interface ApiRequestService extends IService<ApiRequest> {
     void deleteRequestsByCollectionIds(List<Long> collectionIds);
 
     ApiResponse executeApiRequest(ApiExecuteDTO dto);
+
+    ApiResponse executeTempApiRequest(ApiTempExecuteDTO dto);
 
     List<ApiRequest> getRequestsByCollection(Long collectionId);
 }

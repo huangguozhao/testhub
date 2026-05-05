@@ -36,6 +36,7 @@ public class ApiExecutor {
     private final AssertionEngine assertionEngine;
     private final VariableExtractor variableExtractor;
     private final ApiRequestHistoryService apiRequestHistoryService;
+    private final ScriptEngine scriptEngine;
 
     /**
      * 执行API请求
@@ -45,20 +46,172 @@ public class ApiExecutor {
     }
 
     /**
+     * 执行API请求不保存历史记录（用于临时请求）
+     */
+    public ApiResponse executeWithoutHistory(ApiRequest request, Map<String, String> variables) {
+        long startTime = System.currentTimeMillis();
+        ApiResponse response;
+        Map<String, String> currentVars = new HashMap<>(variables != null ? variables : new HashMap<>());
+
+        try {
+            // 执行Pre-request Script
+            if (request.getPreScript() != null && !request.getPreScript().isBlank()) {
+                ScriptEngine.ScriptExecutionResult preResult = scriptEngine.executePreScript(
+                        request.getPreScript(), request, currentVars);
+                if (!preResult.isSuccess()) {
+                    log.warn("Pre-request Script执行失败: {}", preResult.getError());
+                }
+                if (preResult.isAbort()) {
+                    return ApiResponse.builder()
+                            .success(false)
+                            .error("Pre-request Script中止了请求")
+                            .responseTime(System.currentTimeMillis() - startTime)
+                            .build();
+                }
+                if (preResult.getVariables() != null && !preResult.getVariables().isEmpty()) {
+                    currentVars.putAll(preResult.getVariables());
+                }
+            }
+
+            // 替换变量
+            String url = replaceVariables(request.getUrl(), currentVars);
+            String body = replaceVariables(request.getBodyContent(), currentVars);
+
+            // 构建完整的URL（包含query参数）
+            url = buildUrlWithParams(url, request.getParams(), currentVars);
+
+            // 构建HTTP请求
+            HttpHeaders headers = buildHeaders(request.getHeaders(), currentVars);
+            HttpEntity<String> entity = new HttpEntity<>(body, headers);
+
+            // 发送请求
+            ResponseEntity<String> httpResponse = restTemplate.exchange(
+                    url,
+                    HttpMethod.valueOf(request.getMethod().toUpperCase()),
+                    entity,
+                    String.class
+            );
+
+            long duration = System.currentTimeMillis() - startTime;
+
+            log.info("临时请求成功: url={}, method={}, status={}, duration={}ms, headers={}, bodyType={}",
+                    url, request.getMethod(), httpResponse.getStatusCode().value(), duration,
+                    request.getHeaders(), request.getBodyType());
+
+            response = ApiResponse.builder()
+                    .success(true)
+                    .statusCode(httpResponse.getStatusCode().value())
+                    .headers(httpResponse.getHeaders().toSingleValueMap())
+                    .body(httpResponse.getBody())
+                    .responseTime(duration)
+                    .build();
+
+            // 执行Tests脚本
+            if (request.getPostScript() != null && !request.getPostScript().isBlank()) {
+                ScriptEngine.ScriptExecutionResult testResult = scriptEngine.executeTests(
+                        request.getPostScript(), request, response, currentVars);
+                if (!testResult.isSuccess()) {
+                    log.warn("Tests执行失败: {}", testResult.getError());
+                }
+                if (testResult.isAbort()) {
+                    response.setAbort(true);
+                    response.setAbortReason("Tests脚本中止了请求");
+                }
+                if (testResult.getVariables() != null && !testResult.getVariables().isEmpty()) {
+                    currentVars.putAll(testResult.getVariables());
+                }
+            }
+
+        } catch (Exception e) {
+            long duration = System.currentTimeMillis() - startTime;
+            log.error("API执行失败: {}", e.getMessage(), e);
+
+            response = ApiResponse.builder()
+                    .success(false)
+                    .error(e.getMessage())
+                    .responseTime(duration)
+                    .build();
+        }
+
+        return response;
+    }
+
+    /**
+     * 构建带参数的完整URL
+     */
+    private String buildUrlWithParams(String baseUrl, String paramsJson, Map<String, String> variables) {
+        if (paramsJson == null || paramsJson.isBlank()) {
+            return baseUrl;
+        }
+
+        try {
+            Map<String, String> params = objectMapper.readValue(paramsJson, Map.class);
+            if (params == null || params.isEmpty()) {
+                return baseUrl;
+            }
+
+            StringBuilder urlBuilder = new StringBuilder(baseUrl);
+            boolean hasQueryParams = baseUrl.contains("?");
+
+            for (Map.Entry<String, String> entry : params.entrySet()) {
+                String key = replaceVariables(entry.getKey(), variables);
+                String value = replaceVariables(entry.getValue(), variables);
+
+                if (key != null && !key.isBlank()) {
+                    urlBuilder.append(hasQueryParams ? "&" : "?");
+                    urlBuilder.append(key);
+                    if (value != null && !value.isBlank()) {
+                        urlBuilder.append("=").append(value);
+                    }
+                    hasQueryParams = true;
+                }
+            }
+
+            return urlBuilder.toString();
+        } catch (Exception e) {
+            log.warn("解析params失败: {}", e.getMessage());
+            return baseUrl;
+        }
+    }
+
+    /**
      * 执行API请求并保存历史记录
      */
     public ApiResponse execute(ApiRequest request, Map<String, String> variables,
                                Long suiteExecutionId, Long executedBy) {
         long startTime = System.currentTimeMillis();
         ApiResponse response;
+        Map<String, String> currentVars = new HashMap<>(variables != null ? variables : new HashMap<>());
 
         try {
+            // 执行Pre-request Script
+            if (request.getPreScript() != null && !request.getPreScript().isBlank()) {
+                ScriptEngine.ScriptExecutionResult preResult = scriptEngine.executePreScript(
+                        request.getPreScript(), request, currentVars);
+                if (!preResult.isSuccess()) {
+                    log.warn("Pre-request Script执行失败: {}", preResult.getError());
+                }
+                if (preResult.isAbort()) {
+                    return ApiResponse.builder()
+                            .success(false)
+                            .error("Pre-request Script中止了请求")
+                            .responseTime(System.currentTimeMillis() - startTime)
+                            .build();
+                }
+                if (preResult.getVariables() != null && !preResult.getVariables().isEmpty()) {
+                    currentVars.putAll(preResult.getVariables());
+                }
+            }
+
             // 替换变量
-            String url = replaceVariables(request.getUrl(), variables);
-            String body = replaceVariables(request.getBodyContent(), variables);
+            String url = replaceVariables(request.getUrl(), currentVars);
+            String body = replaceVariables(request.getBodyContent(), currentVars);
+
+            // 构建带参数的完整URL
+            url = buildUrlWithParams(url, request.getParams(), currentVars);
 
             // 构建HTTP请求
-            HttpHeaders headers = buildHeaders(request.getHeaders(), variables);
+            HttpHeaders headers = buildHeaders(request.getHeaders(), currentVars);
             HttpEntity<String> entity = new HttpEntity<>(body, headers);
 
             // 发送请求
@@ -79,6 +232,22 @@ public class ApiExecutor {
                     .responseTime(duration)
                     .build();
 
+            // 执行Tests脚本
+            if (request.getPostScript() != null && !request.getPostScript().isBlank()) {
+                ScriptEngine.ScriptExecutionResult testResult = scriptEngine.executeTests(
+                        request.getPostScript(), request, response, currentVars);
+                if (!testResult.isSuccess()) {
+                    log.warn("Tests执行失败: {}", testResult.getError());
+                }
+                if (testResult.isAbort()) {
+                    response.setAbort(true);
+                    response.setAbortReason("Tests脚本中止了请求");
+                }
+                if (testResult.getVariables() != null && !testResult.getVariables().isEmpty()) {
+                    currentVars.putAll(testResult.getVariables());
+                }
+            }
+
         } catch (Exception e) {
             long duration = System.currentTimeMillis() - startTime;
             log.error("API执行失败: {}", e.getMessage(), e);
@@ -91,7 +260,7 @@ public class ApiExecutor {
         }
 
         // 保存历史记录
-        saveRequestHistory(request, response, variables, suiteExecutionId, executedBy);
+        saveRequestHistory(request, response, currentVars, suiteExecutionId, executedBy);
 
         return response;
     }
@@ -101,17 +270,46 @@ public class ApiExecutor {
      */
     private HttpHeaders buildHeaders(String headersJson, Map<String, String> variables) {
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        // 如果有自定义Content-Type，先不设置默认，后面根据bodyType设置
+        boolean hasCustomContentType = false;
 
         if (headersJson != null && !headersJson.isBlank()) {
             try {
-                Map<String, String> headersMap = objectMapper.readValue(headersJson, Map.class);
-                for (Map.Entry<String, String> entry : headersMap.entrySet()) {
-                    String value = replaceVariables(entry.getValue(), variables);
-                    headers.add(entry.getKey(), value);
+                // 尝试解析为JSON数组格式 [{key, value}, ...]
+                if (headersJson.trim().startsWith("[")) {
+                    List<Map<String, String>> headerList = objectMapper.readValue(headersJson, List.class);
+                    for (Map<String, String> item : headerList) {
+                        String key = item.get("key");
+                        String value = item.get("value");
+                        if (key != null && value != null) {
+                            String resolvedValue = replaceVariables(value, variables);
+                            headers.add(key, resolvedValue);
+                            if (key.equalsIgnoreCase("Content-Type")) {
+                                hasCustomContentType = true;
+                            }
+                        }
+                    }
+                } else {
+                    // 解析为JSON对象格式 {key: value}
+                    Map<String, String> headersMap = objectMapper.readValue(headersJson, Map.class);
+                    for (Map.Entry<String, String> entry : headersMap.entrySet()) {
+                        String value = replaceVariables(entry.getValue(), variables);
+                        headers.add(entry.getKey(), value);
+                        if (entry.getKey().equalsIgnoreCase("Content-Type")) {
+                            hasCustomContentType = true;
+                        }
+                    }
                 }
             } catch (Exception e) {
                 log.warn("解析请求头失败: {}", e.getMessage());
+            }
+        }
+
+        // 设置Content-Type（如果没有自定义的话，根据bodyType设置）
+        if (!hasCustomContentType) {
+            if (headers.getContentType() == null) {
+                headers.setContentType(MediaType.APPLICATION_JSON);
             }
         }
 

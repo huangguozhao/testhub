@@ -17,4 +17,6 @@ public class ApiResponse {
     private String body;
     private Long responseTime;
     private String error;
+    private boolean abort;      // Tests脚本是否中止请求
+    private String abortReason; // 中止原因
 }

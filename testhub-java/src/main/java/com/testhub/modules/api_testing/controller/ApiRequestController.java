@@ -6,6 +6,7 @@ import com.testhub.common.result.Result;
 import com.testhub.modules.api_testing.domain.ApiRequest;
 import com.testhub.modules.api_testing.dto.ApiExecuteDTO;
 import com.testhub.modules.api_testing.dto.ApiRequestDTO;
+import com.testhub.modules.api_testing.dto.ApiTempExecuteDTO;
 import com.testhub.modules.api_testing.http.ApiExecutor;
 import com.testhub.modules.api_testing.http.ApiResponse;
 import com.testhub.modules.api_testing.service.ApiRequestService;
@@ -87,6 +88,13 @@ public class ApiRequestController {
         dto.setEnvironmentId(environmentId);
         dto.setOverrideVariables(overrideVariables);
         ApiResponse response = apiRequestService.executeApiRequest(dto);
+        return Result.success(response);
+    }
+
+    @PostMapping("/execute-temp")
+    @Operation(summary = "临时执行API请求（不保存）")
+    public Result<ApiResponse> executeTempApiRequest(@RequestBody ApiTempExecuteDTO dto) {
+        ApiResponse response = apiRequestService.executeTempApiRequest(dto);
         return Result.success(response);
     }
 

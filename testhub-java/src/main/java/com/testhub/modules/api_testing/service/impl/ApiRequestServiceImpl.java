@@ -10,6 +10,7 @@ import com.testhub.modules.api_testing.domain.ApiEnvironment;
 import com.testhub.modules.api_testing.domain.ApiRequest;
 import com.testhub.modules.api_testing.dto.ApiExecuteDTO;
 import com.testhub.modules.api_testing.dto.ApiRequestDTO;
+import com.testhub.modules.api_testing.dto.ApiTempExecuteDTO;
 import com.testhub.modules.api_testing.http.ApiExecutor;
 import com.testhub.modules.api_testing.http.ApiResponse;
 import com.testhub.modules.api_testing.mapper.ApiRequestMapper;
@@ -159,6 +160,38 @@ public class ApiRequestServiceImpl extends ServiceImpl<ApiRequestMapper, ApiRequ
 
         log.info("执行API请求: id={}, url={}", dto.getRequestId(), request.getUrl());
         return apiExecutor.execute(request, variables, null, null);
+    }
+
+    @Override
+    public ApiResponse executeTempApiRequest(ApiTempExecuteDTO dto) {
+        // 获取环境变量
+        Map<String, String> variables = new HashMap<>();
+
+        if (dto.getEnvironmentId() != null) {
+            ApiEnvironment env = apiEnvironmentService.getById(dto.getEnvironmentId());
+            if (env != null && env.getVariables() != null) {
+                try {
+                    Map<String, String> envVars = objectMapper.readValue(env.getVariables(),
+                            new TypeReference<Map<String, String>>() {});
+                    variables.putAll(envVars);
+                } catch (Exception e) {
+                    log.warn("解析环境变量失败: {}", e.getMessage());
+                }
+            }
+        }
+
+        // 构建临时请求对象
+        ApiRequest tempRequest = new ApiRequest();
+        tempRequest.setUrl(dto.getUrl());
+        tempRequest.setMethod(dto.getMethod() != null ? dto.getMethod() : "GET");
+        tempRequest.setParams(dto.getParams());
+        tempRequest.setHeaders(dto.getHeaders());
+        tempRequest.setBodyType(dto.getBodyType());
+        tempRequest.setBodyContent(dto.getBodyContent());
+
+        log.info("执行临时API请求: url={}, method={}", dto.getUrl(), dto.getMethod());
+        // 临时请求不保存历史记录，传入 null 作为 requestId
+        return apiExecutor.executeWithoutHistory(tempRequest, variables);
     }
 
     @Override

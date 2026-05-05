@@ -1353,6 +1353,14 @@ const onNodeClick = async (data) => {
         }
       }
 
+      // 映射 pre_script 和 post_script 到前端使用的字段名
+      if (requestData.pre_script) {
+        requestData.pre_request_script = requestData.pre_script
+      }
+      if (requestData.post_script) {
+        requestData.post_request_script = requestData.post_script
+      }
+
       response.value = null
       selectedRequest.value = requestData
     } catch (error) {
@@ -1695,17 +1703,8 @@ const sendRequest = async () => {
     return
   }
 
-  // 新建的接口还没保存，不允许发送
-  if (!selectedRequest.value.id) {
-    ElMessage.warning('请先保存接口后再发送')
-    return
-  }
-
   try {
     sending.value = true
-
-    // 发送请求前先自动保存当前的修改
-    // await saveRequest()
 
     // 准备请求体数据
     let bodyData = {}
@@ -1749,20 +1748,33 @@ const sendRequest = async () => {
       }
     }
 
-    const requestData = {
-      url: selectedRequest.value.url,
-      method: selectedRequest.value.method,
-      params: convertKeyValueArrayToObject(selectedRequest.value.params || []),
-      headers: selectedRequest.value.headers,
-      environment_id: selectedEnvironment.value
-    }
-    
-    // 对于GET请求，不发送body字段
-    if (hasBody.value) {
-      requestData.body = bodyData
+    // 获取headers（从KeyValueEditor组件或从selectedRequest）
+    let finalHeaders = []
+    if (headersEditorRef.value) {
+      const rows = headersEditorRef.value.rows || []
+      finalHeaders = rows
+        .filter(row => row.enabled && row.key && row.key.trim())
+        .map(row => ({
+          key: row.key.trim(),
+          value: row.value || '',
+          description: row.description || '',
+          enabled: row.enabled !== false
+        }))
+    } else if (selectedRequest.value.headers && Array.isArray(selectedRequest.value.headers)) {
+      finalHeaders = selectedRequest.value.headers.filter(item => item.enabled && item.key)
     }
 
-    const apiResponse = await api.post(`/api-requests/${selectedRequest.value.id}/execute`, requestData)
+    const requestData = {
+      url: selectedRequest.value.url,
+      method: selectedRequest.value.method || 'GET',
+      params: JSON.stringify(convertKeyValueArrayToObject(selectedRequest.value.params || [])),
+      headers: JSON.stringify(finalHeaders),
+      environment_id: selectedEnvironment.value,
+      body_type: bodyType.value,
+      body_content: bodyType.value === 'none' ? '' : JSON.stringify(bodyData)
+    }
+
+    const apiResponse = await api.post('/api-requests/execute-temp', requestData)
     response.value = apiResponse.data
 
     ElMessage.success('请求成功')
@@ -1866,7 +1878,9 @@ const saveRequest = async () => {
       body_type: selectedRequest.value.body_type || 'none',
       body_content: selectedRequest.value.body_content || '',
       assertions: selectedRequest.value.assertions && Array.isArray(selectedRequest.value.assertions) ? JSON.stringify(selectedRequest.value.assertions) : '[]',
-      extractors: selectedRequest.value.extractors && Array.isArray(selectedRequest.value.extractors) ? JSON.stringify(selectedRequest.value.extractors) : '[]'
+      extractors: selectedRequest.value.extractors && Array.isArray(selectedRequest.value.extractors) ? JSON.stringify(selectedRequest.value.extractors) : '[]',
+      pre_script: selectedRequest.value.pre_request_script || '',
+      post_script: selectedRequest.value.post_request_script || ''
     }
     
     // 对于GET请求，不包含body字段
@@ -1918,6 +1932,13 @@ const saveRequest = async () => {
       } catch (e) {
         selectedRequest.value.extractors = []
       }
+    }
+    // 处理 pre_script 和 post_script 字段映射
+    if (selectedRequest.value.pre_script) {
+      selectedRequest.value.pre_request_script = selectedRequest.value.pre_script
+    }
+    if (selectedRequest.value.post_script) {
+      selectedRequest.value.post_request_script = selectedRequest.value.post_script
     }
 
     await loadCollections(selectedProject.value)
