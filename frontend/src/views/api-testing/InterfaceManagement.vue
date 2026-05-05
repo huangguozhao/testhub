@@ -1186,7 +1186,8 @@ const loadRequests = async () => {
           collection.children.push({
             ...request,
             type: 'request',
-            name: request.name
+            name: request.name,
+            children: []
           })
         }
       } else {
@@ -1194,7 +1195,8 @@ const loadRequests = async () => {
         collections.value.push({
           ...request,
           type: 'request',
-          name: request.name
+          name: request.name,
+          children: []
         })
       }
     })
@@ -1223,10 +1225,25 @@ const onNodeClick = async (data) => {
       const apiResponse = await api.get(`/api-requests/${data.id}`)
       const requestData = apiResponse.data
 
-      // 初始化currentHeaders
-      currentHeaders.value = requestData.headers || {}
+      // 初始化currentHeaders（headers可能是JSON字符串，需要先解析）
+      if (requestData.headers && typeof requestData.headers === 'string') {
+        try {
+          currentHeaders.value = JSON.parse(requestData.headers)
+        } catch (e) {
+          currentHeaders.value = {}
+        }
+      } else {
+        currentHeaders.value = requestData.headers || {}
+      }
 
       // 将 params 从字典格式转换为数组格式
+      if (requestData.params && typeof requestData.params === 'string') {
+        try {
+          requestData.params = JSON.parse(requestData.params)
+        } catch (e) {
+          requestData.params = []
+        }
+      }
       if (requestData.params && typeof requestData.params === 'object' && !Array.isArray(requestData.params)) {
         const paramsArray = []
         Object.keys(requestData.params).forEach(key => {
@@ -1244,6 +1261,13 @@ const onNodeClick = async (data) => {
       }
 
       // 将 headers 从字典格式转换为数组格式
+      if (requestData.headers && typeof requestData.headers === 'string') {
+        try {
+          requestData.headers = JSON.parse(requestData.headers)
+        } catch (e) {
+          requestData.headers = []
+        }
+      }
       if (requestData.headers && typeof requestData.headers === 'object' && !Array.isArray(requestData.headers)) {
         const headersArray = []
         Object.keys(requestData.headers).forEach(key => {
@@ -1258,6 +1282,15 @@ const onNodeClick = async (data) => {
           }
         })
         requestData.headers = headersArray
+      }
+
+      // 将 body 从JSON字符串解析
+      if (requestData.body && typeof requestData.body === 'string') {
+        try {
+          requestData.body = JSON.parse(requestData.body)
+        } catch (e) {
+          requestData.body = {}
+        }
       }
 
       // 解析body数据
@@ -1285,6 +1318,24 @@ const onNodeClick = async (data) => {
       } else {
         bodyType.value = 'none'
         rawBody.value = ''
+      }
+
+      // 将 assertions 从JSON字符串解析
+      if (requestData.assertions && typeof requestData.assertions === 'string') {
+        try {
+          requestData.assertions = JSON.parse(requestData.assertions)
+        } catch (e) {
+          requestData.assertions = []
+        }
+      }
+
+      // 将 extractors 从JSON字符串解析
+      if (requestData.extractors && typeof requestData.extractors === 'string') {
+        try {
+          requestData.extractors = JSON.parse(requestData.extractors)
+        } catch (e) {
+          requestData.extractors = []
+        }
       }
 
       response.value = null
@@ -1799,6 +1850,44 @@ const saveRequest = async () => {
     }
 
     selectedRequest.value = response.data
+
+    // 确保保存后的数据格式正确（解析JSON字符串）
+    if (selectedRequest.value.params && typeof selectedRequest.value.params === 'string') {
+      try {
+        selectedRequest.value.params = JSON.parse(selectedRequest.value.params)
+      } catch (e) {
+        selectedRequest.value.params = []
+      }
+    }
+    if (selectedRequest.value.headers && typeof selectedRequest.value.headers === 'string') {
+      try {
+        selectedRequest.value.headers = JSON.parse(selectedRequest.value.headers)
+      } catch (e) {
+        selectedRequest.value.headers = []
+      }
+    }
+    if (selectedRequest.value.body && typeof selectedRequest.value.body === 'string') {
+      try {
+        selectedRequest.value.body = JSON.parse(selectedRequest.value.body)
+      } catch (e) {
+        selectedRequest.value.body = {}
+      }
+    }
+    if (selectedRequest.value.assertions && typeof selectedRequest.value.assertions === 'string') {
+      try {
+        selectedRequest.value.assertions = JSON.parse(selectedRequest.value.assertions)
+      } catch (e) {
+        selectedRequest.value.assertions = []
+      }
+    }
+    if (selectedRequest.value.extractors && typeof selectedRequest.value.extractors === 'string') {
+      try {
+        selectedRequest.value.extractors = JSON.parse(selectedRequest.value.extractors)
+      } catch (e) {
+        selectedRequest.value.extractors = []
+      }
+    }
+
     await loadCollections(selectedProject.value)
     ElMessage.success('保存成功')
   } catch (error) {
