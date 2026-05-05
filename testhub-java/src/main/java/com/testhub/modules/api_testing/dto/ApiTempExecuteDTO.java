@@ -46,4 +46,9 @@ public class ApiTempExecuteDTO {
      * 后置脚本 (JavaScript)
      */
     private String postScript;
+
+    /**
+     * 断言规则 (JSON)
+     */
+    private String assertions;
 }
