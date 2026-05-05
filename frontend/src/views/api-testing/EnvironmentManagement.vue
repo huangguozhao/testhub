@@ -249,8 +249,8 @@ const viewVariables = computed(() => {
 
 const loadProjects = async () => {
   try {
-    const response = await api.get('/api-testing/projects/')
-    projects.value = response.data.results || response.data
+    const response = await api.get('/api-projects')
+    projects.value = response.data?.results || response.data || []
     if (projects.value.length > 0 && !selectedProject.value) {
       selectedProject.value = projects.value[0].id
     }
@@ -262,10 +262,10 @@ const loadProjects = async () => {
 const loadGlobalEnvironments = async () => {
   loading.value = true
   try {
-    const response = await api.get('/api-testing/environments/', {
+    const response = await api.get('/api-environments', {
       params: { scope: 'GLOBAL' }
     })
-    globalEnvironments.value = response.data.results || response.data
+    globalEnvironments.value = response.data?.results || response.data || []
   } catch (error) {
     ElMessage.error(t('apiTesting.messages.error.globalEnvLoadFailed'))
   } finally {
@@ -278,13 +278,13 @@ const loadLocalEnvironments = async () => {
 
   loading.value = true
   try {
-    const response = await api.get('/api-testing/environments/', {
+    const response = await api.get('/api-environments', {
       params: {
         scope: 'LOCAL',
         project: selectedProject.value
       }
     })
-    localEnvironments.value = response.data.results || response.data
+    localEnvironments.value = response.data?.results || response.data || []
   } catch (error) {
     ElMessage.error(t('apiTesting.messages.error.localEnvLoadFailed'))
   } finally {

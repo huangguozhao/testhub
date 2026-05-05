@@ -488,8 +488,9 @@ const getEnvironmentName = (environmentId) => {
 
 const loadProjects = async () => {
   try {
-    const response = await api.get('/api-testing/projects/')
-    projects.value = response.data.results || response.data
+    const response = await api.get('/api-projects')
+    const data = response.data?.results || response.data || []
+    projects.value = Array.isArray(data) ? data : []
 
     // 过滤出HTTP项目
     const httpProjects = projects.value.filter(project => project.project_type !== 'WEBSOCKET')
@@ -510,10 +511,10 @@ const loadTestSuites = async () => {
   if (!selectedProject.value) return
 
   try {
-    const response = await api.get('/api-testing/test-suites/', {
+    const response = await api.get('/api-test-suites', {
       params: { project: selectedProject.value }
     })
-    testSuites.value = response.data.results || response.data
+    testSuites.value = response.data?.results || response.data || []
   } catch (error) {
     ElMessage.error(t('apiTesting.messages.error.loadTestSuites'))
   }
@@ -522,13 +523,13 @@ const loadTestSuites = async () => {
 const loadEnvironments = async () => {
   try {
     // 获取全局环境 + 当前项目环境
-    const response = await api.get('/api-testing/environments/', {
+    const response = await api.get('/api-environments', {
       // 不传递project参数，让后端返回所有可访问的环境（全局+当前项目）
     })
-    const allEnvironments = response.data.results || response.data
+    const allEnvironments = response.data?.results || response.data || []
 
     // 过滤当前项目相关或全局环境
-    environments.value = allEnvironments.filter(env =>
+    environments.value = (allEnvironments).filter(env =>
       env.scope === 'GLOBAL' ||
       (env.scope === 'LOCAL' && (!selectedProject.value || env.project === selectedProject.value))
     )
@@ -542,13 +543,13 @@ const loadRequestTree = async () => {
 
   try {
     // 加载集合
-    const collectionsRes = await api.get('/api-testing/collections/', {
+    const collectionsRes = await api.get('/api-collections', {
       params: { project: selectedProject.value }
     })
     const collections = collectionsRes.data.results || collectionsRes.data
 
     // 加载请求
-    const requestsRes = await api.get('/api-testing/requests/')
+    const requestsRes = await api.get('/api-requests')
     const requests = requestsRes.data.results || requestsRes.data
 
     // 构建树形结构
@@ -599,10 +600,10 @@ const loadExecutions = async () => {
 
   executionsLoading.value = true
   try {
-    const response = await api.get('/api-testing/test-executions/', {
+    const response = await api.get('/api-execution-records', {
       params: { test_suite: selectedSuite.value.id }
     })
-    executions.value = response.data.results || response.data
+    executions.value = response.data?.results || response.data || []
   } catch (error) {
     ElMessage.error(t('apiTesting.messages.error.loadExecutionHistory'))
   } finally {

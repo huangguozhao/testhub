@@ -250,7 +250,7 @@ const loadHistory = async () => {
       params.search = searchText.value
     }
 
-    const response = await api.get('/api-testing/histories/', { params })
+    const response = await api.get('/api-request-histories', { params })
     const data = response.data.results || response.data
 
     if (activeTab.value === 'HTTP') {
