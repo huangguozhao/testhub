@@ -1001,7 +1001,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import { ref, reactive, computed, onMounted, onBeforeUnmount, nextTick, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Folder, Document, MagicStick, Search, Close } from '@element-plus/icons-vue'
 import api from '@/utils/api'
