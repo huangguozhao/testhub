@@ -2742,11 +2742,8 @@ const insertTextAtCursor = (inputRef, textToInsert) => {
 const loadVariableFunctions = async () => {
   try {
     loading.value = true
-    console.log('开始加载变量函数...')
     const apiResponse = await getVariableFunctions()
-    console.log('变量函数响应:', apiResponse)
-    console.log('变量函数响应.data:', apiResponse.data)
-    
+
     // 更灵活地处理响应数据结构
     let functionsData = null
     
@@ -2766,7 +2763,6 @@ const loadVariableFunctions = async () => {
     
     if (functionsData) {
       const groupedFunctions = functionsData
-      console.log('处理后的 groupedFunctions:', groupedFunctions)
 
       // 后端已经按分类分组了，直接转换为标签页所需的格式
       if (typeof groupedFunctions === 'object' && !Array.isArray(groupedFunctions)) {
@@ -2834,11 +2830,8 @@ const loadVariableFunctions = async () => {
         
         variableCategories.value = orderedCategories
       }
-
-      console.log('最终变量分类:', variableCategories.value)
     } else {
-      console.error('响应数据格式错误，无法找到函数数据')
-      console.error('完整响应:', apiResponse)
+      ElMessage.error('响应数据格式错误，使用本地数据')
     }
   } catch (error) {
     console.error('加载变量函数失败:', error)
@@ -2900,7 +2893,6 @@ const useLocalVariableCategories = () => {
       ]
     }
   ]
-  console.log('使用本地变量分类数据:', variableCategories.value)
 }
 </script>
 
