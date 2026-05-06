@@ -92,7 +92,8 @@ public class ApiExecutor {
             HttpHeaders headers = buildHeaders(request.getHeaders(), currentVars);
             HttpEntity<String> entity = new HttpEntity<>(body, headers);
 
-            log.info("【发送HTTP请求】...");
+            log.info("【请求头】{}", headers.toSingleValueMap());
+            log.info("【发送HTTP请求】method={}, url={}", request.getMethod(), url);
 
             // 发送请求
             ResponseEntity<String> httpResponse = restTemplate.exchange(
@@ -279,13 +280,17 @@ public class ApiExecutor {
 
         if (headersJson != null && !headersJson.isBlank()) {
             try {
-                // 尝试解析为JSON数组格式 [{key, value}, ...]
+                // 尝试解析为JSON数组格式 [{key, value, enabled}, ...]
                 if (headersJson.trim().startsWith("[")) {
-                    List<Map<String, String>> headerList = objectMapper.readValue(headersJson, List.class);
-                    for (Map<String, String> item : headerList) {
-                        String key = item.get("key");
-                        String value = item.get("value");
-                        if (key != null && value != null) {
+                    List<Map<String, Object>> headerList = objectMapper.readValue(headersJson, List.class);
+                    for (Map<String, Object> item : headerList) {
+                        // 跳过禁用的header
+                        Object enabled = item.get("enabled");
+                        if (enabled != null && enabled.equals(false)) continue;
+
+                        String key = item.get("key") != null ? item.get("key").toString() : null;
+                        String value = item.get("value") != null ? item.get("value").toString() : null;
+                        if (key != null && !key.isBlank() && value != null) {
                             String resolvedValue = replaceVariables(value, variables);
                             headers.add(key, resolvedValue);
                             if (key.equalsIgnoreCase("Content-Type")) {
