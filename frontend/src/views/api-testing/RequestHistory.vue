@@ -28,6 +28,8 @@
         <HistoryTable
           :data="httpHistory"
           :loading="loading"
+          :retrying="retrying"
+          :retrying-id="retryingId"
           @view-detail="viewDetail"
           @retry-request="retryRequest"
           @selection-change="handleSelectionChange"
@@ -38,6 +40,8 @@
         <HistoryTable
           :data="websocketHistory"
           :loading="loading"
+          :retrying="retrying"
+          :retrying-id="retryingId"
           @view-detail="viewDetail"
           @retry-request="retryRequest"
           @selection-change="handleSelectionChange"
@@ -175,6 +179,8 @@ const showDetailDialog = ref(false)
 const selectedHistory = ref(null)
 const detailTab = ref('request')
 const selectedIds = ref([])
+const retrying = ref(false)
+const retryingId = ref(null)
 
 const currentHistory = computed(() => {
   return activeTab.value === 'HTTP' ? httpHistory.value : websocketHistory.value
@@ -296,15 +302,37 @@ const viewDetail = (history) => {
 }
 
 const retryRequest = async (history) => {
+  retrying.value = true
+  retryingId.value = history.id
   try {
-    // 路径相对于 baseURL (/api)，所以是 /api-requests/{id}/execute
     const response = await api.post(`/api-requests/${history.request_id}/execute`, {})
-    ElMessage.success(t('apiTesting.messages.success.requestRetried'))
+
+    // 根据返回结果显示不同提示
+    const responseData = response.data
+    if (responseData && responseData.success) {
+      ElMessage({
+        type: 'success',
+        message: `请求成功！状态码: ${responseData.statusCode || responseData.responseStatusCode}, 耗时: ${responseData.responseTime}ms`
+      })
+    } else if (responseData && responseData.statusCode) {
+      ElMessage({
+        type: responseData.statusCode >= 400 ? 'warning' : 'success',
+        message: `请求完成，状态码: ${responseData.statusCode || responseData.responseStatusCode}`
+      })
+    } else {
+      ElMessage.success(t('apiTesting.messages.success.requestRetried'))
+    }
+
     showDetailDialog.value = false
     await loadHistory()
   } catch (error) {
-    ElMessage.error(t('apiTesting.messages.error.sendFailed'))
-    console.error(error)
+    ElMessage.error({
+      message: error.message || t('apiTesting.messages.error.sendFailed'),
+      duration: 5000
+    })
+  } finally {
+    retrying.value = false
+    retryingId.value = null
   }
 }
 
