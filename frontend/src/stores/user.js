@@ -28,6 +28,8 @@ export const useUserStore = defineStore('user', () => {
   })
 
   // 启动自动刷新token定时器
+  let visibilityHandler = null
+
   const startAutoRefresh = () => {
     // 清除现有定时器
     if (refreshTimer) {
@@ -64,6 +66,23 @@ export const useUserStore = defineStore('user', () => {
       refreshTimer = setTimeout(checkAndRefresh, 30 * 1000)
     }
 
+    // 监听页面可见性变化，用户从后台切回时立即检查token
+    if (visibilityHandler) {
+      document.removeEventListener('visibilitychange', visibilityHandler)
+    }
+    visibilityHandler = () => {
+      if (document.visibilityState === 'visible') {
+        console.log('页面恢复可见，检查token状态...')
+        // 清除当前定时器，立即执行检查
+        if (refreshTimer) {
+          clearTimeout(refreshTimer)
+          refreshTimer = null
+        }
+        checkAndRefresh()
+      }
+    }
+    document.addEventListener('visibilitychange', visibilityHandler)
+
     // 立即执行一次检查
     checkAndRefresh()
   }
@@ -71,8 +90,12 @@ export const useUserStore = defineStore('user', () => {
   // 停止自动刷新定时器
   const stopAutoRefresh = () => {
     if (refreshTimer) {
-      clearInterval(refreshTimer)
+      clearTimeout(refreshTimer)
       refreshTimer = null
+    }
+    if (visibilityHandler) {
+      document.removeEventListener('visibilitychange', visibilityHandler)
+      visibilityHandler = null
     }
   }
 

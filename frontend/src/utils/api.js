@@ -57,7 +57,6 @@ api.interceptors.request.use(
           } catch (error) {
             console.error('Token刷新失败:', error)
             processQueue(error, null)
-            // 刷新失败会在user store中自动logout
             return Promise.reject(error)
           } finally {
             isRefreshing = false
@@ -110,6 +109,11 @@ api.interceptors.response.use(
   async (error) => {
     const userStore = useUserStore()
     const originalRequest = error.config
+
+    // 如果是请求拦截器因token刷新失败而拒绝的请求，不重复处理
+    if (originalRequest?._refreshFailed) {
+      return Promise.reject(error)
+    }
 
     // 如果是401错误且不是刷新token的请求
     if (error.response?.status === 401 && !originalRequest._retry) {
@@ -170,8 +174,9 @@ api.interceptors.response.use(
       return Promise.reject(error)
     }
 
-    // 其他错误处理
+    // 其他错误处理（跳过请求拦截器已处理的刷新失败场景，避免重复报错）
     if (error.response?.status === 401) {
+      // 已在重试后仍然401，或没有refresh token
       ElMessage.error('登录已过期，请重新登录')
     } else if (error.response?.status >= 500) {
       ElMessage.error('服务器错误，请稍后重试')
