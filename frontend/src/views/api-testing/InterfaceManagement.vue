@@ -776,6 +776,7 @@ const saving = ref(false)
 const activeTab = ref('params')
 const responseActiveTab = ref('body')
 const hasUnsavedChanges = ref(false) // 是否存在未保存的修改
+const requestSnapshot = ref(null) // 请求快照，用于精确判断是否有修改
 const showCreateCollectionDialog = ref(false)
 const showEditCollectionDialog = ref(false)
 const showContextMenu = ref(false)
@@ -797,12 +798,74 @@ const treeProps = {
   label: 'name'
 }
 
-// 监听 selectedRequest 的变化，标记为未保存状态
-watch(selectedRequest, () => {
-  if (selectedRequest.value && selectedRequest.value.id) {
-    hasUnsavedChanges.value = true
+// 保存请求快照（在加载请求和保存请求后调用）
+const saveRequestSnapshot = () => {
+  if (!selectedRequest.value) {
+    requestSnapshot.value = null
+    return
   }
-}, { deep: true })
+  const snapshot = {
+    url: selectedRequest.value.url || '',
+    method: selectedRequest.value.method || 'GET',
+    name: selectedRequest.value.name || '',
+    params: JSON.stringify(selectedRequest.value.params || {}),
+    headers: JSON.stringify(selectedRequest.value.headers || []),
+    body_type: bodyType.value || 'none',
+    body_content: rawBody.value || '',
+    pre_script: selectedRequest.value.pre_request_script || '',
+    post_script: selectedRequest.value.post_request_script || '',
+    assertions: JSON.stringify(selectedRequest.value.assertions || []),
+    extractors: JSON.stringify(selectedRequest.value.extractors || []),
+    environment_id: selectedEnvironment.value
+  }
+  requestSnapshot.value = JSON.stringify(snapshot)
+  hasUnsavedChanges.value = false
+}
+
+// 检查是否有未保存的修改（对比快照）
+const checkUnsavedChanges = () => {
+  if (!selectedRequest.value || !requestSnapshot.value) {
+    hasUnsavedChanges.value = !!selectedRequest.value && !selectedRequest.value.id
+    return
+  }
+  const current = {
+    url: selectedRequest.value.url || '',
+    method: selectedRequest.value.method || 'GET',
+    name: selectedRequest.value.name || '',
+    params: JSON.stringify(selectedRequest.value.params || {}),
+    headers: JSON.stringify(selectedRequest.value.headers || []),
+    body_type: bodyType.value || 'none',
+    body_content: rawBody.value || '',
+    pre_script: selectedRequest.value.pre_request_script || '',
+    post_script: selectedRequest.value.post_request_script || '',
+    assertions: JSON.stringify(selectedRequest.value.assertions || []),
+    extractors: JSON.stringify(selectedRequest.value.extractors || []),
+    environment_id: selectedEnvironment.value
+  }
+  hasUnsavedChanges.value = JSON.stringify(current) !== requestSnapshot.value
+}
+
+// 监听关键字段变化，精确判断是否有修改
+watch(
+  () => {
+    if (!selectedRequest.value) return ''
+    return JSON.stringify({
+      url: selectedRequest.value.url,
+      method: selectedRequest.value.method,
+      name: selectedRequest.value.name,
+      params: selectedRequest.value.params,
+      headers: selectedRequest.value.headers,
+      body_type: bodyType.value,
+      body_content: rawBody.value,
+      pre_script: selectedRequest.value.pre_request_script,
+      post_script: selectedRequest.value.post_request_script,
+      assertions: selectedRequest.value.assertions,
+      extractors: selectedRequest.value.extractors,
+      environment_id: selectedEnvironment.value
+    })
+  },
+  () => { checkUnsavedChanges() }
+)
 
 // 数据工厂选择器相关
 const showDataFactorySelector = ref(false)
@@ -1174,6 +1237,11 @@ const onNodeClick = async (data) => {
 
       response.value = null
       selectedRequest.value = requestData
+
+      // 保存快照，用于精确判断是否有修改
+      // 使用 nextTick 确保 bodyType/rawBody 等响应式数据已更新
+      await nextTick()
+      saveRequestSnapshot()
     } catch (error) {
       ElMessage.error('加载请求失败')
       console.error('加载请求失败:', error)
@@ -1217,6 +1285,8 @@ const createEmptyRequest = () => {
   }
 
   selectedRequest.value = newRequest
+  requestSnapshot.value = null // 新建请求没有快照
+  hasUnsavedChanges.value = false
 }
 
 const openCreateCollectionDialog = () => {
@@ -1598,10 +1668,9 @@ const sendRequest = async () => {
 
       apiResponse = await api.post('/api-requests/execute-temp', requestData)
     } else {
-      // 已保存且无修改，只发送id让后端查询
-      apiResponse = await api.post('/api-requests/execute-temp', {
-        id: selectedRequest.value.id,
-        environment_id: selectedEnvironment.value
+      // 已保存且无修改，使用id接口从数据库查询执行
+      apiResponse = await api.post(`/api-requests/${selectedRequest.value.id}/execute`, null, {
+        params: { environmentId: selectedEnvironment.value }
       })
     }
 
@@ -1778,7 +1847,10 @@ const saveRequest = async () => {
 
     await loadCollections(selectedProject.value)
     ElMessage.success('保存成功')
-    hasUnsavedChanges.value = false // 重置未保存状态
+
+    // 保存快照，重置未保存状态
+    await nextTick()
+    saveRequestSnapshot()
   } catch (error) {
     ElMessage.error('保存失败')
     console.error('保存失败:', error)
