@@ -245,13 +245,12 @@ const loadHistory = async () => {
   loading.value = true
   try {
     const params = {
-      page: currentPage.value,
-      page_size: pageSize.value,
-      request__request_type: activeTab.value
+      current: currentPage.value,
+      size: pageSize.value
     }
 
     if (searchText.value) {
-      params.search = searchText.value
+      params.keyword = searchText.value
     }
 
     const response = await api.get('/api-request-histories', { params })
@@ -298,8 +297,8 @@ const viewDetail = (history) => {
 
 const retryRequest = async (history) => {
   try {
-    // 后端路径: /api/api-requests/{id}/execute
-    const response = await api.post(`/api/api-requests/${history.request_id}/execute`, {})
+    // 路径相对于 baseURL (/api)，所以是 /api-requests/{id}/execute
+    const response = await api.post(`/api-requests/${history.request_id}/execute`, {})
     ElMessage.success(t('apiTesting.messages.success.requestRetried'))
     showDetailDialog.value = false
     await loadHistory()
