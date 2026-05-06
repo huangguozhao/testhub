@@ -146,7 +146,9 @@ public class ApiRequestServiceImpl extends ServiceImpl<ApiRequestMapper, ApiRequ
             try {
                 Map<String, String> overrideVars = objectMapper.readValue(dto.getOverrideVariables(),
                         new TypeReference<Map<String, String>>() {});
-                variables.putAll(overrideVars);
+                if (overrideVars != null) {
+                    variables.putAll(overrideVars);
+                }
             } catch (Exception e) {
                 log.warn("解析覆盖变量失败: {}", e.getMessage());
             }
