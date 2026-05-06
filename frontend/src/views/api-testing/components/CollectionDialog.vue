@@ -23,14 +23,15 @@
         />
       </el-form-item>
       <el-form-item :label="$t('apiTesting.interface.parentCollection')" prop="parent">
-        <el-select v-model="formData.parent" :placeholder="$t('apiTesting.interface.selectParentCollection')" clearable>
-          <el-option
-            v-for="collection in collections"
-            :key="collection.id"
-            :label="collection.name"
-            :value="collection.id"
-          />
-        </el-select>
+        <el-tree-select
+          v-model="formData.parent"
+          :data="collections"
+          :props="{ value: 'id', label: 'name', children: 'children' }"
+          :placeholder="$t('apiTesting.interface.selectParentCollection')"
+          check-strictly
+          clearable
+          filterable
+        />
       </el-form-item>
     </el-form>
 
@@ -61,14 +62,15 @@
         />
       </el-form-item>
       <el-form-item :label="$t('apiTesting.interface.parentCollection')" prop="parent">
-        <el-select v-model="formData.parent" :placeholder="$t('apiTesting.interface.selectParentCollection')" clearable>
-          <el-option
-            v-for="collection in collections.filter(c => c.id !== formData.id)"
-            :key="collection.id"
-            :label="collection.name"
-            :value="collection.id"
-          />
-        </el-select>
+        <el-tree-select
+          v-model="formData.parent"
+          :data="collectionsTreeFiltered"
+          :props="{ value: 'id', label: 'name', children: 'children' }"
+          :placeholder="$t('apiTesting.interface.selectParentCollection')"
+          check-strictly
+          clearable
+          filterable
+        />
       </el-form-item>
     </el-form>
 
@@ -80,7 +82,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, watch } from 'vue'
+import { ref, reactive, computed, watch } from 'vue'
 
 const props = defineProps({
   modelValue: {
@@ -125,6 +127,19 @@ const rules = {
     { required: true, message: '集合名称不能为空', trigger: 'blur' }
   ]
 }
+
+// 排除当前编辑集合及其子集合（防止循环引用）
+const collectionsTreeFiltered = computed(() => {
+  const filterTree = (nodes) => {
+    return nodes
+      .filter(node => node.id !== formData.id)
+      .map(node => ({
+        ...node,
+        children: node.children ? filterTree(node.children) : []
+      }))
+  }
+  return filterTree(props.collections)
+})
 
 // 监听 modelValue 变化
 watch(() => props.modelValue, (newVal) => {

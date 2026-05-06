@@ -187,20 +187,17 @@
                 size="small"
                 class="name-input"
               />
-              <el-select
+              <el-tree-select
                 v-model="selectedRequest.collection_id"
+                :data="collectionTree"
+                :props="{ value: 'id', label: 'name', children: 'children' }"
                 :placeholder="$t('apiTesting.interface.selectCollection')"
                 size="small"
+                check-strictly
                 clearable
+                filterable
                 class="collection-select"
-              >
-                <el-option
-                  v-for="collection in flatCollections.filter(c => c.type === 'collection')"
-                  :key="collection.id"
-                  :label="collection.name"
-                  :value="collection.id"
-                />
-              </el-select>
+              />
               <div class="action-buttons">
                 <el-button size="small" @click="saveRequest" :loading="saving" ref="saveButtonRef">
                   {{ $t('apiTesting.common.save') }}
@@ -686,14 +683,14 @@
     <CollectionDialog
       v-model="showCreateCollectionDialog"
       mode="create"
-      :collections="flatCollections"
+      :collections="collectionTree"
       @confirm="handleCreateCollection"
       @cancel="closeCreateCollectionDialog"
     />
     <CollectionDialog
       v-model="showEditCollectionDialog"
       mode="edit"
-      :collections="flatCollections"
+      :collections="collectionTree"
       :collection="editingCollection"
       @confirm="handleEditCollection"
       @cancel="closeEditCollectionDialog"
@@ -767,6 +764,19 @@ const projects = ref([])
 const selectedProject = ref(null)
 const collections = ref([])
 const flatCollections = ref([])
+
+// 只保留集合节点的树（过滤掉接口节点）
+const collectionTree = computed(() => {
+  const filterTree = (nodes) => {
+    return nodes
+      .filter(node => node.type === 'collection')
+      .map(node => ({
+        ...node,
+        children: node.children ? filterTree(node.children) : []
+      }))
+  }
+  return filterTree(collections.value)
+})
 const environments = ref([])
 const selectedEnvironment = ref(null)
 const selectedRequest = ref(null)
@@ -3422,6 +3432,10 @@ const useLocalVariableCategories = () => {
 
 .name-input .el-input {
   border-radius: 6px;
+}
+
+.collection-select {
+  width: 200px;
 }
 
 .action-buttons {
