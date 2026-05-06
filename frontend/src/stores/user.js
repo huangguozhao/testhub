@@ -147,27 +147,30 @@ export const useUserStore = defineStore('user', () => {
 
     stopAutoRefresh()
 
+    // 先保存refreshToken用于调用logout API，然后立即清除本地状态
+    // 这样请求拦截器不会因为看到过期的accessToken而尝试刷新（导致死锁）
+    const savedRefreshToken = refreshToken.value
+
+    accessToken.value = ''
+    refreshToken.value = ''
+    user.value = null
+    tokenExpiresAt.value = 0
+
+    localStorage.removeItem('access_token')
+    localStorage.removeItem('refresh_token')
+    localStorage.removeItem('token_expires_at')
+    localStorage.removeItem('user')
+
     try {
-      if (refreshToken.value && !isTokenExpired.value) {
+      if (savedRefreshToken) {
         try {
-          await api.post('/auth/logout', { refresh_token: refreshToken.value })
+          await api.post('/auth/logout', { refresh_token: savedRefreshToken })
         } catch (apiError) {
           console.error('Logout API调用失败:', apiError)
         }
       }
     } finally {
-      accessToken.value = ''
-      refreshToken.value = ''
-      user.value = null
-      tokenExpiresAt.value = 0
-
-      localStorage.removeItem('access_token')
-      localStorage.removeItem('refresh_token')
-      localStorage.removeItem('token_expires_at')
-      localStorage.removeItem('user')
-
       isLoggingOut = false
-
       window.location.href = '/login'
     }
   }
@@ -195,7 +198,8 @@ export const useUserStore = defineStore('user', () => {
       return response.data.access_token
     } catch (error) {
       console.error('Token refresh failed:', error)
-      await logout()
+      // 不await logout()，避免死锁（响应拦截器可能已经调用了logout）
+      logout()
       throw error
     }
   }

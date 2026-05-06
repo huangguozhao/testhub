@@ -137,7 +137,10 @@ api.interceptors.response.use(
       // 如果是刷新token的请求失败
       if (originalRequest.url === '/auth/refresh') {
         console.error('Refresh token失败，跳转登录页')
-        await userStore.logout()
+        // 必须先重置isRefreshing并清空队列，否则logout内部的API调用会被卡在队列中导致死锁
+        isRefreshing = false
+        processQueue(error, null)
+        userStore.logout()
         return Promise.reject(error)
       }
 
@@ -160,7 +163,8 @@ api.interceptors.response.use(
         } catch (refreshError) {
           console.error('Token刷新失败:', refreshError)
           processQueue(refreshError, null)
-          await userStore.logout()
+          // logout内部会先清除token再调用API，避免请求拦截器尝试再次刷新
+          userStore.logout()
           return Promise.reject(refreshError)
         } finally {
           isRefreshing = false
@@ -168,7 +172,7 @@ api.interceptors.response.use(
       } else {
         // 没有refresh token，直接退出
         console.error('没有refresh token，跳转登录页')
-        await userStore.logout()
+        userStore.logout()
       }
 
       return Promise.reject(error)
