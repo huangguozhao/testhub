@@ -137,13 +137,7 @@ public class ApiRequestServiceImpl extends ServiceImpl<ApiRequestMapper, ApiRequ
         if (dto.getEnvironmentId() != null) {
             ApiEnvironment env = apiEnvironmentService.getById(dto.getEnvironmentId());
             if (env != null && env.getVariables() != null) {
-                try {
-                    Map<String, String> envVars = objectMapper.readValue(env.getVariables(),
-                            new TypeReference<Map<String, String>>() {});
-                    variables.putAll(envVars);
-                } catch (Exception e) {
-                    log.warn("解析环境变量失败: {}", e.getMessage());
-                }
+                variables.putAll(parseEnvironmentVariables(env.getVariables()));
             }
         }
 
@@ -170,13 +164,7 @@ public class ApiRequestServiceImpl extends ServiceImpl<ApiRequestMapper, ApiRequ
         if (dto.getEnvironmentId() != null) {
             ApiEnvironment env = apiEnvironmentService.getById(dto.getEnvironmentId());
             if (env != null && env.getVariables() != null) {
-                try {
-                    Map<String, String> envVars = objectMapper.readValue(env.getVariables(),
-                            new TypeReference<Map<String, String>>() {});
-                    variables.putAll(envVars);
-                } catch (Exception e) {
-                    log.warn("解析环境变量失败: {}", e.getMessage());
-                }
+                variables.putAll(parseEnvironmentVariables(env.getVariables()));
             }
         }
 
@@ -213,5 +201,34 @@ public class ApiRequestServiceImpl extends ServiceImpl<ApiRequestMapper, ApiRequ
         return this.list(new LambdaQueryWrapper<ApiRequest>()
                 .eq(ApiRequest::getCollectionId, collectionId)
                 .orderByAsc(ApiRequest::getSortOrder));
+    }
+
+    /**
+     * 解析环境变量JSON，支持两种格式：
+     * 1. 简单格式: {"key": "value"} → 直接使用
+     * 2. 复杂格式: {"key": {"initialValue": "v1", "currentValue": "v2"}} → 优先取currentValue，其次initialValue
+     */
+    @SuppressWarnings("unchecked")
+    private Map<String, String> parseEnvironmentVariables(String variablesJson) {
+        Map<String, String> result = new HashMap<>();
+        try {
+            Map<String, Object> rawVars = objectMapper.readValue(variablesJson, new TypeReference<Map<String, Object>>() {});
+            for (Map.Entry<String, Object> entry : rawVars.entrySet()) {
+                Object value = entry.getValue();
+                if (value instanceof Map) {
+                    // 复杂格式: {"initialValue": "v1", "currentValue": "v2"}
+                    Map<String, String> valueMap = (Map<String, String>) value;
+                    String currentValue = valueMap.get("currentValue");
+                    String initialValue = valueMap.get("initialValue");
+                    result.put(entry.getKey(), currentValue != null && !currentValue.isEmpty() ? currentValue : (initialValue != null ? initialValue : ""));
+                } else {
+                    // 简单格式: 直接是字符串值
+                    result.put(entry.getKey(), value != null ? value.toString() : "");
+                }
+            }
+        } catch (Exception e) {
+            log.warn("解析环境变量失败: {}", e.getMessage());
+        }
+        return result;
     }
 }

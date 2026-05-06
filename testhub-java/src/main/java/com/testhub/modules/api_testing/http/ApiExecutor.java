@@ -291,6 +291,10 @@ public class ApiExecutor {
 
     /**
      * 替换变量 {{varName}} -> value
+     * 支持两种变量格式：
+     * 1. 简单格式: {"key": "value"}
+     * 2. 复杂格式: {"key": {"initialValue": "v1", "currentValue": "v2"}}
+     *    优先取 currentValue，其次取 initialValue
      */
     private String replaceVariables(String content, Map<String, String> variables) {
         if (content == null || variables == null) {
@@ -441,11 +445,39 @@ public class ApiExecutor {
     }
 
     /**
-     * 解析环境变量 (key1=value1,key2=value2)
+     * 解析环境变量JSON字符串
+     * 支持两种格式：
+     * 1. 简单格式: {"key": "value"}
+     * 2. 复杂格式: {"key": {"initialValue": "v1", "currentValue": "v2"}}
+     *    优先取 currentValue，其次取 initialValue
      */
+    @SuppressWarnings("unchecked")
     private Map<String, String> parseVariables(String variablesStr) {
         Map<String, String> variables = new HashMap<>();
-        if (variablesStr != null && !variablesStr.isBlank()) {
+        if (variablesStr == null || variablesStr.isBlank()) {
+            return variables;
+        }
+
+        try {
+            Map<String, Object> rawVars = objectMapper.readValue(variablesStr, Map.class);
+            for (Map.Entry<String, Object> entry : rawVars.entrySet()) {
+                Object value = entry.getValue();
+                if (value instanceof Map) {
+                    // 复杂格式
+                    Map<String, String> valueMap = (Map<String, String>) value;
+                    String currentValue = valueMap.get("currentValue");
+                    String initialValue = valueMap.get("initialValue");
+                    variables.put(entry.getKey(),
+                            currentValue != null && !currentValue.isEmpty() ? currentValue
+                                    : (initialValue != null ? initialValue : ""));
+                } else {
+                    // 简单格式
+                    variables.put(entry.getKey(), value != null ? value.toString() : "");
+                }
+            }
+        } catch (Exception e) {
+            log.warn("解析环境变量JSON失败: {}, 尝试旧格式解析", e.getMessage());
+            // 兼容旧的 key=value 格式
             String[] pairs = variablesStr.split(",");
             for (String pair : pairs) {
                 String[] kv = pair.split("=", 2);

@@ -368,7 +368,7 @@ const deleteEnvironment = async (environment) => {
       }
     )
 
-    await api.delete(`/api-testing/environments/${environment.id}/`)
+    await api.delete(`/api-environments/${environment.id}`)
     ElMessage.success(t('apiTesting.messages.success.delete'))
 
     if (activeTab.value === 'GLOBAL') {
@@ -385,7 +385,7 @@ const deleteEnvironment = async (environment) => {
 
 const activateEnvironment = async (environment) => {
   try {
-    await api.post(`/api-testing/environments/${environment.id}/activate/`)
+    await api.post(`/api-environments/${environment.id}/activate`)
     ElMessage.success(t('apiTesting.messages.success.environmentActivated'))
 
     if (activeTab.value === 'GLOBAL') {
@@ -409,7 +409,7 @@ const duplicateEnvironment = async (environment) => {
   }
 
   try {
-    await api.post('/api-testing/environments/', newEnv)
+    await api.post('/api-environments', newEnv)
     ElMessage.success(t('apiTesting.messages.success.copy'))
 
     if (activeTab.value === 'GLOBAL') {
@@ -449,10 +449,10 @@ const submitForm = async () => {
     }
     
     if (editingEnvironment.value) {
-      await api.put(`/api-testing/environments/${editingEnvironment.value.id}/`, data)
+      await api.put(`/api-environments/${editingEnvironment.value.id}`, data)
       ElMessage.success(t('apiTesting.messages.success.environmentUpdated'))
     } else {
-      await api.post('/api-testing/environments/', data)
+      await api.post('/api-environments', data)
       ElMessage.success(t('apiTesting.messages.success.environmentCreated'))
     }
 

@@ -113,12 +113,12 @@ public class ApiProjectServiceImpl extends ServiceImpl<ApiProjectMapper, ApiProj
     public ApiProject createApiProject(ApiProject apiProject) {
         this.save(apiProject);
 
-        // 如果有成员，插入成员记录
-        if (apiProject.getMembers() != null && !apiProject.getMembers().isEmpty()) {
-            for (User member : apiProject.getMembers()) {
+        // 如果有成员ID列表，插入成员记录
+        if (apiProject.getMemberIds() != null && !apiProject.getMemberIds().isEmpty()) {
+            for (Long userId : apiProject.getMemberIds()) {
                 ApiProjectMember pm = new ApiProjectMember();
                 pm.setProjectId(apiProject.getId());
-                pm.setUserId(member.getId());
+                pm.setUserId(userId);
                 pm.setRole("member");
                 apiProjectMemberMapper.insert(pm);
             }
@@ -143,11 +143,11 @@ public class ApiProjectServiceImpl extends ServiceImpl<ApiProjectMapper, ApiProj
         wrapper.eq(ApiProjectMember::getProjectId, id);
         apiProjectMemberMapper.delete(wrapper);
 
-        if (apiProject.getMembers() != null && !apiProject.getMembers().isEmpty()) {
-            for (User member : apiProject.getMembers()) {
+        if (apiProject.getMemberIds() != null && !apiProject.getMemberIds().isEmpty()) {
+            for (Long userId : apiProject.getMemberIds()) {
                 ApiProjectMember pm = new ApiProjectMember();
                 pm.setProjectId(id);
-                pm.setUserId(member.getId());
+                pm.setUserId(userId);
                 pm.setRole("member");
                 apiProjectMemberMapper.insert(pm);
             }

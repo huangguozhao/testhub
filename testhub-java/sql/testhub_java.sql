@@ -51,11 +51,13 @@ INSERT INTO `api_collection` VALUES (1, 1, 3, NULL, 'UserModule', 'User related 
 DROP TABLE IF EXISTS `api_environment`;
 CREATE TABLE `api_environment`  (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '环境ID',
-  `project_id` bigint NOT NULL COMMENT '项目ID',
+  `project_id` bigint NULL DEFAULT NULL COMMENT '项目ID(scope=LOCAL时必填)',
   `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '环境名称',
   `description` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '环境描述',
+  `scope` varchar(10) NOT NULL DEFAULT 'LOCAL' COMMENT '作用域: GLOBAL=全局, LOCAL=项目级',
   `variables` json NOT NULL COMMENT '环境变量(JSON格式)',
   `is_default` tinyint NOT NULL DEFAULT 0 COMMENT '是否默认: 0=否, 1=是',
+  `is_active` tinyint NOT NULL DEFAULT 0 COMMENT '是否激活: 0=否, 1=是',
   `is_deleted` tinyint NOT NULL DEFAULT 0 COMMENT '是否删除: 0=否, 1=是',
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
@@ -63,13 +65,15 @@ CREATE TABLE `api_environment`  (
   `updated_by` bigint NULL DEFAULT NULL COMMENT '更新人',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_project_id`(`project_id` ASC) USING BTREE,
-  INDEX `idx_is_default`(`is_default` ASC) USING BTREE
+  INDEX `idx_is_default`(`is_default` ASC) USING BTREE,
+  INDEX `idx_scope`(`scope` ASC) USING BTREE,
+  INDEX `idx_is_active`(`is_active` ASC) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'API环境表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of api_environment
 -- ----------------------------
-INSERT INTO `api_environment` VALUES (1, 7, 'TestEnv', 'Test environment', '{\"baseUrl\": \"https://httpbin.org\"}', 1, 0, '2026-04-30 09:49:30', '2026-04-30 09:49:30', 4, 4);
+INSERT INTO `api_environment` VALUES (1, 7, 'TestEnv', 'Test environment', 'LOCAL', '{\"baseUrl\": \"https://httpbin.org\"}', 1, 1, 0, '2026-04-30 09:49:30', '2026-04-30 09:49:30', 4, 4);
 
 -- ----------------------------
 -- Table structure for api_execution_record
@@ -112,7 +116,7 @@ INSERT INTO `api_execution_record` VALUES (4, 3, '2026-04-30 12:18:27', 8, 8, 0,
 DROP TABLE IF EXISTS `api_project`;
 CREATE TABLE `api_project`  (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '项目ID',
-  `project_id` bigint NOT NULL COMMENT '关联项目ID',
+  `project_id` bigint NULL DEFAULT NULL COMMENT '关联项目ID',
   `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT 'API项目名称',
   `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL COMMENT '项目描述',
   `base_url` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '基础URL',
@@ -1869,5 +1873,18 @@ CREATE TABLE `ui_test_suite_script`  (
 -- ----------------------------
 -- Records of ui_test_suite_script
 -- ----------------------------
+
+-- ----------------------------
+-- Migration: 环境管理升级 - 添加 scope 和 is_active 字段
+-- 适用于已有数据库的升级（如果表已存在）
+-- ----------------------------
+-- ALTER TABLE `api_environment` ADD COLUMN `scope` varchar(10) NOT NULL DEFAULT 'LOCAL' COMMENT '作用域: GLOBAL=全局, LOCAL=项目级' AFTER `description`;
+-- ALTER TABLE `api_environment` ADD COLUMN `is_active` tinyint NOT NULL DEFAULT 0 COMMENT '是否激活: 0=否, 1=是' AFTER `is_default`;
+-- ALTER TABLE `api_environment` MODIFY COLUMN `project_id` bigint NULL DEFAULT NULL COMMENT '项目ID(scope=LOCAL时必填)';
+-- ALTER TABLE `api_environment` ADD INDEX `idx_scope`(`scope`);
+-- ALTER TABLE `api_environment` ADD INDEX `idx_is_active`(`is_active`);
+
+-- Migration: api_project.project_id 改为可空
+-- ALTER TABLE `api_project` MODIFY COLUMN `project_id` bigint NULL DEFAULT NULL COMMENT '关联项目ID';
 
 SET FOREIGN_KEY_CHECKS = 1;
