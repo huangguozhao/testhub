@@ -459,6 +459,7 @@ public class ApiExecutor {
         try {
             ApiExecutionRecord record = new ApiExecutionRecord();
             record.setSuiteId(suite.getId());
+            record.setSuiteName(suite.getName());
             record.setExecutedAt(LocalDateTime.now());
             record.setTotalCount(result.getTotalCount());
             record.setPassCount(result.getPassCount());

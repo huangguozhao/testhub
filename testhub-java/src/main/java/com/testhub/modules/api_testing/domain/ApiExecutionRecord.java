@@ -1,10 +1,12 @@
 package com.testhub.modules.api_testing.domain;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import com.testhub.modules.system.domain.BaseEntity;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 /**
  * API执行记录实体
@@ -26,16 +28,19 @@ public class ApiExecutionRecord extends BaseEntity {
     /**
      * 总请求数
      */
+    @JsonProperty("total_requests")
     private Integer totalCount;
 
     /**
      * 通过数
      */
+    @JsonProperty("passed_requests")
     private Integer passCount;
 
     /**
      * 失败数
      */
+    @JsonProperty("failed_requests")
     private Integer failCount;
 
     /**
@@ -44,7 +49,7 @@ public class ApiExecutionRecord extends BaseEntity {
     private String resultData;
 
     /**
-     * 执行状态: 0=失败, 1=成功
+     * 执行状态: false=失败, true=成功
      */
     private Boolean status;
 
@@ -67,4 +72,14 @@ public class ApiExecutionRecord extends BaseEntity {
      * 触发来源ID(定时任务ID等)
      */
     private Long triggerId;
+
+    // ---- 瞬态字段：API 返回时填充关联信息 ----
+
+    @TableField(exist = false)
+    @JsonProperty("test_suite_name")
+    private String suiteName;
+
+    @TableField(exist = false)
+    @JsonProperty("executed_by")
+    private Map<String, Object> executedBy;
 }

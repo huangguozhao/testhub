@@ -24,4 +24,12 @@ public class WebMvcConfig implements WebMvcConfigurer {
         registry.addInterceptor(apiLoggingInterceptor)
                 .addPathPatterns("/api/**"); // 只拦截 /api/** 路径
     }
+
+    @Override
+    public void addResourceHandlers(org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry registry) {
+        // 允许访问 Allure 报告等静态文件
+        String mediaPath = System.getProperty("user.dir") + "/media/";
+        registry.addResourceHandler("/media/**")
+                .addResourceLocations("file:" + mediaPath);
+    }
 }

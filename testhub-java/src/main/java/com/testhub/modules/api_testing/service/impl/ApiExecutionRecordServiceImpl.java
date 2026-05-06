@@ -3,13 +3,18 @@ package com.testhub.modules.api_testing.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.testhub.modules.api_testing.domain.ApiExecutionRecord;
+import com.testhub.modules.api_testing.domain.ApiTestSuite;
 import com.testhub.modules.api_testing.mapper.ApiExecutionRecordMapper;
 import com.testhub.modules.api_testing.service.ApiExecutionRecordService;
+import com.testhub.modules.api_testing.service.ApiTestSuiteService;
+import com.testhub.modules.system.domain.User;
+import com.testhub.modules.system.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * API执行记录服务实现
@@ -18,6 +23,9 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class ApiExecutionRecordServiceImpl extends ServiceImpl<ApiExecutionRecordMapper, ApiExecutionRecord> implements ApiExecutionRecordService {
+
+    private final ApiTestSuiteService apiTestSuiteService;
+    private final UserService userService;
 
     @Override
     public ApiExecutionRecord createRecord(ApiExecutionRecord record) {
@@ -36,7 +44,9 @@ public class ApiExecutionRecordServiceImpl extends ServiceImpl<ApiExecutionRecor
             wrapper.last("LIMIT " + limit);
         }
 
-        return this.list(wrapper);
+        List<ApiExecutionRecord> records = this.list(wrapper);
+        enrichRecords(records);
+        return records;
     }
 
     @Override
@@ -50,11 +60,67 @@ public class ApiExecutionRecordServiceImpl extends ServiceImpl<ApiExecutionRecor
             wrapper.last("LIMIT " + limit);
         }
 
-        return this.list(wrapper);
+        List<ApiExecutionRecord> records = this.list(wrapper);
+        enrichRecords(records);
+        return records;
     }
 
     @Override
     public ApiExecutionRecord getRecord(Long id) {
-        return this.getById(id);
+        ApiExecutionRecord record = this.getById(id);
+        if (record != null) {
+            enrichRecords(List.of(record));
+        }
+        return record;
+    }
+
+    /**
+     * 填充关联信息：套件名称、执行者
+     */
+    private void enrichRecords(List<ApiExecutionRecord> records) {
+        if (records == null || records.isEmpty()) return;
+
+        // 批量查询套件名称
+        Set<Long> suiteIds = records.stream()
+                .map(ApiExecutionRecord::getSuiteId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        Map<Long, String> suiteNameMap = new HashMap<>();
+        for (Long suiteId : suiteIds) {
+            try {
+                ApiTestSuite suite = apiTestSuiteService.getById(suiteId);
+                if (suite != null) {
+                    suiteNameMap.put(suiteId, suite.getName());
+                }
+            } catch (Exception e) {
+                log.warn("查询套件失败: suiteId={}", suiteId);
+            }
+        }
+
+        // 批量查询执行者
+        Set<Long> userIds = records.stream()
+                .map(r -> r.getCreatedBy())
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        Map<Long, User> userMap = new HashMap<>();
+        for (Long userId : userIds) {
+            try {
+                User user = userService.getById(userId);
+                if (user != null) {
+                    userMap.put(userId, user);
+                }
+            } catch (Exception e) {
+                log.warn("查询用户失败: userId={}", userId);
+            }
+        }
+
+        // 填充到记录
+        for (ApiExecutionRecord record : records) {
+            record.setSuiteName(suiteNameMap.get(record.getSuiteId()));
+            if (record.getCreatedBy() != null && userMap.containsKey(record.getCreatedBy())) {
+                User user = userMap.get(record.getCreatedBy());
+                record.setExecutedBy(Map.of("id", user.getId(), "username", user.getUsername()));
+            }
+        }
     }
 }
