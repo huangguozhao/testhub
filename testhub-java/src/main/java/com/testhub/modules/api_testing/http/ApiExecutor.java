@@ -202,6 +202,9 @@ public class ApiExecutor {
 
     /**
      * 构建带参数的完整URL
+     * 支持两种格式:
+     * 1. 对象格式: {"key": "value"}
+     * 2. 数组格式: [{"key": "name", "value": "test", "enabled": true}]
      */
     private String buildUrlWithParams(String baseUrl, String paramsJson, Map<String, String> variables) {
         if (paramsJson == null || paramsJson.isBlank()) {
@@ -209,25 +212,52 @@ public class ApiExecutor {
         }
 
         try {
-            Map<String, String> params = objectMapper.readValue(paramsJson, Map.class);
-            if (params == null || params.isEmpty()) {
-                return baseUrl;
-            }
-
             StringBuilder urlBuilder = new StringBuilder(baseUrl);
             boolean hasQueryParams = baseUrl.contains("?");
 
-            for (Map.Entry<String, String> entry : params.entrySet()) {
-                String key = replaceVariables(entry.getKey(), variables);
-                String value = replaceVariables(entry.getValue(), variables);
+            String trimmed = paramsJson.trim();
+            if (trimmed.startsWith("[")) {
+                // 数组格式: [{key, value, enabled, ...}]
+                List<Map<String, Object>> paramList = objectMapper.readValue(paramsJson, List.class);
+                for (Map<String, Object> item : paramList) {
+                    // 跳过禁用的参数
+                    Object enabled = item.get("enabled");
+                    if (enabled != null && enabled.equals(false)) continue;
 
-                if (key != null && !key.isBlank()) {
-                    urlBuilder.append(hasQueryParams ? "&" : "?");
-                    urlBuilder.append(key);
-                    if (value != null && !value.isBlank()) {
-                        urlBuilder.append("=").append(value);
+                    String key = item.get("key") != null ? item.get("key").toString() : null;
+                    String value = item.get("value") != null ? item.get("value").toString() : null;
+
+                    key = replaceVariables(key, variables);
+                    value = replaceVariables(value, variables);
+
+                    if (key != null && !key.isBlank()) {
+                        urlBuilder.append(hasQueryParams ? "&" : "?");
+                        urlBuilder.append(key);
+                        if (value != null && !value.isBlank()) {
+                            urlBuilder.append("=").append(value);
+                        }
+                        hasQueryParams = true;
                     }
-                    hasQueryParams = true;
+                }
+            } else {
+                // 对象格式: {key: value}
+                Map<String, String> params = objectMapper.readValue(paramsJson, Map.class);
+                if (params == null || params.isEmpty()) {
+                    return baseUrl;
+                }
+
+                for (Map.Entry<String, String> entry : params.entrySet()) {
+                    String key = replaceVariables(entry.getKey(), variables);
+                    String value = replaceVariables(entry.getValue(), variables);
+
+                    if (key != null && !key.isBlank()) {
+                        urlBuilder.append(hasQueryParams ? "&" : "?");
+                        urlBuilder.append(key);
+                        if (value != null && !value.isBlank()) {
+                            urlBuilder.append("=").append(value);
+                        }
+                        hasQueryParams = true;
+                    }
                 }
             }
 
