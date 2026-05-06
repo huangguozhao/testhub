@@ -298,8 +298,8 @@ const viewDetail = (history) => {
 
 const retryRequest = async (history) => {
   try {
-    // 后端返回的是扁平结构，使用 request_id
-    const response = await api.post(`/api-testing/requests/${history.request_id}/execute/`, {})
+    // 后端路径: /api/api-requests/{id}/execute
+    const response = await api.post(`/api/api-requests/${history.request_id}/execute`, {})
     ElMessage.success(t('apiTesting.messages.success.requestRetried'))
     showDetailDialog.value = false
     await loadHistory()
