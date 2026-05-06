@@ -168,12 +168,12 @@
             <span class="status-text">{{ executeResult.success ? '请求成功' : '请求失败' }}</span>
           </div>
           <div class="result-meta">
-            <el-tag :type="getResultStatusType(executeResult.statusCode || executeResult.responseStatusCode)">
-              {{ executeResult.statusCode || executeResult.responseStatusCode || 'N/A' }}
+            <el-tag :type="getResultStatusType(executeResult.status_code)">
+              {{ executeResult.status_code || 'N/A' }}
             </el-tag>
             <span class="response-time">
               <el-icon><Clock /></el-icon>
-              {{ executeResult.responseTime ? executeResult.responseTime + 'ms' : '-' }}
+              {{ executeResult.response_time ? executeResult.response_time + 'ms' : '-' }}
             </span>
           </div>
         </div>
@@ -197,10 +197,10 @@
               <el-empty v-if="Object.keys(resultHeaders).length === 0" description="无响应头" />
             </div>
           </el-tab-pane>
-          <el-tab-pane v-if="executeResult.assertions && executeResult.assertions.length > 0" label="断言结果" name="assertions">
+          <el-tab-pane v-if="executeResult.assertion_results && executeResult.assertion_results.length > 0" label="断言结果" name="assertions">
             <div class="assertions-results">
               <div
-                v-for="(result, index) in executeResult.assertions"
+                v-for="(result, index) in executeResult.assertion_results"
                 :key="index"
                 class="assertion-item"
                 :class="{ 'passed': result.passed, 'failed': !result.passed }"
@@ -212,10 +212,10 @@
               </div>
             </div>
           </el-tab-pane>
-          <el-tab-pane v-if="executeResult.errorMessage" label="错误信息" name="error">
+          <el-tab-pane v-if="executeResult.error" label="错误信息" name="error">
             <div class="error-content">
               <el-alert
-                :title="executeResult.errorMessage"
+                :title="executeResult.error"
                 type="error"
                 :closable="false"
                 show-icon
@@ -288,23 +288,23 @@ const resultDialogTitle = computed(() => {
 })
 
 const resultHeaders = computed(() => {
-  if (!executeResult.value?.responseHeaders) return {}
+  if (!executeResult.value?.headers) return {}
   try {
-    return typeof executeResult.value.responseHeaders === 'string'
-      ? JSON.parse(executeResult.value.responseHeaders)
-      : executeResult.value.responseHeaders
+    return typeof executeResult.value.headers === 'string'
+      ? JSON.parse(executeResult.value.headers)
+      : executeResult.value.headers
   } catch (e) {
     return {}
   }
 })
 
 const highlightedResultBody = computed(() => {
-  if (!executeResult.value?.responseBody) return ''
+  if (!executeResult.value?.body) return ''
   try {
-    const json = JSON.parse(executeResult.value.responseBody)
+    const json = JSON.parse(executeResult.value.body)
     return highlightJson(JSON.stringify(json, null, 2))
   } catch (e) {
-    return escapeHtml(executeResult.value.responseBody)
+    return escapeHtml(executeResult.value.body)
   }
 })
 
@@ -349,8 +349,8 @@ const formatResultBody = () => {
 }
 
 const copyResultBody = () => {
-  if (executeResult.value?.responseBody) {
-    navigator.clipboard.writeText(executeResult.value.responseBody)
+  if (executeResult.value?.body) {
+    navigator.clipboard.writeText(executeResult.value.body)
     ElMessage.success('已复制到剪贴板')
   }
 }
