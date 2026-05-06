@@ -27,9 +27,9 @@
           {{ formatDate(scope.row.created_at) }}
         </template>
       </el-table-column>
-      <el-table-column :label="$t('apiTesting.component.environmentTable.operation')" width="250" fixed="right">
+      <el-table-column :label="$t('apiTesting.component.environmentTable.operation')" width="300" fixed="right">
         <template #default="scope">
-          <el-button-group>
+          <div class="action-buttons">
             <el-button
               v-if="!scope.row.is_active"
               link
@@ -51,7 +51,7 @@
             <el-button link type="danger" @click="$emit('delete', scope.row)" size="small">
               {{ $t('apiTesting.component.environmentTable.delete') }}
             </el-button>
-          </el-button-group>
+          </div>
         </template>
       </el-table-column>
     </el-table>
@@ -177,5 +177,36 @@ const viewVariables = (environment) => {
   color: #303133;
   font-size: 14px;
   font-weight: 600;
+}
+
+.action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+}
+
+.action-buttons .el-button--primary.is-link {
+  color: #ffffff;
+}
+
+.action-buttons .el-button--primary.is-link:hover {
+  color: #d0d0d0;
+}
+
+.action-buttons .el-button--success.is-link {
+  color: #67c23a;
+}
+
+.action-buttons .el-button--success.is-link:hover {
+  color: #85ce61;
+}
+
+.action-buttons .el-button--danger.is-link {
+  color: #f56c6c;
+}
+
+.action-buttons .el-button--danger.is-link:hover {
+  color: #f89898;
 }
 </style>
