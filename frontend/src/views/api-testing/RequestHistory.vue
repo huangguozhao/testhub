@@ -68,16 +68,16 @@
       <div v-if="selectedHistory" class="history-detail">
         <el-descriptions :title="$t('apiTesting.history.basicInfo')" :column="2" border>
           <el-descriptions-item :label="$t('apiTesting.interface.requestName')">
-            {{ selectedHistory.request.name }}
+            {{ selectedHistory.url || '-' }}
           </el-descriptions-item>
           <el-descriptions-item :label="$t('apiTesting.history.requestMethod')">
-            <el-tag :type="getMethodType(selectedHistory.request.method)">
-              {{ selectedHistory.request.method }}
+            <el-tag :type="getMethodType(selectedHistory.method)">
+              {{ selectedHistory.method || 'GET' }}
             </el-tag>
           </el-descriptions-item>
           <el-descriptions-item :label="$t('apiTesting.history.statusCode')">
-            <el-tag :type="getStatusType(selectedHistory.status_code)">
-              {{ selectedHistory.status_code || $t('apiTesting.history.noResponse') }}
+            <el-tag :type="getStatusType(selectedHistory.response_status_code)">
+              {{ selectedHistory.response_status_code || $t('apiTesting.history.noResponse') }}
             </el-tag>
           </el-descriptions-item>
           <el-descriptions-item :label="$t('apiTesting.history.responseTime')">
@@ -87,7 +87,7 @@
             {{ formatDate(selectedHistory.executed_at) }}
           </el-descriptions-item>
           <el-descriptions-item :label="$t('apiTesting.history.executor')">
-            {{ selectedHistory.executed_by.username }}
+            {{ selectedHistory.executed_by?.username || selectedHistory.executed_by || '-' }}
           </el-descriptions-item>
         </el-descriptions>
 
@@ -95,37 +95,25 @@
           <el-tab-pane :label="$t('apiTesting.history.requestInfo')" name="request">
             <div class="detail-section">
               <h4>{{ $t('apiTesting.history.requestUrl') }}</h4>
-              <el-input v-model="selectedHistory.request_data.url" readonly />
+              <el-input v-model="selectedHistory.url" readonly />
 
               <h4>{{ $t('apiTesting.history.requestHeaders') }}</h4>
-              <el-table :data="formatHeaders(selectedHistory.request_data.headers)" style="width: 100%">
+              <el-table :data="parseHeaders(selectedHistory.request_headers)" style="width: 100%">
                 <el-table-column prop="key" label="Key" width="200" />
                 <el-table-column prop="value" label="Value" />
               </el-table>
 
-              <h4 v-if="selectedHistory.request_data.params && Object.keys(selectedHistory.request_data.params).length > 0">
-                {{ $t('apiTesting.history.requestParams') }}
-              </h4>
-              <el-table
-                v-if="selectedHistory.request_data.params && Object.keys(selectedHistory.request_data.params).length > 0"
-                :data="formatHeaders(selectedHistory.request_data.params)"
-                style="width: 100%"
-              >
-                <el-table-column prop="key" label="Key" width="200" />
-                <el-table-column prop="value" label="Value" />
-              </el-table>
-
-              <h4 v-if="selectedHistory.request_data.body">{{ $t('apiTesting.history.requestBody') }}</h4>
-              <pre v-if="selectedHistory.request_data.body" class="json-content">
-                {{ JSON.stringify(selectedHistory.request_data.body, null, 2) }}
+              <h4 v-if="selectedHistory.request_body">{{ $t('apiTesting.history.requestBody') }}</h4>
+              <pre v-if="selectedHistory.request_body" class="json-content">
+                {{ formatRequestBody(selectedHistory.request_body) }}
               </pre>
             </div>
           </el-tab-pane>
 
           <el-tab-pane :label="$t('apiTesting.history.responseInfo')" name="response">
-            <div v-if="selectedHistory.response_data" class="detail-section">
+            <div v-if="selectedHistory.response_body" class="detail-section">
               <h4>{{ $t('apiTesting.history.responseHeaders') }}</h4>
-              <el-table :data="formatHeaders(selectedHistory.response_data.headers)" style="width: 100%">
+              <el-table :data="parseHeaders(selectedHistory.response_headers)" style="width: 100%">
                 <el-table-column prop="key" label="Key" width="200" />
                 <el-table-column prop="value" label="Value" />
               </el-table>
@@ -193,18 +181,34 @@ const currentHistory = computed(() => {
 })
 
 const responseBodyText = computed(() => {
-  if (!selectedHistory.value?.response_data) return ''
-  
-  try {
-    if (selectedHistory.value.response_data.json) {
-      return JSON.stringify(selectedHistory.value.response_data.json, null, 2)
-    } else {
-      return selectedHistory.value.response_data.body || ''
-    }
-  } catch (e) {
-    return selectedHistory.value.response_data.body || ''
-  }
+  if (!selectedHistory.value?.response_body) return ''
+  return selectedHistory.value.response_body
 })
+
+// 解析 headers（可能是 JSON 字符串）
+const parseHeaders = (headers) => {
+  if (!headers) return []
+  try {
+    const parsed = typeof headers === 'string' ? JSON.parse(headers) : headers
+    return Object.keys(parsed).map(key => ({
+      key,
+      value: parsed[key]
+    }))
+  } catch (e) {
+    return []
+  }
+}
+
+// 格式化请求体
+const formatRequestBody = (body) => {
+  if (!body) return ''
+  try {
+    const parsed = typeof body === 'string' ? JSON.parse(body) : body
+    return JSON.stringify(parsed, null, 2)
+  } catch (e) {
+    return body
+  }
+}
 
 const getMethodType = (method) => {
   const typeMap = {
@@ -371,9 +375,7 @@ const handleBatchDelete = () => {
 }
 
 const formatResponseBody = () => {
-  if (selectedHistory.value?.response_data?.json) {
-    // 已经格式化了
-  }
+  // 响应体已经在 computed 中处理
 }
 
 const copyResponseBody = () => {
