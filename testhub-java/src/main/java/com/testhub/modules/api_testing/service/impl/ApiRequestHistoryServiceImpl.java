@@ -11,6 +11,7 @@ import com.testhub.modules.api_testing.mapper.ApiRequestHistoryMapper;
 import com.testhub.modules.api_testing.service.ApiRequestHistoryService;
 import com.testhub.modules.api_testing.service.ApiRequestService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Lazy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +29,7 @@ public class ApiRequestHistoryServiceImpl extends ServiceImpl<ApiRequestHistoryM
         implements ApiRequestHistoryService {
 
     private final ObjectMapper objectMapper;
+    @Lazy
     private final ApiRequestService apiRequestService;
 
     @Override
