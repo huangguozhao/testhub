@@ -251,15 +251,17 @@ const loadHistory = async () => {
     }
 
     const response = await api.get('/api-request-histories', { params })
-    const data = response.data.results || response.data
+    // 响应拦截器已提取 response.data.data，所以 response.data 就是 { records, total, ... }
+    const records = response.data?.records || []
+    const totalCount = response.data?.total || 0
 
     if (activeTab.value === 'HTTP') {
-      httpHistory.value = data
+      httpHistory.value = records
     } else {
-      websocketHistory.value = data
+      websocketHistory.value = records
     }
 
-    total.value = response.data.count || data.length
+    total.value = totalCount
   } catch (error) {
     ElMessage.error(t('apiTesting.messages.error.loadHistory'))
     console.error(error)

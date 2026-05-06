@@ -7,38 +7,42 @@
       @selection-change="$emit('selection-change', $event)"
     >
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column prop="request.name" :label="$t('apiTesting.component.historyTable.requestName')" min-width="200" />
-      <el-table-column prop="request.method" :label="$t('apiTesting.component.historyTable.method')" width="80">
+      <el-table-column prop="url" :label="$t('apiTesting.component.historyTable.requestName')" min-width="200" show-overflow-tooltip>
         <template #default="scope">
-          <el-tag :type="getMethodType(scope.row.request.method)" size="small">
-            {{ scope.row.request.method }}
+          {{ scope.row.url || scope.row.request?.name || '-' }}
+        </template>
+      </el-table-column>
+      <el-table-column prop="method" :label="$t('apiTesting.component.historyTable.method')" width="80">
+        <template #default="scope">
+          <el-tag :type="getMethodType(scope.row.method)" size="small">
+            {{ scope.row.method || 'GET' }}
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="request_data.url" :label="$t('apiTesting.component.historyTable.url')" min-width="300" show-overflow-tooltip />
-      <el-table-column prop="status_code" :label="$t('apiTesting.component.historyTable.statusCode')" width="100">
+      <el-table-column prop="url" :label="$t('apiTesting.component.historyTable.url')" min-width="300" show-overflow-tooltip />
+      <el-table-column prop="response_status_code" :label="$t('apiTesting.component.historyTable.statusCode')" width="100">
         <template #default="scope">
           <el-tag
-            v-if="scope.row.status_code"
-            :type="getStatusType(scope.row.status_code)"
+            v-if="scope.row.response_status_code"
+            :type="getStatusType(scope.row.response_status_code)"
             size="small"
           >
-            {{ scope.row.status_code }}
+            {{ scope.row.response_status_code }}
           </el-tag>
-          <el-tag v-else type="danger" size="small">{{ $t('apiTesting.component.historyTable.error') }}</el-tag>
+          <el-tag v-else-if="scope.row.error_message" type="danger" size="small">{{ $t('apiTesting.component.historyTable.error') }}</el-tag>
+          <span v-else>-</span>
         </template>
       </el-table-column>
       <el-table-column prop="response_time" :label="$t('apiTesting.component.historyTable.responseTime')" width="100">
         <template #default="scope">
-          {{ scope.row.response_time?.toFixed(0) || 0 }}ms
+          {{ scope.row.response_time ? scope.row.response_time.toFixed(0) + 'ms' : '-' }}
         </template>
       </el-table-column>
-      <el-table-column prop="environment.name" :label="$t('apiTesting.component.historyTable.environment')" width="120">
+      <el-table-column prop="executed_by" :label="$t('apiTesting.component.historyTable.executor')" width="120">
         <template #default="scope">
-          {{ scope.row.environment?.name || $t('apiTesting.component.historyTable.noEnvironment') }}
+          {{ scope.row.executed_by?.username || scope.row.executed_by || '-' }}
         </template>
       </el-table-column>
-      <el-table-column prop="executed_by.username" :label="$t('apiTesting.component.historyTable.executor')" width="120" />
       <el-table-column prop="executed_at" :label="$t('apiTesting.component.historyTable.executionTime')" width="160">
         <template #default="scope">
           {{ formatDate(scope.row.executed_at) }}
@@ -103,5 +107,23 @@ const formatDate = (dateString) => {
 <style scoped>
 .history-table {
   height: 100%;
+}
+
+:deep(.el-button--primary) {
+  color: #fff !important;
+}
+
+:deep(.el-button--danger) {
+  color: #fff !important;
+}
+
+:deep(.el-button.is-link) {
+  background: transparent;
+  border: none;
+  padding: 4px 8px;
+}
+
+:deep(.el-button.is-link:hover) {
+  opacity: 0.8;
 }
 </style>
