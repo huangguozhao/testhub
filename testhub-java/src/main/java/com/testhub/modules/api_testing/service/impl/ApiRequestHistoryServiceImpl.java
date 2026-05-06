@@ -10,9 +10,8 @@ import com.testhub.modules.api_testing.http.ApiResponse;
 import com.testhub.modules.api_testing.mapper.ApiRequestHistoryMapper;
 import com.testhub.modules.api_testing.service.ApiRequestHistoryService;
 import com.testhub.modules.api_testing.service.ApiRequestService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Lazy;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -24,13 +23,16 @@ import java.util.Map;
  */
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class ApiRequestHistoryServiceImpl extends ServiceImpl<ApiRequestHistoryMapper, ApiRequestHistory>
         implements ApiRequestHistoryService {
 
     private final ObjectMapper objectMapper;
-    @Lazy
     private final ApiRequestService apiRequestService;
+
+    public ApiRequestHistoryServiceImpl(ObjectMapper objectMapper, @Lazy ApiRequestService apiRequestService) {
+        this.objectMapper = objectMapper;
+        this.apiRequestService = apiRequestService;
+    }
 
     @Override
     public ApiRequestHistory saveHistory(ApiRequestHistory history) {
