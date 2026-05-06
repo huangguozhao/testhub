@@ -1607,7 +1607,12 @@ const sendRequest = async () => {
 
     response.value = apiResponse.data
 
-    ElMessage.success('请求成功')
+    // 根据执行结果显示提示
+    if (apiResponse.data?.success === false) {
+      ElMessage.warning(apiResponse.data?.error || '请求执行失败')
+    } else {
+      ElMessage.success('请求成功')
+    }
   } catch (error) {
     ElMessage.error('请求失败')
     console.error('请求失败:', error)

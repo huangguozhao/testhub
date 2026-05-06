@@ -3,8 +3,11 @@
     <div class="response-header">
       <h3>{{ $t('apiTesting.interface.response') }}</h3>
       <div class="response-info">
-        <el-tag :type="getStatusType(response.status_code)">
+        <el-tag v-if="response.status_code" :type="getStatusType(response.status_code)">
           {{ response.status_code }}
+        </el-tag>
+        <el-tag v-else-if="response.success === false" type="danger">
+          {{ $t('apiTesting.interface.failed') || 'Failed' }}
         </el-tag>
         <span class="response-time">{{ response.response_time ? response.response_time.toFixed(0) : 0 }}ms</span>
       </div>
@@ -172,7 +175,14 @@ const preScriptResult = computed(() => props.response?.pre_script_result || null
 const postScriptResult = computed(() => props.response?.post_script_result || null)
 
 // 响应体内容
-const bodyContent = computed(() => props.response?.body || '')
+const bodyContent = computed(() => {
+  if (props.response?.body) return props.response.body
+  // 如果请求失败且有错误信息，显示错误
+  if (props.response?.success === false && props.response?.error) {
+    return JSON.stringify({ error: props.response.error }, null, 2)
+  }
+  return ''
+})
 
 // 高亮显示的响应体
 const highlightedBody = computed(() => {
