@@ -53,7 +53,7 @@
           <el-button link type="primary" @click="$emit('view-detail', scope.row)" size="small">
             {{ $t('apiTesting.component.historyTable.viewDetail') }}
           </el-button>
-          <el-button link type="primary" :loading="retrying && retryingId === scope.row.id" @click="$emit('retry-request', scope.row)" size="small" :disabled="retrying">
+          <el-button link type="primary" @click="$emit('retry-request', scope.row)" size="small">
             {{ $t('apiTesting.component.historyTable.retryRequest') }}
           </el-button>
           <el-button link type="danger" @click="$emit('delete-item', scope.row)" size="small">
@@ -76,14 +76,6 @@ defineProps({
   loading: {
     type: Boolean,
     default: false
-  },
-  retrying: {
-    type: Boolean,
-    default: false
-  },
-  retryingId: {
-    type: [Number, String],
-    default: null
   }
 })
 

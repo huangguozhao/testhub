@@ -28,8 +28,6 @@
         <HistoryTable
           :data="httpHistory"
           :loading="loading"
-          :retrying="retrying"
-          :retrying-id="retryingId"
           @view-detail="viewDetail"
           @retry-request="retryRequest"
           @selection-change="handleSelectionChange"
@@ -40,8 +38,6 @@
         <HistoryTable
           :data="websocketHistory"
           :loading="loading"
-          :retrying="retrying"
-          :retrying-id="retryingId"
           @view-detail="viewDetail"
           @retry-request="retryRequest"
           @selection-change="handleSelectionChange"
@@ -154,6 +150,94 @@
         </el-button>
       </template>
     </el-dialog>
+
+    <!-- 执行结果弹窗 -->
+    <el-dialog
+      v-model="showResultDialog"
+      :title="resultDialogTitle"
+      width="70%"
+      :top="'8vh'"
+      :close-on-click-modal="true"
+    >
+      <div v-if="executeResult" class="execute-result">
+        <!-- 结果头部 -->
+        <div class="result-header" :class="{ 'success': executeResult.success, 'failed': !executeResult.success }">
+          <div class="result-status">
+            <el-icon v-if="executeResult.success" class="status-icon success"><CircleCheck /></el-icon>
+            <el-icon v-else class="status-icon failed"><CircleClose /></el-icon>
+            <span class="status-text">{{ executeResult.success ? '请求成功' : '请求失败' }}</span>
+          </div>
+          <div class="result-meta">
+            <el-tag :type="getResultStatusType(executeResult.statusCode || executeResult.responseStatusCode)">
+              {{ executeResult.statusCode || executeResult.responseStatusCode || 'N/A' }}
+            </el-tag>
+            <span class="response-time">
+              <el-icon><Clock /></el-icon>
+              {{ executeResult.responseTime ? executeResult.responseTime + 'ms' : '-' }}
+            </span>
+          </div>
+        </div>
+
+        <!-- 结果内容 -->
+        <el-tabs v-model="resultTab" class="result-tabs">
+          <el-tab-pane label="响应体" name="body">
+            <div class="result-body">
+              <div class="result-actions">
+                <el-button size="small" @click="formatResultBody">格式化</el-button>
+                <el-button size="small" @click="copyResultBody">复制</el-button>
+              </div>
+              <pre class="result-content" v-html="highlightedResultBody"></pre>
+            </div>
+          </el-tab-pane>
+          <el-tab-pane label="响应头" name="headers">
+            <div class="result-headers">
+              <div v-for="(value, key) in resultHeaders" :key="key" class="header-row">
+                <strong>{{ key }}:</strong> {{ value }}
+              </div>
+              <el-empty v-if="Object.keys(resultHeaders).length === 0" description="无响应头" />
+            </div>
+          </el-tab-pane>
+          <el-tab-pane v-if="executeResult.assertions && executeResult.assertions.length > 0" label="断言结果" name="assertions">
+            <div class="assertions-results">
+              <div
+                v-for="(result, index) in executeResult.assertions"
+                :key="index"
+                class="assertion-item"
+                :class="{ 'passed': result.passed, 'failed': !result.passed }"
+              >
+                <el-tag :type="result.passed ? 'success' : 'danger'" size="small">
+                  {{ result.passed ? '通过' : '失败' }}
+                </el-tag>
+                <span class="assertion-name">{{ result.name || '断言 ' + (index + 1) }}</span>
+              </div>
+            </div>
+          </el-tab-pane>
+          <el-tab-pane v-if="executeResult.errorMessage" label="错误信息" name="error">
+            <div class="error-content">
+              <el-alert
+                :title="executeResult.errorMessage"
+                type="error"
+                :closable="false"
+                show-icon
+              />
+            </div>
+          </el-tab-pane>
+        </el-tabs>
+      </div>
+
+      <!-- 加载中 -->
+      <div v-else class="executing">
+        <el-icon class="is-loading" :size="32"><Loading /></el-icon>
+        <span>正在执行请求...</span>
+      </div>
+
+      <template #footer>
+        <el-button @click="showResultDialog = false">关闭</el-button>
+        <el-button type="primary" @click="openInInterface">
+          在接口管理中打开
+        </el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -179,8 +263,12 @@ const showDetailDialog = ref(false)
 const selectedHistory = ref(null)
 const detailTab = ref('request')
 const selectedIds = ref([])
-const retrying = ref(false)
-const retryingId = ref(null)
+
+// 执行结果弹窗
+const showResultDialog = ref(false)
+const executeResult = ref(null)
+const resultTab = ref('body')
+const resultRequestId = ref(null)
 
 const currentHistory = computed(() => {
   return activeTab.value === 'HTTP' ? httpHistory.value : websocketHistory.value
@@ -190,6 +278,87 @@ const responseBodyText = computed(() => {
   if (!selectedHistory.value?.response_body) return ''
   return selectedHistory.value.response_body
 })
+
+// 执行结果相关
+const resultDialogTitle = computed(() => {
+  if (executeResult.value) {
+    return `执行结果 - ${executeResult.value.method || 'GET'} ${executeResult.value.url || ''}`
+  }
+  return '执行结果'
+})
+
+const resultHeaders = computed(() => {
+  if (!executeResult.value?.responseHeaders) return {}
+  try {
+    return typeof executeResult.value.responseHeaders === 'string'
+      ? JSON.parse(executeResult.value.responseHeaders)
+      : executeResult.value.responseHeaders
+  } catch (e) {
+    return {}
+  }
+})
+
+const highlightedResultBody = computed(() => {
+  if (!executeResult.value?.responseBody) return ''
+  try {
+    const json = JSON.parse(executeResult.value.responseBody)
+    return highlightJson(JSON.stringify(json, null, 2))
+  } catch (e) {
+    return escapeHtml(executeResult.value.responseBody)
+  }
+})
+
+const getResultStatusType = (status) => {
+  if (!status) return 'info'
+  if (status >= 200 && status < 300) return 'success'
+  if (status >= 300 && status < 400) return 'warning'
+  if (status >= 400) return 'danger'
+  return 'info'
+}
+
+const highlightJson = (str) => {
+  if (!str) return ''
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, (match) => {
+      let cls = 'number'
+      if (/^"/.test(match)) {
+        cls = /:$/.test(match) ? 'key' : 'string'
+      } else if (/true|false/.test(match)) {
+        cls = 'boolean'
+      } else if (/null/.test(match)) {
+        cls = 'null'
+      }
+      return `<span class="json-${cls}">${match}</span>`
+    })
+}
+
+const escapeHtml = (str) => {
+  if (!str) return ''
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+}
+
+const formatResultBody = () => {
+  // 格式化已在 computed 中处理
+}
+
+const copyResultBody = () => {
+  if (executeResult.value?.responseBody) {
+    navigator.clipboard.writeText(executeResult.value.responseBody)
+    ElMessage.success('已复制到剪贴板')
+  }
+}
+
+const openInInterface = () => {
+  showResultDialog.value = false
+  // 可以导航到接口管理页面
+}
 
 // 解析 headers（可能是 JSON 字符串）
 const parseHeaders = (headers) => {
@@ -302,37 +471,24 @@ const viewDetail = (history) => {
 }
 
 const retryRequest = async (history) => {
-  retrying.value = true
-  retryingId.value = history.id
+  resultRequestId.value = history.request_id
+  executeResult.value = null
+  resultTab.value = 'body'
+  showResultDialog.value = true
+
   try {
     const response = await api.post(`/api-requests/${history.request_id}/execute`, {})
+    executeResult.value = response.data
 
-    // 根据返回结果显示不同提示
-    const responseData = response.data
-    if (responseData && responseData.success) {
-      ElMessage({
-        type: 'success',
-        message: `请求成功！状态码: ${responseData.statusCode || responseData.responseStatusCode}, 耗时: ${responseData.responseTime}ms`
-      })
-    } else if (responseData && responseData.statusCode) {
-      ElMessage({
-        type: responseData.statusCode >= 400 ? 'warning' : 'success',
-        message: `请求完成，状态码: ${responseData.statusCode || responseData.responseStatusCode}`
-      })
-    } else {
-      ElMessage.success(t('apiTesting.messages.success.requestRetried'))
-    }
-
-    showDetailDialog.value = false
+    // 刷新历史列表
     await loadHistory()
   } catch (error) {
-    ElMessage.error({
-      message: error.message || t('apiTesting.messages.error.sendFailed'),
-      duration: 5000
-    })
-  } finally {
-    retrying.value = false
-    retryingId.value = null
+    executeResult.value = {
+      success: false,
+      errorMessage: error.response?.data?.message || error.message || '请求执行失败',
+      statusCode: error.response?.status,
+      responseTime: 0
+    }
   }
 }
 
@@ -492,5 +648,183 @@ onMounted(() => {
 .empty-response {
   padding: 40px 0;
   text-align: center;
+}
+
+/* 执行结果弹窗样式 */
+.execute-result {
+  min-height: 400px;
+}
+
+.result-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.result-header.success {
+  background: linear-gradient(135deg, #67c23a20 0%, #67c23a10 100%);
+  border: 1px solid #67c23a40;
+}
+
+.result-header.failed {
+  background: linear-gradient(135deg, #f56c6c20 0%, #f56c6c10 100%);
+  border: 1px solid #f56c6c40;
+}
+
+.result-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.status-icon {
+  font-size: 24px;
+}
+
+.status-icon.success {
+  color: #67c23a;
+}
+
+.status-icon.failed {
+  color: #f56c6c;
+}
+
+.status-text {
+  font-size: 18px;
+  font-weight: 600;
+  color: #303133;
+}
+
+.result-meta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.response-time {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #606266;
+  font-size: 14px;
+}
+
+.result-tabs {
+  margin-top: 0;
+}
+
+.result-body {
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.result-actions {
+  margin-bottom: 16px;
+  display: flex;
+  gap: 8px;
+}
+
+.result-content {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 14px;
+  line-height: 1.6;
+  max-height: 500px;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  margin: 0;
+}
+
+.result-headers {
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  max-height: 500px;
+  overflow: auto;
+}
+
+.result-headers .header-row {
+  padding: 10px 0;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.result-headers .header-row:last-child {
+  border-bottom: none;
+}
+
+.result-headers strong {
+  color: #881391;
+}
+
+.assertions-results {
+  padding: 20px;
+}
+
+.assertion-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: white;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.assertion-item.passed {
+  border-left: 4px solid #67c23a;
+}
+
+.assertion-item.failed {
+  border-left: 4px solid #f56c6c;
+}
+
+.assertion-name {
+  font-size: 14px;
+  color: #303133;
+}
+
+.error-content {
+  padding: 20px;
+}
+
+.executing {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  gap: 16px;
+  color: #606266;
+}
+
+/* JSON 语法高亮 */
+:deep(.json-key) {
+  color: #881391;
+}
+
+:deep(.json-string) {
+  color: #0b7500;
+}
+
+:deep(.json-number) {
+  color: #00f;
+}
+
+:deep(.json-boolean) {
+  color: #d73a49;
+}
+
+:deep(.json-null) {
+  color: #808080;
 }
 </style>
