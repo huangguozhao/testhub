@@ -85,4 +85,9 @@ public class ApiRequest extends BaseEntity {
      * 排序
      */
     private Integer sortOrder;
+
+    /**
+     * 请求类型: HTTP, WEBSOCKET
+     */
+    private String requestType;
 }

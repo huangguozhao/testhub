@@ -101,4 +101,9 @@ public class ApiRequestHistory {
      * 创建时间
      */
     private LocalDateTime createdAt;
+
+    /**
+     * 请求类型: HTTP, WEBSOCKET
+     */
+    private String requestType;
 }

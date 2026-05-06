@@ -1,0 +1,1172 @@
+{
+  "config": {
+    "configFile": "D:\\Project\\testhub_platform\\frontend\\playwright.config.js",
+    "rootDir": "D:/Project/testhub_platform/frontend/tests",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "D:/Project/testhub_platform/frontend/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "D:/Project/testhub_platform/frontend/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list",
+        null
+      ],
+      [
+        "html",
+        {
+          "open": "never",
+          "outputFolder": "playwright-report"
+        }
+      ],
+      [
+        "json",
+        {
+          "outputFile": "playwright-report/results.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.59.1",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "interface-management.spec.js",
+      "file": "interface-management.spec.js",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "接口管理页面全面测试",
+          "file": "interface-management.spec.js",
+          "line": 6,
+          "column": 6,
+          "specs": [
+            {
+              "title": "1. 验证页面加载和左侧边栏",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 6120,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "✓ API登录成功\n"
+                        },
+                        {
+                          "text": "✓ 导航到接口管理页面: http://localhost:3001/api-testing/interfaces\n"
+                        },
+                        {
+                          "text": "✓ 左侧边栏加载正常\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-04T23:34:10.821Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "D:\\Project\\testhub_platform\\frontend\\test-results\\interface-management-接口管理页面全面测试-1-验证页面加载和左侧边栏-chromium\\video.webm"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "D:\\Project\\testhub_platform\\frontend\\test-results\\interface-management-接口管理页面全面测试-1-验证页面加载和左侧边栏-chromium\\trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a24a78527f23e52e6aab-a9660e958ab67885509c",
+              "file": "interface-management.spec.js",
+              "line": 44,
+              "column": 7
+            },
+            {
+              "title": "2. 验证项目选择器",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5969,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "✓ 导航到接口管理页面: http://localhost:3001/api-testing/interfaces\n"
+                        },
+                        {
+                          "text": "✓ 项目选择器正常\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-04T23:34:17.600Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "D:\\Project\\testhub_platform\\frontend\\test-results\\interface-management-接口管理页面全面测试-2-验证项目选择器-chromium\\video.webm"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "D:\\Project\\testhub_platform\\frontend\\test-results\\interface-management-接口管理页面全面测试-2-验证项目选择器-chromium\\trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a24a78527f23e52e6aab-672b5417ae55b94663c9",
+              "file": "interface-management.spec.js",
+              "line": 50,
+              "column": 7
+            },
+            {
+              "title": "3. 创建新集合",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 8524,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "✓ 导航到接口管理页面: http://localhost:3001/api-testing/interfaces\n"
+                        },
+                        {
+                          "text": "✓ 创建新集合完成\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-04T23:34:23.721Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "D:\\Project\\testhub_platform\\frontend\\test-results\\interface-management-接口管理页面全面测试-3-创建新集合-chromium\\video.webm"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "D:\\Project\\testhub_platform\\frontend\\test-results\\interface-management-接口管理页面全面测试-3-创建新集合-chromium\\trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a24a78527f23e52e6aab-b2d90d07fd723a957381",
+              "file": "interface-management.spec.js",
+              "line": 60,
+              "column": 7
+            },
+            {
+              "title": "4. 创建新接口",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 6645,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "✓ 导航到接口管理页面: http://localhost:3001/api-testing/interfaces\n"
+                        },
+                        {
+                          "text": "✓ 创建新接口完成\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-04T23:34:32.446Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "D:\\Project\\testhub_platform\\frontend\\test-results\\interface-management-接口管理页面全面测试-4-创建新接口-chromium\\video.webm"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "D:\\Project\\testhub_platform\\frontend\\test-results\\interface-management-接口管理页面全面测试-4-创建新接口-chromium\\trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a24a78527f23e52e6aab-f908333046e3c89d3860",
+              "file": "interface-management.spec.js",
+              "line": 82,
+              "column": 7
+            },
+            {
+              "title": "5. 填写接口信息并保存",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5590,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "✓ 导航到接口管理页面: http://localhost:3001/api-testing/interfaces\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-04T23:34:39.257Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "D:\\Project\\testhub_platform\\frontend\\test-results\\interface-management-接口管理页面全面测试-5-填写接口信息并保存-chromium\\video.webm"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "D:\\Project\\testhub_platform\\frontend\\test-results\\interface-management-接口管理页面全面测试-5-填写接口信息并保存-chromium\\trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a24a78527f23e52e6aab-180f50bdb65699782e33",
+              "file": "interface-management.spec.js",
+              "line": 97,
+              "column": 7
+            },
+            {
+              "title": "6. 发送接口请求",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5433,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "✓ 导航到接口管理页面: http://localhost:3001/api-testing/interfaces\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-04T23:34:44.972Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "D:\\Project\\testhub_platform\\frontend\\test-results\\interface-management-接口管理页面全面测试-6-发送接口请求-chromium\\video.webm"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "D:\\Project\\testhub_platform\\frontend\\test-results\\interface-management-接口管理页面全面测试-6-发送接口请求-chromium\\trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a24a78527f23e52e6aab-951c265c306848fe139e",
+              "file": "interface-management.spec.js",
+              "line": 115,
+              "column": 7
+            },
+            {
+              "title": "7. 树形结构操作",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 6358,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "✓ 导航到接口管理页面: http://localhost:3001/api-testing/interfaces\n"
+                        },
+                        {
+                          "text": "✓ 树形结构展开/折叠正常\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-04T23:34:50.527Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "D:\\Project\\testhub_platform\\frontend\\test-results\\interface-management-接口管理页面全面测试-7-树形结构操作-chromium\\video.webm"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "D:\\Project\\testhub_platform\\frontend\\test-results\\interface-management-接口管理页面全面测试-7-树形结构操作-chromium\\trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a24a78527f23e52e6aab-6a7c42be68b1de6a034d",
+              "file": "interface-management.spec.js",
+              "line": 131,
+              "column": 7
+            },
+            {
+              "title": "8. 搜索功能",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 6812,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "✓ 导航到接口管理页面: http://localhost:3001/api-testing/interfaces\n"
+                        },
+                        {
+                          "text": "✓ 搜索功能正常\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-04T23:34:57.117Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "D:\\Project\\testhub_platform\\frontend\\test-results\\interface-management-接口管理页面全面测试-8-搜索功能-chromium\\video.webm"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "D:\\Project\\testhub_platform\\frontend\\test-results\\interface-management-接口管理页面全面测试-8-搜索功能-chromium\\trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a24a78527f23e52e6aab-9e716f3535a48100a0bb",
+              "file": "interface-management.spec.js",
+              "line": 147,
+              "column": 7
+            },
+            {
+              "title": "9. 右键菜单",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5877,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "✓ 导航到接口管理页面: http://localhost:3001/api-testing/interfaces\n"
+                        },
+                        {
+                          "text": "✓ 右键菜单正常\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-04T23:35:04.085Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "D:\\Project\\testhub_platform\\frontend\\test-results\\interface-management-接口管理页面全面测试-9-右键菜单-chromium\\video.webm"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "D:\\Project\\testhub_platform\\frontend\\test-results\\interface-management-接口管理页面全面测试-9-右键菜单-chromium\\trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a24a78527f23e52e6aab-6fa302b0bbd14d9de660",
+              "file": "interface-management.spec.js",
+              "line": 160,
+              "column": 7
+            },
+            {
+              "title": "10. 变量助手",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5411,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "✓ 导航到接口管理页面: http://localhost:3001/api-testing/interfaces\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-04T23:35:10.108Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "D:\\Project\\testhub_platform\\frontend\\test-results\\interface-management-接口管理页面全面测试-10-变量助手-chromium\\video.webm"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "D:\\Project\\testhub_platform\\frontend\\test-results\\interface-management-接口管理页面全面测试-10-变量助手-chromium\\trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a24a78527f23e52e6aab-07b6b22c6b1148bdb006",
+              "file": "interface-management.spec.js",
+              "line": 175,
+              "column": 7
+            },
+            {
+              "title": "11. 环境切换",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 6501,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "✓ 导航到接口管理页面: http://localhost:3001/api-testing/interfaces\n"
+                        },
+                        {
+                          "text": "✓ 环境切换正常\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-04T23:35:15.663Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "D:\\Project\\testhub_platform\\frontend\\test-results\\interface-management-接口管理页面全面测试-11-环境切换-chromium\\video.webm"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "D:\\Project\\testhub_platform\\frontend\\test-results\\interface-management-接口管理页面全面测试-11-环境切换-chromium\\trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a24a78527f23e52e6aab-521eb1165dbf9a148460",
+              "file": "interface-management.spec.js",
+              "line": 186,
+              "column": 7
+            },
+            {
+              "title": "12. 接口详情标签页切换",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5488,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "✓ 导航到接口管理页面: http://localhost:3001/api-testing/interfaces\n"
+                        },
+                        {
+                          "text": "✓ 无选中请求时无标签页（预期行为）\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-04T23:35:22.359Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "D:\\Project\\testhub_platform\\frontend\\test-results\\interface-management-接口管理页面全面测试-12-接口详情标签页切换-chromium\\video.webm"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "D:\\Project\\testhub_platform\\frontend\\test-results\\interface-management-接口管理页面全面测试-12-接口详情标签页切换-chromium\\trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a24a78527f23e52e6aab-0a6a7a5e454301b462b7",
+              "file": "interface-management.spec.js",
+              "line": 199,
+              "column": 7
+            },
+            {
+              "title": "13. 响应区域",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5538,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "✓ 导航到接口管理页面: http://localhost:3001/api-testing/interfaces\n"
+                        },
+                        {
+                          "text": "✓ 响应区域（无请求时不可见）\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-04T23:35:27.976Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "D:\\Project\\testhub_platform\\frontend\\test-results\\interface-management-接口管理页面全面测试-13-响应区域-chromium\\video.webm"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "D:\\Project\\testhub_platform\\frontend\\test-results\\interface-management-接口管理页面全面测试-13-响应区域-chromium\\trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a24a78527f23e52e6aab-f2271d473e90890cde99",
+              "file": "interface-management.spec.js",
+              "line": 223,
+              "column": 7
+            },
+            {
+              "title": "14. 导入CURL功能",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5621,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "✓ 导航到接口管理页面: http://localhost:3001/api-testing/interfaces\n"
+                        },
+                        {
+                          "text": "✓ 导入下拉菜单正常（对话框可能需要更多操作触发）\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-04T23:35:33.650Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "D:\\Project\\testhub_platform\\frontend\\test-results\\interface-management-接口管理页面全面测试-14-导入CURL功能-chromium\\video.webm"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "D:\\Project\\testhub_platform\\frontend\\test-results\\interface-management-接口管理页面全面测试-14-导入CURL功能-chromium\\trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a24a78527f23e52e6aab-2c7cd9f67666ef830663",
+              "file": "interface-management.spec.js",
+              "line": 244,
+              "column": 7
+            },
+            {
+              "title": "15. 生成代码功能",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 6343,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "✓ 导航到接口管理页面: http://localhost:3001/api-testing/interfaces\n"
+                        },
+                        {
+                          "text": "✓ 生成代码功能正常\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-04T23:35:39.406Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "D:\\Project\\testhub_platform\\frontend\\test-results\\interface-management-接口管理页面全面测试-15-生成代码功能-chromium\\video.webm"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "D:\\Project\\testhub_platform\\frontend\\test-results\\interface-management-接口管理页面全面测试-15-生成代码功能-chromium\\trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a24a78527f23e52e6aab-fa265e296d55a1e7c3b8",
+              "file": "interface-management.spec.js",
+              "line": 285,
+              "column": 7
+            },
+            {
+              "title": "16. 集合右键菜单操作",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5973,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "✓ 导航到接口管理页面: http://localhost:3001/api-testing/interfaces\n"
+                        },
+                        {
+                          "text": "✓ 集合右键菜单正常\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-04T23:35:45.900Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "D:\\Project\\testhub_platform\\frontend\\test-results\\interface-management-接口管理页面全面测试-16-集合右键菜单操作-chromium\\video.webm"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "D:\\Project\\testhub_platform\\frontend\\test-results\\interface-management-接口管理页面全面测试-16-集合右键菜单操作-chromium\\trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a24a78527f23e52e6aab-e38047bf1a1b526776c4",
+              "file": "interface-management.spec.js",
+              "line": 340,
+              "column": 7
+            },
+            {
+              "title": "17. HTTP方法选择",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5336,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "✓ 导航到接口管理页面: http://localhost:3001/api-testing/interfaces\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-04T23:35:51.999Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "D:\\Project\\testhub_platform\\frontend\\test-results\\interface-management-接口管理页面全面测试-17-HTTP方法选择-chromium\\video.webm"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "D:\\Project\\testhub_platform\\frontend\\test-results\\interface-management-接口管理页面全面测试-17-HTTP方法选择-chromium\\trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a24a78527f23e52e6aab-2fe65476dde856766a1b",
+              "file": "interface-management.spec.js",
+              "line": 361,
+              "column": 7
+            },
+            {
+              "title": "18. 认证类型切换",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5492,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "✓ 导航到接口管理页面: http://localhost:3001/api-testing/interfaces\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-04T23:35:57.471Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "D:\\Project\\testhub_platform\\frontend\\test-results\\interface-management-接口管理页面全面测试-18-认证类型切换-chromium\\video.webm"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "D:\\Project\\testhub_platform\\frontend\\test-results\\interface-management-接口管理页面全面测试-18-认证类型切换-chromium\\trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a24a78527f23e52e6aab-7a7dac728bfb0aef5b56",
+              "file": "interface-management.spec.js",
+              "line": 380,
+              "column": 7
+            },
+            {
+              "title": "19. Body类型切换",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5422,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "✓ 导航到接口管理页面: http://localhost:3001/api-testing/interfaces\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-04T23:36:03.092Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "D:\\Project\\testhub_platform\\frontend\\test-results\\interface-management-接口管理页面全面测试-19-Body类型切换-chromium\\video.webm"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "D:\\Project\\testhub_platform\\frontend\\test-results\\interface-management-接口管理页面全面测试-19-Body类型切换-chromium\\trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a24a78527f23e52e6aab-2b57b10ac8c3ab59f61f",
+              "file": "interface-management.spec.js",
+              "line": 405,
+              "column": 7
+            },
+            {
+              "title": "20. 断言功能",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5434,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "✓ 导航到接口管理页面: http://localhost:3001/api-testing/interfaces\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-04T23:36:08.653Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "D:\\Project\\testhub_platform\\frontend\\test-results\\interface-management-接口管理页面全面测试-20-断言功能-chromium\\video.webm"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "D:\\Project\\testhub_platform\\frontend\\test-results\\interface-management-接口管理页面全面测试-20-断言功能-chromium\\trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a24a78527f23e52e6aab-eeeedf7e3387b9002b54",
+              "file": "interface-management.spec.js",
+              "line": 432,
+              "column": 7
+            },
+            {
+              "title": "21. 前置脚本和后置脚本",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5375,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "✓ 导航到接口管理页面: http://localhost:3001/api-testing/interfaces\n"
+                        },
+                        {
+                          "text": "\n========== 清理测试数据 ==========\n"
+                        },
+                        {
+                          "text": "========== 清理完成 ==========\n\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-04T23:36:14.216Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "D:\\Project\\testhub_platform\\frontend\\test-results\\interface-management-接口管理页面全面测试-21-前置脚本和后置脚本-chromium\\video.webm"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "D:\\Project\\testhub_platform\\frontend\\test-results\\interface-management-接口管理页面全面测试-21-前置脚本和后置脚本-chromium\\trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a24a78527f23e52e6aab-b495631f925bbddc4bd2",
+              "file": "interface-management.spec.js",
+              "line": 449,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-05-04T23:34:09.335Z",
+    "duration": 130974.07299999999,
+    "expected": 21,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

@@ -32,11 +32,12 @@ public class ApiRequestHistoryController {
             @RequestParam(required = false) Long suiteExecutionId,
             @RequestParam(required = false) Boolean success,
             @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String requestType,
             @RequestParam(defaultValue = "1") long current,
             @RequestParam(defaultValue = "20") long size
     ) {
         IPage<ApiRequestHistory> page = apiRequestHistoryService.getHistoryPage(
-                requestId, suiteExecutionId, success, keyword, current, size);
+                requestId, suiteExecutionId, success, keyword, requestType, current, size);
         return Result.success(PageResult.of(page));
     }
 

@@ -43,6 +43,7 @@ public interface ApiRequestHistoryService extends IService<ApiRequestHistory> {
             Long suiteExecutionId,
             Boolean success,
             String keyword,
+            String requestType,
             long current,
             long size
     );

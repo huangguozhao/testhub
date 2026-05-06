@@ -9,6 +9,7 @@ import com.testhub.modules.api_testing.domain.ApiRequestHistory;
 import com.testhub.modules.api_testing.http.ApiResponse;
 import com.testhub.modules.api_testing.mapper.ApiRequestHistoryMapper;
 import com.testhub.modules.api_testing.service.ApiRequestHistoryService;
+import com.testhub.modules.api_testing.service.ApiRequestService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,7 @@ public class ApiRequestHistoryServiceImpl extends ServiceImpl<ApiRequestHistoryM
         implements ApiRequestHistoryService {
 
     private final ObjectMapper objectMapper;
+    private final ApiRequestService apiRequestService;
 
     @Override
     public ApiRequestHistory saveHistory(ApiRequestHistory history) {
@@ -73,6 +75,16 @@ public class ApiRequestHistoryServiceImpl extends ServiceImpl<ApiRequestHistoryM
         history.setExecutedBy(executedBy);
         history.setCreatedAt(LocalDateTime.now());
 
+        // 获取请求类型
+        if (requestId != null) {
+            var apiRequest = apiRequestService.getById(requestId);
+            if (apiRequest != null && apiRequest.getRequestType() != null) {
+                history.setRequestType(apiRequest.getRequestType());
+            } else {
+                history.setRequestType("HTTP"); // 默认为 HTTP
+            }
+        }
+
         return this.saveHistory(history);
     }
 
@@ -82,6 +94,7 @@ public class ApiRequestHistoryServiceImpl extends ServiceImpl<ApiRequestHistoryM
             Long suiteExecutionId,
             Boolean success,
             String keyword,
+            String requestType,
             long current,
             long size
     ) {
@@ -98,6 +111,10 @@ public class ApiRequestHistoryServiceImpl extends ServiceImpl<ApiRequestHistoryM
 
         if (success != null) {
             wrapper.eq(ApiRequestHistory::getSuccess, success);
+        }
+
+        if (requestType != null && !requestType.isBlank()) {
+            wrapper.eq(ApiRequestHistory::getRequestType, requestType);
         }
 
         if (keyword != null && !keyword.isBlank()) {

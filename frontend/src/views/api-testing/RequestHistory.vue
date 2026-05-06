@@ -428,6 +428,9 @@ const loadHistory = async () => {
       params.keyword = searchText.value
     }
 
+    // 传递请求类型过滤
+    params.requestType = activeTab.value
+
     const response = await api.get('/api-request-histories', { params })
     // 响应拦截器已提取 response.data.data，所以 response.data 就是 { records, total, ... }
     const records = response.data?.records || []
