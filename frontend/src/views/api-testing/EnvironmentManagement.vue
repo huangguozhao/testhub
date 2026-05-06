@@ -236,10 +236,23 @@ const rules = computed(() => ({
   ]
 }))
 
+// 解析变量（兼容JSON字符串和对象格式）
+const parseVariables = (variables) => {
+  if (!variables) return {}
+  if (typeof variables === 'string') {
+    try {
+      return JSON.parse(variables)
+    } catch {
+      return {}
+    }
+  }
+  return variables
+}
+
 const viewVariables = computed(() => {
   if (!viewingEnvironment.value?.variables) return []
-  
-  const vars = viewingEnvironment.value.variables
+
+  const vars = parseVariables(viewingEnvironment.value.variables)
   return Object.keys(vars).map(key => ({
     key,
     initialValue: vars[key]?.initialValue || vars[key] || '',
@@ -325,9 +338,9 @@ const editEnvironment = (environment) => {
   form.name = environment.name
   form.scope = environment.scope
   form.project = environment.project
-  
+
   // 转换变量格式
-  const variables = environment.variables || {}
+  const variables = parseVariables(environment.variables)
   form.variables = Object.keys(variables).map(key => {
     const value = variables[key]
     if (typeof value === 'object') {
@@ -405,7 +418,7 @@ const duplicateEnvironment = async (environment) => {
     project: environment.scope === 'LOCAL' ?
       (typeof environment.project === 'object' ? environment.project.id : environment.project) :
       null,
-    variables: environment.variables || {}
+    variables: parseVariables(environment.variables)
   }
 
   try {

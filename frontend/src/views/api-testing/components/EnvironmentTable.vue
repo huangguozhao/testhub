@@ -12,7 +12,7 @@
       <el-table-column v-if="scope === 'LOCAL'" prop="project_name" :label="$t('apiTesting.component.environmentTable.relatedProject')" width="150" />
       <el-table-column :label="$t('apiTesting.component.environmentTable.variableCount')" width="100">
         <template #default="scope">
-          {{ Object.keys(scope.row.variables || {}).length }}
+          {{ Object.keys(parseVariables(scope.row.variables)).length }}
         </template>
       </el-table-column>
       <el-table-column prop="is_active" :label="$t('apiTesting.component.environmentTable.status')" width="80">
@@ -85,7 +85,7 @@
 
         <div class="variables-table">
           <h4>{{ $t('apiTesting.component.environmentTable.variableList') }}</h4>
-          <el-table :data="formatVariables(viewingEnvironment.variables)" style="width: 100%">
+          <el-table :data="formatVariables(parseVariables(viewingEnvironment.variables))" style="width: 100%">
             <el-table-column prop="key" :label="$t('apiTesting.component.environmentTable.variableName')" width="150" />
             <el-table-column prop="initialValue" :label="$t('apiTesting.component.environmentTable.initialValue')" />
             <el-table-column prop="currentValue" :label="$t('apiTesting.component.environmentTable.currentValue')" />
@@ -125,6 +125,19 @@ defineProps({
 defineEmits(['edit', 'delete', 'activate', 'duplicate'])
 
 const showViewDialog = ref(false)
+
+// 解析变量（兼容JSON字符串和对象格式）
+const parseVariables = (variables) => {
+  if (!variables) return {}
+  if (typeof variables === 'string') {
+    try {
+      return JSON.parse(variables)
+    } catch {
+      return {}
+    }
+  }
+  return variables
+}
 const viewingEnvironment = ref(null)
 
 const formatDate = (dateString) => {

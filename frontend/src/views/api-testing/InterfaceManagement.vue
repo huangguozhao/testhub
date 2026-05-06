@@ -150,7 +150,12 @@
                       :key="env.id"
                       :label="env.name"
                       :value="env.id"
-                    />
+                    >
+                      <span>{{ env.name }}</span>
+                      <el-tag v-if="env._displayScope" size="small" :type="env.scope === 'GLOBAL' ? 'primary' : 'success'" style="margin-left: 8px;">
+                        {{ env._displayScope }}
+                      </el-tag>
+                    </el-option>
                   </el-select>
                 </template>
               </el-input>
@@ -1003,13 +1008,25 @@ const loadCollections = async (projectId) => {
 
 const loadEnvironments = async (projectId) => {
   try {
-    const response = await api.get('/api-environments', {
-      params: {
-        projectId: projectId
-      }
-    })
-    // 后端返回分页格式 { records: [...], total, current, size }
-    environments.value = response.data.records || response.data || []
+    // 同时加载全局环境和项目本地环境
+    const [globalRes, localRes] = await Promise.all([
+      api.get('/api-environments', { params: { scope: 'GLOBAL' } }),
+      projectId
+        ? api.get('/api-environments', { params: { scope: 'LOCAL', projectId } })
+        : Promise.resolve({ data: [] })
+    ])
+    const globalEnvs = (globalRes.data.records || globalRes.data || []).map(e => ({ ...e, _displayScope: '全局' }))
+    const localEnvs = (localRes.data.records || localRes.data || []).map(e => ({ ...e, _displayScope: '本地' }))
+    environments.value = [...globalEnvs, ...localEnvs]
+
+    // 自动选中已激活的环境（优先本地，其次全局）
+    const activeLocal = localEnvs.find(e => e.is_active)
+    const activeGlobal = globalEnvs.find(e => e.is_active)
+    // 如果当前已选的环境还在列表中，保持不变
+    const currentStillExists = environments.value.some(e => e.id === selectedEnvironment.value)
+    if (!currentStillExists) {
+      selectedEnvironment.value = activeLocal?.id || activeGlobal?.id || null
+    }
   } catch (error) {
     ElMessage.error('加载环境失败')
     console.error('加载环境失败:', error)
