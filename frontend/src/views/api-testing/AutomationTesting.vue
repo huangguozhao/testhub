@@ -663,7 +663,7 @@ const handleSuiteAction = async ({ action, suite }) => {
 const runTestSuite = async (suite) => {
   running.value = true
   try {
-    const response = await api.post(`/api-testing/test-suites/${suite.id}/execute/`)
+    const response = await api.post(`/api-test-suites/${suite.id}/execute`)
     currentExecution.value = response.data
     showExecutionDialog.value = true
     await loadExecutions()
@@ -693,7 +693,7 @@ const duplicateSuite = async (suite) => {
       project: suite.project,
       environment: suite.environment || null  // 修复：直接使用environment ID
     }
-    await api.post('/api-testing/test-suites/', newSuite)
+    await api.post('/api-test-suites', newSuite)
     ElMessage.success(t('apiTesting.messages.success.copy'))
     await loadTestSuites()
   } catch (error) {
@@ -713,7 +713,7 @@ const deleteSuite = async (suite) => {
       }
     )
 
-    await api.delete(`/api-testing/test-suites/${suite.id}/`)
+    await api.delete(`/api-test-suites/${suite.id}`)
     ElMessage.success(t('apiTesting.messages.success.delete'))
 
     if (selectedSuite.value?.id === suite.id) {
@@ -736,10 +736,10 @@ const submitSuiteForm = async () => {
   submittingSuite.value = true
   try {
     if (editingSuite.value) {
-      await api.put(`/api-testing/test-suites/${editingSuite.value.id}/`, suiteForm)
+      await api.put(`/api-test-suites/${editingSuite.value.id}`, suiteForm)
       ElMessage.success(t('apiTesting.messages.success.suiteUpdated'))
     } else {
-      await api.post('/api-testing/test-suites/', suiteForm)
+      await api.post('/api-test-suites', suiteForm)
       ElMessage.success(t('apiTesting.messages.success.suiteCreated'))
     }
 
@@ -802,7 +802,7 @@ const addSelectedRequests = async () => {
   addingRequests.value = true
   try {
     // 这里需要调用添加请求到套件的API
-    await api.post(`/api-testing/test-suites/${selectedSuite.value.id}/add-requests/`, {
+    await api.post(`/api-test-suites/${selectedSuite.value.id}/add-requests`, {
       request_ids: requestIds
     })
 
@@ -819,7 +819,7 @@ const addSelectedRequests = async () => {
 
 const updateRequestEnabled = async (suiteRequest) => {
   try {
-    await api.put(`/api-testing/test-suite-requests/${suiteRequest.id}/`, {
+    await api.put(`/api-test-suite-requests/${suiteRequest.id}`, {
       enabled: suiteRequest.enabled
     })
   } catch (error) {
@@ -840,7 +840,7 @@ const removeRequest = async (suiteRequest) => {
       type: 'warning'
     })
 
-    await api.delete(`/api-testing/test-suite-requests/${suiteRequest.id}/`)
+    await api.delete(`/api-test-suite-requests/${suiteRequest.id}`)
     ElMessage.success(t('apiTesting.messages.success.removeSuccess'))
     // 重新加载当前测试套件详情
     await reloadCurrentSuite()
@@ -856,7 +856,7 @@ const reloadCurrentSuite = async () => {
 
   try {
     // 重新加载当前测试套件的详细信息
-    const response = await api.get(`/api-testing/test-suites/${selectedSuite.value.id}/`)
+    const response = await api.get(`/api-test-suites/${selectedSuite.value.id}`)
     const updatedSuite = response.data
 
     // 强制重新设置响应式数据
