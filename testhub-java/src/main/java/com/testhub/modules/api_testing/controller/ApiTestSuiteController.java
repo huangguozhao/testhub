@@ -30,8 +30,13 @@ public class ApiTestSuiteController {
 
     @GetMapping
     @Operation(summary = "获取项目的所有测试套件")
-    public Result<List<ApiTestSuite>> getTestSuites(@RequestParam Long projectId) {
-        List<ApiTestSuite> suites = apiTestSuiteService.getTestSuitesByProject(projectId);
+    public Result<List<ApiTestSuite>> getTestSuites(@RequestParam(required = false) Long projectId) {
+        List<ApiTestSuite> suites;
+        if (projectId != null) {
+            suites = apiTestSuiteService.getTestSuitesByProject(projectId);
+        } else {
+            suites = apiTestSuiteService.list();
+        }
         return Result.success(suites);
     }
 

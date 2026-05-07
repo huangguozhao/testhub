@@ -24,8 +24,13 @@ public class ApiScheduledTaskController {
 
     @GetMapping
     @Operation(summary = "获取项目的所有定时任务")
-    public Result<List<ApiScheduledTask>> getTasks(@RequestParam Long projectId) {
-        List<ApiScheduledTask> tasks = apiScheduledTaskService.getTasksByProject(projectId);
+    public Result<List<ApiScheduledTask>> getTasks(@RequestParam(required = false) Long projectId) {
+        List<ApiScheduledTask> tasks;
+        if (projectId != null) {
+            tasks = apiScheduledTaskService.getTasksByProject(projectId);
+        } else {
+            tasks = apiScheduledTaskService.list();
+        }
         return Result.success(tasks);
     }
 
