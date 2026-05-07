@@ -62,7 +62,14 @@ public class ApiScheduledTaskServiceImpl extends ServiceImpl<ApiScheduledTaskMap
                 }
                 case "ONCE" -> {
                     scheduleType = "FIX_RATE";
-                    scheduleConf = "31536000"; // 365天（不会自动触发，靠手动触发）
+                    // 计算到执行时间的秒数差
+                    long delaySeconds = 31536000; // 默认365天
+                    if (task.getOnceTime() != null) {
+                        long diff = java.time.Duration.between(LocalDateTime.now(), task.getOnceTime()).getSeconds();
+                        delaySeconds = Math.max(diff, 60); // 至少60秒
+                    }
+                    scheduleConf = String.valueOf(delaySeconds);
+                    task.setNextRunAt(task.getOnceTime() != null ? task.getOnceTime() : LocalDateTime.now().plusSeconds(delaySeconds));
                 }
                 default -> {
                     scheduleType = "CRON";
@@ -80,9 +87,11 @@ public class ApiScheduledTaskServiceImpl extends ServiceImpl<ApiScheduledTaskMap
                 this.updateById(task);
                 log.info("XXL-JOB 注册成功: taskId={}, xxlJobId={}", task.getId(), xxlJobId);
 
-                // ONCE 类型立即触发一次
-                if ("ONCE".equals(task.getTriggerType())) {
+                // ONCE 类型：如果执行时间已过或未设置，立即触发
+                if ("ONCE".equals(task.getTriggerType())
+                        && (task.getOnceTime() == null || task.getOnceTime().isBefore(LocalDateTime.now()))) {
                     xxlJobApiClient.triggerJob(xxlJobId, String.valueOf(task.getId()));
+                    log.info("ONCE 任务立即触发: taskId={}", task.getId());
                 }
             } else {
                 log.warn("XXL-JOB 注册失败，任务已保存但不会自动触发: taskId={}", task.getId());
@@ -99,16 +108,52 @@ public class ApiScheduledTaskServiceImpl extends ServiceImpl<ApiScheduledTaskMap
     @Transactional(rollbackFor = Exception.class)
     public ApiScheduledTask updateTask(Long id, ApiScheduledTask task) {
         task.setId(id);
+
+        // 合并已有数据用于后续逻辑
+        ApiScheduledTask existing = this.getById(id);
+        if (existing == null) {
+            throw new RuntimeException("定时任务不存在: " + id);
+        }
+
+        // ONCE 类型修改时间后，自动重新启用
+        String effectiveTriggerType = task.getTriggerType() != null ? task.getTriggerType() : existing.getTriggerType();
+        boolean wasDisabled = !Boolean.TRUE.equals(existing.getIsEnabled());
+        if ("ONCE".equals(effectiveTriggerType) && wasDisabled) {
+            task.setIsEnabled(true);
+            log.info("ONCE 任务修改后自动启用: taskId={}", id);
+        }
+
+        // 计算下次执行时间
+        if ("ONCE".equals(effectiveTriggerType)) {
+            LocalDateTime onceTime = task.getOnceTime() != null ? task.getOnceTime() : existing.getOnceTime();
+            if (onceTime != null) {
+                task.setNextRunAt(onceTime);
+            }
+        } else if ("CRON".equals(effectiveTriggerType)) {
+            String cron = task.getCronExpression() != null ? task.getCronExpression() : existing.getCronExpression();
+            if (cron != null) {
+                try {
+                    var cronExpr = org.springframework.scheduling.support.CronExpression.parse(cron);
+                    task.setNextRunAt(cronExpr.next(LocalDateTime.now()));
+                } catch (Exception e) {
+                    log.warn("解析CRON表达式失败: {}", cron);
+                }
+            }
+        } else if ("INTERVAL".equals(effectiveTriggerType)) {
+            long seconds = task.getIntervalValue() != null ? task.getIntervalValue()
+                    : (existing.getIntervalValue() != null ? existing.getIntervalValue() : 3600);
+            task.setNextRunAt(LocalDateTime.now().plusSeconds(seconds));
+        }
+
         this.updateById(task);
 
         // 更新 XXL-JOB 任务配置
-        ApiScheduledTask existing = this.getById(id);
-        if (existing != null && existing.getXxlJobId() != null) {
+        if (existing.getXxlJobId() != null) {
             try {
                 String scheduleType;
                 String scheduleConf;
 
-                switch (task.getTriggerType() != null ? task.getTriggerType() : existing.getTriggerType()) {
+                switch (effectiveTriggerType) {
                     case "CRON" -> {
                         scheduleType = "CRON";
                         scheduleConf = task.getCronExpression() != null ? task.getCronExpression() : existing.getCronExpression();
@@ -117,7 +162,18 @@ public class ApiScheduledTaskServiceImpl extends ServiceImpl<ApiScheduledTaskMap
                         scheduleType = "FIX_RATE";
                         long seconds = task.getIntervalValue() != null ? task.getIntervalValue()
                                 : (existing.getIntervalValue() != null ? existing.getIntervalValue() : 3600);
-                        scheduleConf = String.valueOf(seconds * 1000);
+                        scheduleConf = String.valueOf(seconds);
+                    }
+                    case "ONCE" -> {
+                        scheduleType = "FIX_RATE";
+                        // 计算到执行时间的秒数差
+                        LocalDateTime onceTime = task.getOnceTime() != null ? task.getOnceTime() : existing.getOnceTime();
+                        long delaySeconds = 31536000; // 默认365天
+                        if (onceTime != null) {
+                            long diff = java.time.Duration.between(LocalDateTime.now(), onceTime).getSeconds();
+                            delaySeconds = Math.max(diff, 60); // 至少60秒
+                        }
+                        scheduleConf = String.valueOf(delaySeconds);
                     }
                     default -> {
                         scheduleType = "FIX_RATE";
@@ -128,6 +184,12 @@ public class ApiScheduledTaskServiceImpl extends ServiceImpl<ApiScheduledTaskMap
                 String jobDesc = "API定时任务-" + (task.getName() != null ? task.getName() : existing.getName()) + "(ID:" + id + ")";
                 xxlJobApiClient.updateJob(existing.getXxlJobId(), XXL_JOB_GROUP_ID, jobDesc,
                         XXL_JOB_HANDLER, String.valueOf(id), scheduleType, scheduleConf);
+
+                // 如果任务之前被停止（ONCE 执行后），重新启动 XXL-JOB job
+                if (wasDisabled && Boolean.TRUE.equals(task.getIsEnabled())) {
+                    xxlJobApiClient.startJob(existing.getXxlJobId());
+                    log.info("XXL-JOB 任务已重新启动: xxlJobId={}", existing.getXxlJobId());
+                }
             } catch (Exception e) {
                 log.error("更新XXL-JOB失败: taskId={}, error={}", id, e.getMessage(), e);
             }
@@ -210,7 +272,7 @@ public class ApiScheduledTaskServiceImpl extends ServiceImpl<ApiScheduledTaskMap
         }
 
         log.info("执行定时任务: id={}, name={}", id, task.getName());
-        apiExecutor.executeSuite(suite.getId());
+        apiExecutor.executeSuite(suite.getId(), "scheduled", id);
 
         // 更新执行时间
         task.setLastRunAt(LocalDateTime.now());

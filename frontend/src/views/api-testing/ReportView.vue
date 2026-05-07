@@ -48,7 +48,14 @@
         </el-table-column>
         <el-table-column label="执行者" width="120">
           <template #default="scope">
-            {{ scope.row.executed_by?.username || '-' }}
+            {{ scope.row.executed_by?.username || (scope.row.trigger_type === 'scheduled' ? '定时任务' : '-') }}
+          </template>
+        </el-table-column>
+        <el-table-column label="触发方式" width="100">
+          <template #default="scope">
+            <el-tag :type="scope.row.trigger_type === 'scheduled' ? 'warning' : 'info'" size="small">
+              {{ scope.row.trigger_type === 'scheduled' ? '定时任务' : '手动执行' }}
+            </el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="created_at" :label="$t('apiTesting.report.executionTime')" width="180">
@@ -96,6 +103,17 @@
           </el-descriptions-item>
           <el-descriptions-item label="失败">
             <span style="color: #f56c6c">{{ detailRecord.failed_requests }}</span>
+          </el-descriptions-item>
+          <el-descriptions-item label="触发方式">
+            <el-tag :type="detailRecord.trigger_type === 'scheduled' ? 'warning' : 'info'" size="small">
+              {{ detailRecord.trigger_type === 'scheduled' ? '定时任务' : '手动执行' }}
+            </el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item label="执行者">
+            {{ detailRecord.executed_by?.username || (detailRecord.trigger_type === 'scheduled' ? '定时任务' : '-') }}
+          </el-descriptions-item>
+          <el-descriptions-item label="耗时">
+            {{ detailRecord.duration ? detailRecord.duration + 'ms' : '-' }}
           </el-descriptions-item>
         </el-descriptions>
 

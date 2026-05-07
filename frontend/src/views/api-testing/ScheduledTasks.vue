@@ -40,11 +40,9 @@
           </el-select>
         </el-col>
         <el-col :span="6">
-          <el-select v-model="filters.status" :placeholder="$t('apiTesting.scheduledTask.taskStatus')" clearable>
-            <el-option :label="$t('apiTesting.scheduledTask.status.active')" value="ACTIVE" />
-            <el-option :label="$t('apiTesting.scheduledTask.status.paused')" value="PAUSED" />
-            <el-option :label="$t('apiTesting.scheduledTask.status.completed')" value="COMPLETED" />
-            <el-option :label="$t('apiTesting.scheduledTask.status.failed')" value="FAILED" />
+          <el-select v-model="filters.is_enabled" placeholder="任务状态" clearable>
+            <el-option label="启用" :value="true" />
+            <el-option label="暂停" :value="false" />
           </el-select>
         </el-col>
         <el-col :span="6">
@@ -106,8 +104,8 @@
               <template #dropdown>
                 <el-dropdown-menu>
                   <el-dropdown-item command="edit">{{ $t('apiTesting.common.edit') }}</el-dropdown-item>
-                  <el-dropdown-item command="pause" v-if="scope.row.status === 'ACTIVE'">{{ $t('apiTesting.scheduledTask.pause') }}</el-dropdown-item>
-                  <el-dropdown-item command="activate" v-if="scope.row.status === 'PAUSED'">{{ $t('apiTesting.scheduledTask.activate') }}</el-dropdown-item>
+                  <el-dropdown-item command="pause" v-if="scope.row.is_enabled">{{ $t('apiTesting.scheduledTask.pause') }}</el-dropdown-item>
+                  <el-dropdown-item command="activate" v-if="!scope.row.is_enabled">{{ $t('apiTesting.scheduledTask.activate') }}</el-dropdown-item>
                   <el-dropdown-item command="logs">{{ $t('apiTesting.scheduledTask.executionLogs') }}</el-dropdown-item>
                   <el-dropdown-item command="delete" divided>{{ $t('apiTesting.common.delete') }}</el-dropdown-item>
                 </el-dropdown-menu>
@@ -277,26 +275,48 @@
     </el-dialog>
 
     <!-- 执行日志对话框 -->
-    <el-dialog v-model="showLogsDialog" :title="$t('apiTesting.scheduledTask.executionLogs')" width="1000px">
+    <el-dialog v-model="showLogsDialog" :title="$t('apiTesting.scheduledTask.executionLogs')" width="1100px">
       <el-table :data="executionLogs" v-loading="logsLoading">
-        <el-table-column prop="start_time" :label="$t('apiTesting.scheduledTask.startTime')" width="180">
+        <el-table-column prop="executed_at" label="执行时间" width="180">
           <template #default="scope">
-            <div class="time-cell">{{ formatDateTime(scope.row.start_time) }}</div>
+            <div class="time-cell">{{ formatDateTime(scope.row.executed_at) }}</div>
           </template>
         </el-table-column>
-        <el-table-column prop="end_time" :label="$t('apiTesting.scheduledTask.endTime')" width="180">
+        <el-table-column prop="total_requests" label="总请求数" width="100" />
+        <el-table-column label="通过" width="80">
           <template #default="scope">
-            <div class="time-cell">{{ formatDateTime(scope.row.end_time) }}</div>
+            <span style="color: #67c23a">{{ scope.row.passed_requests }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="status" :label="$t('apiTesting.common.status')" width="100">
+        <el-table-column label="失败" width="80">
           <template #default="scope">
-            <el-tag :type="scope.row.status === 'COMPLETED' ? 'success' : 'danger'">
-              {{ scope.row.status === 'COMPLETED' ? $t('apiTesting.common.success') : $t('apiTesting.common.failed') }}
+            <span style="color: #f56c6c">{{ scope.row.failed_requests }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="状态" width="100">
+          <template #default="scope">
+            <el-tag :type="scope.row.status ? 'success' : 'danger'">
+              {{ scope.row.status ? $t('apiTesting.common.success') : $t('apiTesting.common.failed') }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="error_message" :label="$t('apiTesting.scheduledTask.errorMessage')" width="300" show-overflow-tooltip />
+        <el-table-column label="执行者" width="120">
+          <template #default="scope">
+            {{ scope.row.executed_by?.username || (scope.row.trigger_type === 'scheduled' ? '定时任务' : '-') }}
+          </template>
+        </el-table-column>
+        <el-table-column label="耗时" width="100">
+          <template #default="scope">
+            {{ scope.row.duration ? scope.row.duration + 'ms' : '-' }}
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="120">
+          <template #default="scope">
+            <el-button size="small" type="primary" @click="viewExecutionDetail(scope.row)">
+              查看详情
+            </el-button>
+          </template>
+        </el-table-column>
       </el-table>
     </el-dialog>
   </div>
@@ -364,7 +384,7 @@ const editingTask = ref(null)
 const filters = reactive({
   task_type: '',
   trigger_type: '',
-  status: ''
+  is_enabled: ''
 })
 
 // 分页配置
@@ -426,6 +446,7 @@ const onProjectChange = () => {
 }
 
 // 加载任务列表
+const allTasks = ref([])
 const loadTasks = async () => {
   if (!selectedProject.value) return
   loading.value = true
@@ -433,18 +454,30 @@ const loadTasks = async () => {
     const params = {
       page: pagination.current,
       page_size: pagination.size,
-      projectId: selectedProject.value,
-      ...filters
+      projectId: selectedProject.value
     }
     const response = await getScheduledTasks(params)
     const data = response.data
-    tasks.value = Array.isArray(data) ? data : (data.results || data.records || [])
-    pagination.total = Array.isArray(data) ? data.length : (data.count || data.total || 0)
+    allTasks.value = Array.isArray(data) ? data : (data.results || data.records || [])
+    applyFilters()
   } catch (error) {
     ElMessage.error(t('apiTesting.messages.error.loadTasksFailed'))
   } finally {
     loading.value = false
   }
+}
+
+// 应用前端筛选
+const applyFilters = () => {
+  let filtered = [...allTasks.value]
+  if (filters.trigger_type) {
+    filtered = filtered.filter(t => t.trigger_type === filters.trigger_type)
+  }
+  if (filters.is_enabled !== '' && filters.is_enabled !== null && filters.is_enabled !== undefined) {
+    filtered = filtered.filter(t => t.is_enabled === filters.is_enabled)
+  }
+  tasks.value = filtered
+  pagination.total = filtered.length
 }
 
 // 加载测试套件
@@ -531,7 +564,7 @@ const resetFilters = () => {
   Object.assign(filters, {
     task_type: '',
     trigger_type: '',
-    status: ''
+    is_enabled: ''
   })
   loadTasks()
 }
@@ -654,6 +687,11 @@ const viewTaskLogs = async (task) => {
   } finally {
     logsLoading.value = false
   }
+}
+
+// 查看执行详情
+const viewExecutionDetail = (row) => {
+  window.open(`/api-testing/reports?highlight=${row.id}`, '_blank')
 }
 
 // 处理任务操作

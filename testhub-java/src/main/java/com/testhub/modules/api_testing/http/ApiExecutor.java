@@ -349,6 +349,10 @@ public class ApiExecutor {
      * 执行测试套件
      */
     public SuiteExecutionResult executeSuite(Long suiteId) {
+        return executeSuite(suiteId, "manual", null);
+    }
+
+    public SuiteExecutionResult executeSuite(Long suiteId, String triggerType, Long triggerId) {
         log.info("开始执行测试套件: suiteId={}", suiteId);
 
         SuiteExecutionResult result = new SuiteExecutionResult();
@@ -441,7 +445,7 @@ public class ApiExecutor {
             result.setEndTime(new Date());
 
             // 保存执行记录
-            saveExecutionRecord(suite, result, variables, "manual", null);
+            saveExecutionRecord(suite, result, variables, triggerType, triggerId);
 
         } catch (Exception e) {
             log.error("执行测试套件失败: {}", e.getMessage(), e);
@@ -449,7 +453,7 @@ public class ApiExecutor {
             result.setError(e.getMessage());
             result.setEndTime(new Date());
             if (suite != null) {
-                saveExecutionRecord(suite, result, variables, "manual", null);
+                saveExecutionRecord(suite, result, variables, triggerType, triggerId);
             }
         }
 
