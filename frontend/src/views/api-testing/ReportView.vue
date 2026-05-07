@@ -58,10 +58,10 @@
         </el-table-column>
         <el-table-column :label="$t('apiTesting.common.operation')" width="240" fixed="right">
           <template #default="scope">
-            <el-button link type="primary" @click="viewDetail(scope.row)">
+            <el-button size="small" type="primary" @click="viewDetail(scope.row)">
               查看详情
             </el-button>
-            <el-button link type="primary" @click="generateReport(scope.row)">
+            <el-button size="small" type="success" @click="generateReport(scope.row)">
               {{ $t('apiTesting.report.generateAndViewReport') }}
             </el-button>
           </template>
@@ -97,39 +97,47 @@
         <h4 style="margin: 16px 0 8px;">请求执行结果</h4>
         <el-table :data="detailResults" style="width: 100%" max-height="400">
           <el-table-column type="index" width="50" />
-          <el-table-column prop="requestName" label="请求名称" min-width="150">
+          <el-table-column label="请求名称" min-width="150">
             <template #default="scope">
-              {{ scope.row.requestName || scope.row.name || '-' }}
+              {{ scope.row.request_name || scope.row.requestName || '-' }}
             </template>
           </el-table-column>
-          <el-table-column prop="method" label="方法" width="80">
+          <el-table-column label="方法" width="80">
             <template #default="scope">
               <el-tag size="small" :type="getMethodType(scope.row.method)">
                 {{ scope.row.method || 'GET' }}
               </el-tag>
             </template>
           </el-table-column>
-          <el-table-column prop="url" label="URL" min-width="250" show-overflow-tooltip />
-          <el-table-column prop="statusCode" label="状态码" width="80">
+          <el-table-column label="URL" min-width="250" show-overflow-tooltip>
             <template #default="scope">
-              <span :style="{ color: getStatusColor(scope.row.statusCode) }">
-                {{ scope.row.statusCode || '-' }}
+              {{ scope.row.url || '-' }}
+            </template>
+          </el-table-column>
+          <el-table-column label="状态码" width="80">
+            <template #default="scope">
+              <span :style="{ color: getStatusColor(scope.row.status_code) }">
+                {{ scope.row.status_code || '-' }}
               </span>
             </template>
           </el-table-column>
-          <el-table-column prop="responseTime" label="耗时" width="80">
+          <el-table-column label="耗时" width="80">
             <template #default="scope">
-              {{ scope.row.responseTime != null ? scope.row.responseTime + 'ms' : '-' }}
+              {{ scope.row.response_time != null ? scope.row.response_time + 'ms' : '-' }}
             </template>
           </el-table-column>
           <el-table-column label="结果" width="80">
             <template #default="scope">
-              <el-tag :type="(scope.row.success || scope.row.passed) ? 'success' : 'danger'" size="small">
-                {{ (scope.row.success || scope.row.passed) ? '通过' : '失败' }}
+              <el-tag :type="scope.row.success ? 'success' : 'danger'" size="small">
+                {{ scope.row.success ? '通过' : '失败' }}
               </el-tag>
             </template>
           </el-table-column>
-          <el-table-column prop="error" label="错误信息" min-width="150" show-overflow-tooltip />
+          <el-table-column label="错误信息" min-width="150" show-overflow-tooltip>
+            <template #default="scope">
+              {{ scope.row.error || '-' }}
+            </template>
+          </el-table-column>
         </el-table>
 
         <!-- 断言结果 -->
@@ -221,13 +229,14 @@ const viewDetail = async (record) => {
     const response = await api.get(`/api-execution-records/${record.id}`)
     detailRecord.value = response.data
 
-    // 解析 resultData
+    // 解析 result_data (SNAKE_CASE)
     const data = response.data
-    if (data.resultData) {
+    const resultData = data.result_data || data.resultData
+    if (resultData) {
       try {
-        detailResults.value = typeof data.resultData === 'string'
-          ? JSON.parse(data.resultData)
-          : data.resultData
+        detailResults.value = typeof resultData === 'string'
+          ? JSON.parse(resultData)
+          : resultData
       } catch {
         detailResults.value = []
       }
