@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * API执行记录控制器
@@ -33,6 +34,9 @@ public class ApiExecutionRecordController {
     private final ApiTestSuiteService apiTestSuiteService;
     private final AllureReportGenerator allureReportGenerator;
     private final ObjectMapper objectMapper;
+
+    // 报告生成锁：同一份报告同时只允许一个请求生成，其他请求等待结果
+    private final ConcurrentHashMap<Long, Object> reportLocks = new ConcurrentHashMap<>();
 
     @GetMapping("/project/{projectId}")
     @Operation(summary = "获取项目的执行记录")
@@ -76,50 +80,58 @@ public class ApiExecutionRecordController {
             return Result.notFound("执行记录不存在");
         }
 
-        try {
-            String basePath = System.getProperty("user.dir");
-            String resultsDir = basePath + "/media/api-testing/allure-results/execution_" + id;
-            String reportDir = basePath + "/media/api-testing/allure-reports/execution_" + id;
+        String basePath = System.getProperty("user.dir");
+        String resultsDir = basePath + "/media/api-testing/allure-results/execution_" + id;
+        String reportDir = basePath + "/media/api-testing/allure-reports/execution_" + id;
+        String allureReportUrl = "/media/api-testing/allure-reports/execution_" + id + "/index.html";
+        String simpleReportUrl = "/media/api-testing/allure-reports/execution_" + id + "/summary.html";
 
-            // 检查报告是否已存在
-            String allureReportPath = reportDir + "/index.html";
-            String simpleReportPath = reportDir + "/summary.html";
-            if (Files.exists(Path.of(allureReportPath))) {
+        // 先快速检查报告是否已存在（无需加锁）
+        if (Files.exists(Path.of(reportDir, "index.html"))) {
+            return Result.success(Map.of("report_url", allureReportUrl));
+        }
+        if (Files.exists(Path.of(reportDir, "summary.html"))) {
+            return Result.success(Map.of("report_url", simpleReportUrl));
+        }
+
+        // 同一份报告同时只允许一个请求生成，其他请求等待结果
+        Object lock = reportLocks.computeIfAbsent(id, k -> new Object());
+        synchronized (lock) {
+            try {
+                // 双重检查：可能在等待锁期间其他线程已生成完毕
+                if (Files.exists(Path.of(reportDir, "index.html"))) {
+                    return Result.success(Map.of("report_url", allureReportUrl));
+                }
+                if (Files.exists(Path.of(reportDir, "summary.html"))) {
+                    return Result.success(Map.of("report_url", simpleReportUrl));
+                }
+
+                Files.createDirectories(Path.of(resultsDir));
+                Files.createDirectories(Path.of(reportDir));
+
+                // 生成 Allure 结果文件
+                generateAllureResultFiles(record, resultsDir);
+
+                // 使用 Allure 生成报告
+                String reportUrl;
+                boolean allureSuccess = allureReportGenerator.generateReport(resultsDir, reportDir);
+                if (allureSuccess) {
+                    reportUrl = allureReportUrl;
+                    log.info("Allure 报告生成成功: executionId={}", id);
+                } else {
+                    reportUrl = generateSimpleHtmlReport(record, reportDir, id);
+                }
+
                 Map<String, String> result = new HashMap<>();
-                result.put("report_url", "/media/api-testing/allure-reports/execution_" + id + "/index.html");
+                result.put("report_url", reportUrl);
                 return Result.success(result);
+
+            } catch (Exception e) {
+                log.error("生成报告失败: {}", e.getMessage(), e);
+                return Result.error("生成报告失败: " + e.getMessage());
+            } finally {
+                reportLocks.remove(id);
             }
-            if (Files.exists(Path.of(simpleReportPath))) {
-                Map<String, String> result = new HashMap<>();
-                result.put("report_url", "/media/api-testing/allure-reports/execution_" + id + "/summary.html");
-                return Result.success(result);
-            }
-
-            // 确保目录存在
-            Files.createDirectories(Path.of(resultsDir));
-            Files.createDirectories(Path.of(reportDir));
-
-            // 生成 Allure 结果文件
-            generateAllureResultFiles(record, resultsDir);
-
-            // 使用 Allure 生成报告
-            String reportUrl;
-            boolean allureSuccess = allureReportGenerator.generateReport(resultsDir, reportDir);
-            if (allureSuccess) {
-                reportUrl = "/media/api-testing/allure-reports/execution_" + id + "/index.html";
-                log.info("Allure 报告生成成功: executionId={}", id);
-            } else {
-                // Allure 不可用，生成简单 HTML 汇总页
-                reportUrl = generateSimpleHtmlReport(record, reportDir, id);
-            }
-
-            Map<String, String> result = new HashMap<>();
-            result.put("report_url", reportUrl);
-            return Result.success(result);
-
-        } catch (Exception e) {
-            log.error("生成报告失败: {}", e.getMessage(), e);
-            return Result.error("生成报告失败: " + e.getMessage());
         }
     }
 
