@@ -12,6 +12,7 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -34,6 +35,7 @@ public class ApiExecutor {
     private final ApiEnvironmentService apiEnvironmentService;
     private final ApiExecutionRecordService apiExecutionRecordService;
     private final ApiTestSuiteService apiTestSuiteService;
+    @Lazy
     private final ApiTestSuiteRequestService apiTestSuiteRequestService;
     private final AssertionEngine assertionEngine;
     private final VariableExtractor variableExtractor;
