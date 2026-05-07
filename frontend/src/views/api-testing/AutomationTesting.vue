@@ -93,7 +93,7 @@
               {{ selectedSuite.description || $t('apiTesting.automation.noDescription') }}
             </div>
             <div class="suite-meta">
-              <el-tag size="small">{{ getEnvironmentName(selectedSuite.environment) }}</el-tag>
+              <el-tag size="small">{{ getEnvironmentName(selectedSuite.environment_id) }}</el-tag>
               <span class="meta-text">{{ $t('apiTesting.automation.creator') }}{{ selectedSuite.created_by?.username }}</span>
               <span class="meta-text">{{ $t('apiTesting.automation.createTime') }}{{ formatDate(selectedSuite.created_at) }}</span>
             </div>
@@ -226,8 +226,8 @@
           />
         </el-form-item>
 
-        <el-form-item :label="$t('apiTesting.automation.belongProject')" prop="project">
-          <el-select v-model="suiteForm.project" :placeholder="$t('apiTesting.automation.selectProject')">
+        <el-form-item :label="$t('apiTesting.automation.belongProject')" prop="project_id">
+          <el-select v-model="suiteForm.project_id" :placeholder="$t('apiTesting.automation.selectProject')">
             <el-option
               v-for="project in httpProjects"
               :key="project.id"
@@ -237,8 +237,8 @@
           </el-select>
         </el-form-item>
 
-        <el-form-item :label="$t('apiTesting.automation.executionEnvironment')" prop="environment">
-          <el-select v-model="suiteForm.environment" :placeholder="$t('apiTesting.automation.selectEnvironment')" clearable>
+        <el-form-item :label="$t('apiTesting.automation.executionEnvironment')" prop="environment_id">
+          <el-select v-model="suiteForm.environment_id" :placeholder="$t('apiTesting.automation.selectEnvironment')" clearable>
             <el-option
               v-for="env in environments"
               :key="env.id"
@@ -397,13 +397,13 @@ const requestTreeRef = ref()
 const suiteForm = reactive({
   name: '',
   description: '',
-  project: null,
-  environment: null
+  project_id: null,
+  environment_id: null
 })
 
 const suiteRules = computed(() => ({
   name: [{ required: true, message: t('apiTesting.automation.inputSuiteName'), trigger: 'blur' }],
-  project: [{ required: true, message: t('apiTesting.automation.selectProject'), trigger: 'change' }]
+  project_id: [{ required: true, message: t('apiTesting.automation.selectProject'), trigger: 'change' }]
 }))
 
 const requestTreeProps = {
@@ -533,7 +533,7 @@ const loadEnvironments = async () => {
     // 过滤当前项目相关或全局环境
     environments.value = (allEnvironments).filter(env =>
       env.scope === 'GLOBAL' ||
-      (env.scope === 'LOCAL' && (!selectedProject.value || env.project === selectedProject.value))
+      (env.scope === 'LOCAL' && (!selectedProject.value || env.project_id === selectedProject.value))
     )
   } catch (error) {
     ElMessage.error(t('apiTesting.messages.error.loadEnvironments'))
@@ -566,7 +566,7 @@ const loadRequestTree = async () => {
 const buildRequestTree = (collections, requests) => {
   const map = {}
   const roots = []
-  
+
   // 创建集合节点
   collections.forEach(collection => {
     map[collection.id] = {
@@ -575,27 +575,28 @@ const buildRequestTree = (collections, requests) => {
       children: []
     }
   })
-  
+
   // 构建集合层级关系
   collections.forEach(collection => {
-    if (collection.parent && map[collection.parent]) {
-      map[collection.parent].children.push(map[collection.id])
+    if (collection.parent_id && map[collection.parent_id]) {
+      map[collection.parent_id].children.push(map[collection.id])
     } else {
       roots.push(map[collection.id])
     }
   })
-  
+
   // 添加请求到对应集合
   requests.forEach(request => {
-    if (map[request.collection]) {
-      map[request.collection].children.push({
+    const collectionId = request.collection_id
+    if (collectionId && map[collectionId]) {
+      map[collectionId].children.push({
         ...request,
         type: 'request',
         id: `request_${request.id}`
       })
     }
   })
-  
+
   return roots
 }
 
@@ -604,10 +605,8 @@ const loadExecutions = async () => {
 
   executionsLoading.value = true
   try {
-    const response = await api.get('/api-execution-records', {
-      params: { test_suite: selectedSuite.value.id }
-    })
-    executions.value = response.data?.results || response.data || []
+    const response = await api.get(`/api-execution-records/suite/${selectedSuite.value.id}`)
+    executions.value = response.data || []
   } catch (error) {
     ElMessage.error(t('apiTesting.messages.error.loadExecutionHistory'))
   } finally {
@@ -638,9 +637,23 @@ const onProjectChange = async () => {
   ])
 }
 
-const selectSuite = (suite) => {
+const selectSuite = async (suite) => {
   selectedSuite.value = suite
-  loadExecutions()
+  await Promise.all([
+    loadSuiteRequests(suite),
+    loadExecutions()
+  ])
+}
+
+const loadSuiteRequests = async (suite) => {
+  try {
+    const response = await api.get(`/api-test-suites/${suite.id}/requests`)
+    const requests = response.data || []
+    // 将请求列表合并到套件对象中
+    selectedSuite.value = { ...selectedSuite.value, suite_requests: requests }
+  } catch (error) {
+    console.error('加载套件请求失败:', error)
+  }
 }
 
 const handleSuiteAction = async ({ action, suite }) => {
@@ -679,9 +692,8 @@ const editSuite = (suite) => {
   editingSuite.value = suite
   suiteForm.name = suite.name
   suiteForm.description = suite.description
-  suiteForm.project = suite.project
-  // 修复：environment字段直接是ID，不需要?.id
-  suiteForm.environment = suite.environment || null
+  suiteForm.project_id = suite.project_id
+  suiteForm.environment_id = suite.environment_id || null
   showCreateSuiteDialog.value = true
 }
 
@@ -690,8 +702,8 @@ const duplicateSuite = async (suite) => {
     const newSuite = {
       name: `${suite.name} - ${t('apiTesting.common.copyText')}`,
       description: suite.description,
-      project: suite.project,
-      environment: suite.environment || null  // 修复：直接使用environment ID
+      project_id: suite.project_id,
+      environment_id: suite.environment_id || null
     }
     await api.post('/api-test-suites', newSuite)
     ElMessage.success(t('apiTesting.messages.success.copy'))
@@ -757,8 +769,8 @@ const resetSuiteForm = () => {
   Object.assign(suiteForm, {
     name: '',
     description: '',
-    project: selectedProject.value,
-    environment: null
+    project_id: selectedProject.value,
+    environment_id: null
   })
   suiteFormRef.value?.resetFields()
 }
@@ -858,6 +870,10 @@ const reloadCurrentSuite = async () => {
     // 重新加载当前测试套件的详细信息
     const response = await api.get(`/api-test-suites/${selectedSuite.value.id}`)
     const updatedSuite = response.data
+
+    // 加载套件的请求列表
+    const requestsRes = await api.get(`/api-test-suites/${selectedSuite.value.id}/requests`)
+    updatedSuite.suite_requests = requestsRes.data || []
 
     // 强制重新设置响应式数据
     selectedSuite.value = { ...updatedSuite }

@@ -54,9 +54,9 @@ export function runScheduledTask(id) {
 // 获取执行日志
 export function getExecutionLogs(taskId, params = {}) {
   return api({
-    url: `/api-execution-records`,
+    url: `/api-execution-records/trigger/${taskId}`,
     method: 'get',
-    params: { taskId, ...params }
+    params
   })
 }
 

@@ -66,6 +66,21 @@ public class ApiExecutionRecordServiceImpl extends ServiceImpl<ApiExecutionRecor
     }
 
     @Override
+    public List<ApiExecutionRecord> getRecordsByTriggerId(Long triggerId, Integer limit) {
+        LambdaQueryWrapper<ApiExecutionRecord> wrapper = new LambdaQueryWrapper<ApiExecutionRecord>()
+                .eq(ApiExecutionRecord::getTriggerId, triggerId)
+                .orderByDesc(ApiExecutionRecord::getExecutedAt);
+
+        if (limit != null && limit > 0) {
+            wrapper.last("LIMIT " + limit);
+        }
+
+        List<ApiExecutionRecord> records = this.list(wrapper);
+        enrichRecords(records);
+        return records;
+    }
+
+    @Override
     public ApiExecutionRecord getRecord(Long id) {
         ApiExecutionRecord record = this.getById(id);
         if (record != null) {

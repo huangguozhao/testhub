@@ -962,7 +962,7 @@ export function updateTaskNotificationSetting(id, data) {
 // 获取用户列表（复用接口测试的用户接口）
 export function getUiUsers(params) {
   return request({
-    url: '/api-testing/users/',
+    url: '/users',
     method: 'get',
     params
   })

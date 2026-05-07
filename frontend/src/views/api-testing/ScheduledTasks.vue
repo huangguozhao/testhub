@@ -650,7 +650,7 @@ const editTask = (task) => {
 // 暂停任务
 const pauseTask = async (task) => {
   try {
-    await api.post(`/api-testing/scheduled-tasks/${task.id}/pause/`)
+    await api.put(`/api-scheduled-tasks/${task.id}/disable`)
     ElMessage.success(t('apiTesting.messages.success.taskPaused'))
     loadTasks()
   } catch (error) {
@@ -662,7 +662,7 @@ const pauseTask = async (task) => {
 // 激活任务
 const activateTask = async (task) => {
   try {
-    await api.post(`/api-testing/scheduled-tasks/${task.id}/activate/`)
+    await api.put(`/api-scheduled-tasks/${task.id}/enable`)
     ElMessage.success(t('apiTesting.messages.success.taskActivated'))
     loadTasks()
   } catch (error) {

@@ -57,6 +57,15 @@ public class ApiExecutionRecordController {
         return Result.success(record);
     }
 
+    @GetMapping("/trigger/{triggerId}")
+    @Operation(summary = "按触发来源获取执行记录")
+    public Result<List<ApiExecutionRecord>> getRecordsByTriggerId(
+            @PathVariable Long triggerId,
+            @RequestParam(required = false, defaultValue = "50") Integer limit) {
+        List<ApiExecutionRecord> records = apiExecutionRecordService.getRecordsByTriggerId(triggerId, limit);
+        return Result.success(records);
+    }
+
     @PostMapping("/{id}/generate-allure-report")
     @Operation(summary = "生成Allure报告")
     public Result<Map<String, String>> generateAllureReport(@PathVariable Long id) {

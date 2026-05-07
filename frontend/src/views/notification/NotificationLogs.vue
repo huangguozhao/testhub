@@ -276,7 +276,7 @@ import {Search} from '@element-plus/icons-vue'
 import {ref, reactive, onMounted, computed} from 'vue'
 import {useI18n} from 'vue-i18n'
 import {ElMessage} from 'element-plus'
-import axios from 'axios'
+import api from '@/utils/api'
 
 export default {
   name: 'NotificationLogs',
@@ -317,8 +317,8 @@ export default {
       loading.value = true
       try {
         const params = {
-          page: pagination.currentPage,
-          page_size: pagination.pageSize,
+          current: pagination.currentPage,
+          size: pagination.pageSize,
           ordering: sortParams.order === 'ascending' ? sortParams.prop : `-${sortParams.prop}`
         }
 
@@ -334,9 +334,9 @@ export default {
           params.status = searchForm.status
         }
 
-        const response = await axios.get('/api/api-testing/notification-logs/', {params})
-        logsData.value = response.data.results || []
-        pagination.total = response.data.count || 0
+        const response = await api.get('/notifications/logs', {params})
+        logsData.value = response.data.records || []
+        pagination.total = response.data.total || 0
       } catch (error) {
         console.error('Fetch notification logs failed:', error)
         ElMessage.error(t('notification.logs.messages.fetchFailed'))
@@ -382,7 +382,7 @@ export default {
     // 查看详情
     const viewDetail = async (row) => {
       try {
-        const response = await axios.get(`/api/api-testing/notification-logs/${row.id}/detail/`)
+        const response = await api.get(`/notifications/logs/${row.id}`)
         selectedLog.value = response.data
         detailDialogVisible.value = true
       } catch (error) {

@@ -29,4 +29,9 @@ public interface ApiExecutionRecordService extends IService<ApiExecutionRecord> 
      * 获取记录详情
      */
     ApiExecutionRecord getRecord(Long id);
+
+    /**
+     * 按触发来源ID获取执行记录
+     */
+    List<ApiExecutionRecord> getRecordsByTriggerId(Long triggerId, Integer limit);
 }

@@ -2,7 +2,9 @@ package com.testhub.modules.api_testing.controller;
 
 import com.testhub.common.result.Result;
 import com.testhub.modules.api_testing.domain.ApiTestSuite;
+import com.testhub.modules.api_testing.domain.ApiTestSuiteRequest;
 import com.testhub.modules.api_testing.http.ApiExecutor;
+import com.testhub.modules.api_testing.service.ApiTestSuiteRequestService;
 import com.testhub.modules.api_testing.service.ApiTestSuiteService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -11,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * API测试套件控制器
@@ -22,6 +25,7 @@ import java.util.List;
 public class ApiTestSuiteController {
 
     private final ApiTestSuiteService apiTestSuiteService;
+    private final ApiTestSuiteRequestService apiTestSuiteRequestService;
     private final ApiExecutor apiExecutor;
 
     @GetMapping
@@ -66,5 +70,25 @@ public class ApiTestSuiteController {
     public Result<ApiExecutor.SuiteExecutionResult> executeTestSuite(@PathVariable Long id) {
         ApiExecutor.SuiteExecutionResult result = apiExecutor.executeSuite(id);
         return Result.success(result);
+    }
+
+    @PostMapping("/{id}/add-requests")
+    @Operation(summary = "添加请求到测试套件")
+    public Result<Void> addRequestsToSuite(
+            @PathVariable Long id,
+            @RequestBody Map<String, List<Long>> body) {
+        List<Long> requestIds = body.get("request_ids");
+        if (requestIds == null || requestIds.isEmpty()) {
+            return Result.error("请求ID列表不能为空");
+        }
+        apiTestSuiteRequestService.addRequestsToSuite(id, requestIds);
+        return Result.success();
+    }
+
+    @GetMapping("/{id}/requests")
+    @Operation(summary = "获取套件的所有请求")
+    public Result<List<ApiTestSuiteRequest>> getSuiteRequests(@PathVariable Long id) {
+        List<ApiTestSuiteRequest> requests = apiTestSuiteRequestService.getRequestsBySuite(id);
+        return Result.success(requests);
     }
 }
