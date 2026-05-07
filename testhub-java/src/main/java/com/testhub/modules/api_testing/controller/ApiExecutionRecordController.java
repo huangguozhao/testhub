@@ -81,6 +81,20 @@ public class ApiExecutionRecordController {
             String resultsDir = basePath + "/media/api-testing/allure-results/execution_" + id;
             String reportDir = basePath + "/media/api-testing/allure-reports/execution_" + id;
 
+            // 检查报告是否已存在
+            String allureReportPath = reportDir + "/index.html";
+            String simpleReportPath = reportDir + "/summary.html";
+            if (Files.exists(Path.of(allureReportPath))) {
+                Map<String, String> result = new HashMap<>();
+                result.put("report_url", "/media/api-testing/allure-reports/execution_" + id + "/index.html");
+                return Result.success(result);
+            }
+            if (Files.exists(Path.of(simpleReportPath))) {
+                Map<String, String> result = new HashMap<>();
+                result.put("report_url", "/media/api-testing/allure-reports/execution_" + id + "/summary.html");
+                return Result.success(result);
+            }
+
             // 确保目录存在
             Files.createDirectories(Path.of(resultsDir));
             Files.createDirectories(Path.of(reportDir));
