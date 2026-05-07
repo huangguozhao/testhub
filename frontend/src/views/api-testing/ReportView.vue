@@ -64,7 +64,7 @@
             <el-button
               size="small"
               type="success"
-              :loading="generatingReport"
+              :loading="generatingReportId === scope.row.id"
               @click="generateReport(scope.row)"
             >
               {{ $t('apiTesting.report.generateAndViewReport') }}
@@ -171,7 +171,7 @@
 
       <template #footer>
         <el-button @click="showDetailDialog = false">关闭</el-button>
-        <el-button type="primary" :loading="generatingReport" @click="generateReport(detailRecord)">
+        <el-button type="primary" :loading="generatingReportId === detailRecord?.id" @click="generateReport(detailRecord)">
           {{ $t('apiTesting.report.generateAndViewReport') }}
         </el-button>
       </template>
@@ -255,10 +255,10 @@ const viewDetail = async (record) => {
   }
 }
 
-const generatingReport = ref(false)
+const generatingReportId = ref(null)
 
 const generateReport = async (record) => {
-  generatingReport.value = true
+  generatingReportId.value = record.id
   try {
     const response = await api.post(
       `/api-execution-records/${record.id}/generate-allure-report`,
@@ -282,7 +282,7 @@ const generateReport = async (record) => {
   } catch (error) {
     ElMessage.error('生成报告失败: ' + (error.message || '未知错误'))
   } finally {
-    generatingReport.value = false
+    generatingReportId.value = null
   }
 }
 
