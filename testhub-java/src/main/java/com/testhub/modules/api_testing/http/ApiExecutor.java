@@ -389,6 +389,8 @@ public class ApiExecutor {
                     RequestResult requestResult = new RequestResult();
                     requestResult.setRequestId(request.getId());
                     requestResult.setRequestName(request.getName());
+                    requestResult.setMethod(request.getMethod());
+                    requestResult.setUrl(request.getUrl());
 
                     // 执行请求
                     ApiResponse response = execute(request, variables);
@@ -574,6 +576,8 @@ public class ApiExecutor {
     public static class RequestResult {
         private Long requestId;
         private String requestName;
+        private String method;
+        private String url;
         private boolean success;
         private Integer statusCode;
         private Long responseTime;

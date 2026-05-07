@@ -146,7 +146,7 @@ public class ApiExecutionRecordController {
      */
     private Map<String, Object> buildAllureResult(ApiExecutionRecord record, Map<String, Object> reqResult,
                                                    int index, String suiteName, long baseTime) {
-        String name = getStringValue(reqResult, "requestName", "请求 " + (index + 1));
+        String name = getStringValue(reqResult, "request_name", "请求 " + (index + 1));
         String method = getStringValue(reqResult, "method", "GET");
         String url = getStringValue(reqResult, "url", "");
         boolean passed = Boolean.TRUE.equals(reqResult.get("success")) || Boolean.TRUE.equals(reqResult.get("passed"));
@@ -286,12 +286,12 @@ public class ApiExecutionRecordController {
         StringBuilder rows = new StringBuilder();
         for (int i = 0; i < results.size(); i++) {
             Map<String, Object> r = results.get(i);
-            String name = getStringValue(r, "requestName", "请求 " + (i + 1));
+            String name = getStringValue(r, "request_name", "请求 " + (i + 1));
             String method = getStringValue(r, "method", "GET");
             String url = getStringValue(r, "url", "");
             boolean passed = Boolean.TRUE.equals(r.get("success")) || Boolean.TRUE.equals(r.get("passed"));
-            Object statusCode = r.get("statusCode");
-            Object responseTime = r.get("responseTime");
+            Object statusCode = r.get("status_code");
+            Object responseTime = r.get("response_time");
             String error = getStringValue(r, "error", "");
 
             rows.append("<tr class=\"").append(passed ? "passed" : "failed").append("\">");
