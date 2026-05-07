@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import java.io.*;
 import java.net.URI;
 import java.nio.file.*;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -61,13 +62,16 @@ public class AllureReportGenerator {
             Files.createDirectories(reportPath);
 
             // 执行 allure generate
-            ProcessBuilder pb = new ProcessBuilder(
-                    allureCmd.toString(),
-                    "generate",
-                    "--clean",
-                    "--output", reportDir,
-                    resultsDir
-            );
+            boolean isWindows = System.getProperty("os.name").toLowerCase().contains("win");
+            List<String> command;
+            if (isWindows) {
+                command = List.of("cmd", "/c", allureCmd.toString(),
+                        "generate", "--clean", "--output", reportDir, resultsDir);
+            } else {
+                command = List.of(allureCmd.toString(),
+                        "generate", "--clean", "--output", reportDir, resultsDir);
+            }
+            ProcessBuilder pb = new ProcessBuilder(command);
             pb.redirectErrorStream(true);
             pb.environment().put("JAVA_HOME", System.getProperty("java.home"));
 
@@ -104,27 +108,72 @@ public class AllureReportGenerator {
      */
     private Path findAllureExecutable() {
         boolean isWindows = System.getProperty("os.name").toLowerCase().contains("win");
-        String executable = isWindows ? "allure.bat" : "allure";
 
-        // 优先检查项目 tools 目录
-        Path toolsPath = Path.of(toolsDir, "allure", "bin", executable);
-        if (Files.exists(toolsPath)) {
-            return toolsPath;
-        }
+        if (isWindows) {
+            // Windows: 优先查找 allure.bat
+            // 1. 检查项目 tools 目录
+            Path toolsPath = Path.of(toolsDir, "allure", "bin", "allure.bat");
+            if (Files.exists(toolsPath)) {
+                return toolsPath;
+            }
 
-        // 检查系统 PATH
-        try {
-            ProcessBuilder pb = new ProcessBuilder(isWindows ? "where" : "which", "allure");
-            pb.redirectErrorStream(true);
-            Process process = pb.start();
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-                String line = reader.readLine();
-                if (line != null && !line.isBlank() && Files.exists(Path.of(line.trim()))) {
-                    return Path.of(line.trim());
+            // 2. 检查系统 PATH 中的 allure.bat
+            try {
+                ProcessBuilder pb = new ProcessBuilder("where", "allure.bat");
+                pb.redirectErrorStream(true);
+                Process process = pb.start();
+                try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                    String line = reader.readLine();
+                    if (line != null && !line.isBlank()) {
+                        Path p = Path.of(line.trim());
+                        if (Files.exists(p)) {
+                            return p;
+                        }
+                    }
+                }
+                process.waitFor();
+            } catch (Exception ignored) {
+            }
+
+            // 3. 检查常见安装路径
+            for (String dir : List.of("C:\\allure", "D:\\allure", "C:\\Tools\\allure", "D:\\Tools")) {
+                try {
+                    Path dirPath = Path.of(dir);
+                    if (!Files.isDirectory(dirPath)) continue;
+                    // 查找 allure-* 子目录
+                    try (var entries = Files.list(dirPath)) {
+                        for (Path entry : (Iterable<Path>) entries::iterator) {
+                            if (Files.isDirectory(entry) && entry.getFileName().toString().startsWith("allure-")) {
+                                Path bat = entry.resolve("bin").resolve("allure.bat");
+                                if (Files.exists(bat)) {
+                                    return bat;
+                                }
+                            }
+                        }
+                    }
+                } catch (Exception ignored) {
                 }
             }
-            process.waitFor();
-        } catch (Exception ignored) {
+        } else {
+            // Linux/Mac
+            Path toolsPath = Path.of(toolsDir, "allure", "bin", "allure");
+            if (Files.exists(toolsPath)) {
+                return toolsPath;
+            }
+
+            try {
+                ProcessBuilder pb = new ProcessBuilder("which", "allure");
+                pb.redirectErrorStream(true);
+                Process process = pb.start();
+                try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                    String line = reader.readLine();
+                    if (line != null && !line.isBlank() && Files.exists(Path.of(line.trim()))) {
+                        return Path.of(line.trim());
+                    }
+                }
+                process.waitFor();
+            } catch (Exception ignored) {
+            }
         }
 
         return null;
