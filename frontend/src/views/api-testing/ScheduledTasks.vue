@@ -2,10 +2,25 @@
   <div class="scheduled-tasks">
     <div class="header">
       <h3>{{ $t('apiTesting.scheduledTask.title') }}</h3>
-      <el-button type="primary" @click="handleCreateClick">
-        <el-icon><Plus /></el-icon>
-        {{ $t('apiTesting.scheduledTask.createTask') }}
-      </el-button>
+      <div class="actions">
+        <el-select
+          v-model="selectedProject"
+          :placeholder="$t('apiTesting.common.selectProject')"
+          style="width: 200px; margin-right: 12px;"
+          @change="onProjectChange"
+        >
+          <el-option
+            v-for="project in projects"
+            :key="project.id"
+            :label="project.name"
+            :value="project.id"
+          />
+        </el-select>
+        <el-button type="primary" @click="handleCreateClick">
+          <el-icon><Plus /></el-icon>
+          {{ $t('apiTesting.scheduledTask.createTask') }}
+        </el-button>
+      </div>
     </div>
 
     <!-- 筛选条件 -->
@@ -43,13 +58,6 @@
     <div class="task-list">
       <el-table :data="tasks" v-loading="loading">
         <el-table-column prop="name" :label="$t('apiTesting.scheduledTask.taskName')" min-width="200" />
-        <el-table-column prop="task_type" :label="$t('apiTesting.scheduledTask.taskType')" width="120">
-          <template #default="scope">
-            <el-tag :type="scope.row.task_type === 'TEST_SUITE' ? 'success' : 'primary'">
-              {{ scope.row.task_type === 'TEST_SUITE' ? $t('apiTesting.scheduledTask.taskTypes.testSuiteShort') : $t('apiTesting.scheduledTask.taskTypes.apiRequestShort') }}
-            </el-tag>
-          </template>
-        </el-table-column>
         <el-table-column prop="trigger_type" :label="$t('apiTesting.scheduledTask.triggerType')" width="120">
           <template #default="scope">
             <el-tag>
@@ -57,31 +65,33 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="status" :label="$t('apiTesting.common.status')" width="100">
+        <el-table-column prop="is_enabled" :label="$t('apiTesting.common.status')" width="100">
           <template #default="scope">
-            <el-tag :type="scope.row.status === 'ACTIVE' ? 'success' : scope.row.status === 'PAUSED' ? 'warning' : 'info'">
-              {{ getStatusText(scope.row.status) }}
+            <el-tag :type="scope.row.is_enabled ? 'success' : 'warning'">
+              {{ scope.row.is_enabled ? $t('apiTesting.scheduledTask.status.active') : $t('apiTesting.scheduledTask.status.paused') }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="notification_type_display" :label="$t('apiTesting.scheduledTask.notificationType')" width="120">
+        <el-table-column prop="notification_config" :label="$t('apiTesting.scheduledTask.notificationType')" width="120">
           <template #default="scope">
-            <el-tag
-              :type="getNotificationTypeTag(scope.row.notification_type_display)"
-              size="small"
-            >
-              {{ scope.row.notification_type_display || '-' }}
+            <el-tag :type="getNotificationTypeTag(scope.row.notification_config)" size="small">
+              {{ getNotificationTypeDisplay(scope.row.notification_config) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="next_run_time" :label="$t('apiTesting.scheduledTask.nextRunTime')" width="180">
+        <el-table-column :label="$t('apiTesting.scheduledTask.nextRunTime')" width="180">
           <template #default="scope">
-            {{ formatDateTime(scope.row.next_run_time) }}
+            <span v-if="scope.row.trigger_type === 'ONCE'">
+              {{ formatDateTime(scope.row.once_time) }}
+            </span>
+            <span v-else>
+              {{ formatDateTime(scope.row.next_run_at) }}
+            </span>
           </template>
         </el-table-column>
-        <el-table-column prop="last_run_time" :label="$t('apiTesting.scheduledTask.lastRunTime')" width="180">
+        <el-table-column prop="last_run_at" :label="$t('apiTesting.scheduledTask.lastRunTime')" width="180">
           <template #default="scope">
-            {{ formatDateTime(scope.row.last_run_time) }}
+            {{ formatDateTime(scope.row.last_run_at) }}
           </template>
         </el-table-column>
         <el-table-column :label="$t('apiTesting.common.operation')" width="200" fixed="right">
@@ -341,6 +351,8 @@ const testSuites = ref([])
 const apiRequests = ref([])
 const environments = ref([])
 const users = ref([]) // 添加用户列表
+const projects = ref([])
+const selectedProject = ref(null)
 const loading = ref(false)
 const logsLoading = ref(false)
 const submitting = ref(false)
@@ -380,26 +392,54 @@ const taskForm = reactive({
 })
 
 // 生命周期
-onMounted(() => {
+onMounted(async () => {
+  await loadProjects()
+  if (selectedProject.value) {
+    loadTasks()
+    loadTestSuites()
+    loadApiRequests()
+    loadEnvironments()
+  }
+  loadUsers() // 加载用户列表
+})
+
+// 加载项目列表
+const loadProjects = async () => {
+  try {
+    const response = await api.get('/api-projects')
+    projects.value = response.data.records || response.data || []
+    if (projects.value.length > 0) {
+      selectedProject.value = projects.value[0].id
+    }
+  } catch (error) {
+    console.error('加载项目失败:', error)
+    ElMessage.error(t('apiTesting.messages.error.loadProjects'))
+  }
+}
+
+// 项目切换
+const onProjectChange = () => {
   loadTasks()
   loadTestSuites()
   loadApiRequests()
   loadEnvironments()
-  loadUsers() // 加载用户列表
-})
+}
 
 // 加载任务列表
 const loadTasks = async () => {
+  if (!selectedProject.value) return
   loading.value = true
   try {
     const params = {
       page: pagination.current,
       page_size: pagination.size,
+      projectId: selectedProject.value,
       ...filters
     }
     const response = await getScheduledTasks(params)
-    tasks.value = response.data.results
-    pagination.total = response.data.count
+    const data = response.data
+    tasks.value = Array.isArray(data) ? data : (data.results || data.records || [])
+    pagination.total = Array.isArray(data) ? data.length : (data.count || data.total || 0)
   } catch (error) {
     ElMessage.error(t('apiTesting.messages.error.loadTasksFailed'))
   } finally {
@@ -409,9 +449,11 @@ const loadTasks = async () => {
 
 // 加载测试套件
 const loadTestSuites = async () => {
+  if (!selectedProject.value) return
   try {
-    const response = await getTestSuites()
-    testSuites.value = response.data.results
+    const response = await getTestSuites({ projectId: selectedProject.value })
+    const data = response.data
+    testSuites.value = Array.isArray(data) ? data : (data.results || data.records || [])
   } catch (error) {
     console.error('加载测试套件失败:', error)
   }
@@ -419,9 +461,11 @@ const loadTestSuites = async () => {
 
 // 加载API请求
 const loadApiRequests = async () => {
+  if (!selectedProject.value) return
   try {
-    const response = await getApiRequests()
-    apiRequests.value = response.data.results
+    const response = await getApiRequests({ projectId: selectedProject.value })
+    const data = response.data
+    apiRequests.value = Array.isArray(data) ? data : (data.results || data.records || [])
   } catch (error) {
     console.error('加载API请求失败:', error)
   }
@@ -429,9 +473,11 @@ const loadApiRequests = async () => {
 
 // 加载环境
 const loadEnvironments = async () => {
+  if (!selectedProject.value) return
   try {
-    const response = await getEnvironments()
-    environments.value = response.data.results
+    const response = await getEnvironments({ projectId: selectedProject.value })
+    const data = response.data
+    environments.value = Array.isArray(data) ? data : (data.results || data.records || [])
   } catch (error) {
     console.error('加载环境失败:', error)
   }
@@ -441,8 +487,8 @@ const loadEnvironments = async () => {
 const loadUsers = async () => {
   try {
     const response = await getUsers()
-    // 处理分页数据结构
-    const usersData = response.data.results || response.data
+    const data = response.data
+    const usersData = Array.isArray(data) ? data : (data.results || data.records || [])
     users.value = usersData.map(user => ({
       ...user,
       display_name: user.first_name ? `${user.first_name}（${user.email}）` : `${user.username}（${user.email}）`
@@ -494,33 +540,31 @@ const resetFilters = () => {
 const submitTaskForm = async () => {
   submitting.value = true
   try {
-    // 准备提交数据，确保格式正确
+    // 准备提交数据，字段名需匹配后端实体（SNAKE_CASE）
     const submitData = {
       name: taskForm.name,
-      description: taskForm.description,
-      task_type: taskForm.task_type,
-      trigger_type: taskForm.trigger_type,
-      notify_on_success: taskForm.notify_on_success,
-      notify_on_failure: taskForm.notify_on_failure,
-      notification_type_input: taskForm.notification_type,
-      notify_emails: taskForm.notify_emails,
-      environment: taskForm.environment
+      suite_id: taskForm.test_suite,  // 后端字段名是 suite_id
+      trigger_type: taskForm.trigger_type
     }
 
     // 根据触发器类型添加对应字段
     if (taskForm.trigger_type === 'CRON') {
       submitData.cron_expression = taskForm.cron_expression
     } else if (taskForm.trigger_type === 'INTERVAL') {
-      submitData.interval_seconds = taskForm.interval_seconds
+      submitData.interval_value = taskForm.interval_seconds
+      submitData.interval_unit = 'seconds'
     } else if (taskForm.trigger_type === 'ONCE') {
-      submitData.execute_at = taskForm.execute_at
+      submitData.once_time = taskForm.execute_at
     }
 
-    // 根据任务类型添加对应字段
-    if (taskForm.task_type === 'TEST_SUITE') {
-      submitData.test_suite = taskForm.test_suite
-    } else if (taskForm.task_type === 'API_REQUEST') {
-      submitData.api_request = taskForm.api_request
+    // 通知配置
+    if (taskForm.notify_on_success || taskForm.notify_on_failure) {
+      submitData.notification_config = JSON.stringify({
+        on_success: taskForm.notify_on_success,
+        on_failure: taskForm.notify_on_failure,
+        type: taskForm.notification_type,
+        emails: taskForm.notify_emails
+      })
     }
 
     if (editingTask.value) {
@@ -573,14 +617,28 @@ const formatDateTime = (dateString) => {
   }).replace(/\//g, '-')
 }
 
-// 获取通知类型标签样式
-const getNotificationTypeTag = (typeDisplay) => {
-  const typeMap = {
-    '邮箱通知': '',
-    'Webhook机器人': 'primary',
-    '两种都发送': 'warning'
+// 获取通知类型显示文本
+const getNotificationTypeDisplay = (config) => {
+  if (!config) return '-'
+  try {
+    const c = typeof config === 'string' ? JSON.parse(config) : config
+    const typeMap = { email: '邮箱通知', webhook: 'Webhook', both: '两种都发送' }
+    return typeMap[c.type] || '-'
+  } catch {
+    return '-'
   }
-  return typeMap[typeDisplay] || 'info'
+}
+
+// 获取通知类型标签样式
+const getNotificationTypeTag = (config) => {
+  if (!config) return 'info'
+  try {
+    const c = typeof config === 'string' ? JSON.parse(config) : config
+    const typeMap = { email: '', webhook: 'primary', both: 'warning' }
+    return typeMap[c.type] || 'info'
+  } catch {
+    return 'info'
+  }
 }
 
 // 查看执行日志
@@ -622,27 +680,41 @@ const handleTaskAction = (command, task) => {
 // 编辑任务
 const editTask = (task) => {
   editingTask.value = task
+
+  // 解析通知配置
+  let notifyOnSuccess = false
+  let notifyOnFailure = false
+  let notificationType = 'email'
+  let notifyEmails = []
+  if (task.notification_config) {
+    try {
+      const config = typeof task.notification_config === 'string'
+        ? JSON.parse(task.notification_config)
+        : task.notification_config
+      notifyOnSuccess = config.on_success || false
+      notifyOnFailure = config.on_failure || false
+      notificationType = config.type || 'email'
+      notifyEmails = config.emails || []
+    } catch (e) {
+      console.warn('解析通知配置失败:', e)
+    }
+  }
+
   Object.assign(taskForm, {
     name: task.name,
     description: task.description,
-    task_type: task.task_type,
+    task_type: task.suite_id ? 'TEST_SUITE' : 'API_REQUEST',
     trigger_type: task.trigger_type,
     cron_expression: task.cron_expression,
-    interval_seconds: task.interval_seconds,
-    execute_at: task.execute_at,
-    test_suite: task.test_suite || null,
+    interval_seconds: task.interval_value || 3600,
+    execute_at: task.once_time,
+    test_suite: task.suite_id || null,
     api_request: task.api_request || null,
     environment: task.environment || null,
-    notify_on_success: task.notify_on_success,
-    notify_on_failure: task.notify_on_failure,
-    notification_type: task.notification_type || 'email',
-    notify_emails: task.notify_emails || []
-  })
-  console.log('编辑任务数据回显:', {
-    test_suite: task.test_suite,
-    environment: task.environment,
-    taskForm_test_suite: taskForm.test_suite,
-    taskForm_environment: taskForm.environment
+    notify_on_success: notifyOnSuccess,
+    notify_on_failure: notifyOnFailure,
+    notification_type: notificationType,
+    notify_emails: notifyEmails
   })
   showCreateDialog.value = true
 }
@@ -705,7 +777,12 @@ const deleteTask = async (task) => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: px;
+  margin-bottom: 20px;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
 }
 
 .filters {

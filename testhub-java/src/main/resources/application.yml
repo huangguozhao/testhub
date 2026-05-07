@@ -46,7 +46,7 @@ spring:
 
   # JSON 配置
   jackson:
-    date-format: yyyy-MM-dd HH:mm:ss
+    date-format: yyyy-MM-dd HH:mm:ssXXX
     time-zone: Asia/Shanghai
     serialization:
       write-dates-as-timestamps: false
@@ -83,7 +83,7 @@ minio:
 xxl-job:
   admin:
     addresses: ${XXL_JOB_ADMIN_ADDRESSES:http://localhost:8088/xxl-job-admin}
-  accessToken:
+  accessToken: ${XXL_JOB_ACCESS_TOKEN:default_token}
   executor:
     app-name: ${XXL_JOB_EXECUTOR_APPNAME:testhub-executor}
     port: ${XXL_JOB_EXECUTOR_PORT:9999}

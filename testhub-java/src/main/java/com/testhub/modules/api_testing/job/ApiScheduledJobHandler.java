@@ -64,13 +64,9 @@ public class ApiScheduledJobHandler {
                 return;
             }
 
-            // 执行任务
+            // 执行任务（executeTaskNow 内部已更新 lastRunAt 和 ONCE 类型自动禁用）
             log.info("开始执行定时任务: id={}, name={}", taskId, task.getName());
             apiScheduledTaskService.executeTaskNow(taskId);
-
-            // 更新执行时间
-            task.setLastRunAt(LocalDateTime.now());
-            apiScheduledTaskService.updateById(task);
 
             log.info("定时任务执行完成: id={}", taskId);
             XxlJobHelper.handleSuccess();

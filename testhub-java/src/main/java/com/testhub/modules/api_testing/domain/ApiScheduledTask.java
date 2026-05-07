@@ -19,6 +19,11 @@ public class ApiScheduledTask extends BaseEntity {
     private Long suiteId;
 
     /**
+     * XXL-JOB 任务ID
+     */
+    private Long xxlJobId;
+
+    /**
      * 任务名称
      */
     private String name;
