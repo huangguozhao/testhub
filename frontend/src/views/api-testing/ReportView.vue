@@ -61,7 +61,12 @@
             <el-button size="small" type="primary" @click="viewDetail(scope.row)">
               查看详情
             </el-button>
-            <el-button size="small" type="success" @click="generateReport(scope.row)">
+            <el-button
+              size="small"
+              type="success"
+              :loading="generatingReport"
+              @click="generateReport(scope.row)"
+            >
               {{ $t('apiTesting.report.generateAndViewReport') }}
             </el-button>
           </template>
@@ -166,7 +171,7 @@
 
       <template #footer>
         <el-button @click="showDetailDialog = false">关闭</el-button>
-        <el-button type="primary" @click="generateReport(detailRecord)">
+        <el-button type="primary" :loading="generatingReport" @click="generateReport(detailRecord)">
           {{ $t('apiTesting.report.generateAndViewReport') }}
         </el-button>
       </template>
@@ -176,7 +181,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { useI18n } from 'vue-i18n'
 import api from '@/utils/api'
 import dayjs from 'dayjs'
@@ -250,16 +255,34 @@ const viewDetail = async (record) => {
   }
 }
 
+const generatingReport = ref(false)
+
 const generateReport = async (record) => {
+  generatingReport.value = true
   try {
-    ElMessage.info('正在生成报告...')
-    const response = await api.post(`/api-execution-records/${record.id}/generate-allure-report`)
+    const response = await api.post(
+      `/api-execution-records/${record.id}/generate-allure-report`,
+      null,
+      { timeout: 300000 } // Allure 生成较慢，5分钟超时
+    )
     const reportUrl = response.data?.report_url
     if (reportUrl) {
-      window.open(reportUrl, '_blank')
+      const fullUrl = window.location.origin + reportUrl
+      const opened = window.open(fullUrl, '_blank')
+      // 浏览器拦截弹窗时，显示链接让用户手动打开
+      if (!opened || opened.closed) {
+        ElMessageBox.alert(
+          `<div>报告已生成，但浏览器拦截了弹窗。请点击下方链接查看：</div>
+           <a href="${fullUrl}" target="_blank" style="color: #409eff; word-break: break-all;">${fullUrl}</a>`,
+          '报告已生成',
+          { dangerouslyUseHTMLString: true, confirmButtonText: '确定' }
+        )
+      }
     }
   } catch (error) {
-    ElMessage.error('生成报告失败')
+    ElMessage.error('生成报告失败: ' + (error.message || '未知错误'))
+  } finally {
+    generatingReport.value = false
   }
 }
 
