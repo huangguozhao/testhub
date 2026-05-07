@@ -312,13 +312,13 @@
         <div class="execution-summary">
           <el-row :gutter="20">
             <el-col :span="6">
-              <el-statistic :title="$t('apiTesting.automation.totalRequests')" :value="currentExecution.total_requests" />
+              <el-statistic :title="$t('apiTesting.automation.totalRequests')" :value="currentExecution.total_count" />
             </el-col>
             <el-col :span="6">
-              <el-statistic :title="$t('apiTesting.automation.passedCount')" :value="currentExecution.passed_requests" />
+              <el-statistic :title="$t('apiTesting.automation.passedCount')" :value="currentExecution.pass_count" />
             </el-col>
             <el-col :span="6">
-              <el-statistic :title="$t('apiTesting.automation.failedCount')" :value="currentExecution.failed_requests" />
+              <el-statistic :title="$t('apiTesting.automation.failedCount')" :value="currentExecution.fail_count" />
             </el-col>
             <el-col :span="6">
               <el-statistic :title="$t('apiTesting.automation.passRate')" :value="getPassRate(currentExecution)" suffix="%" />
@@ -328,26 +328,31 @@
 
         <div class="execution-results">
           <h4>{{ $t('apiTesting.automation.detailedResults') }}</h4>
-          <el-table :data="formatExecutionResults(currentExecution.results)">
-            <el-table-column prop="name" :label="$t('apiTesting.automation.requestName')" min-width="200" />
-            <el-table-column prop="method" :label="$t('apiTesting.automation.method')" width="80">
+          <el-table :data="formatExecutionResults(currentExecution.request_results)">
+            <el-table-column prop="request_name" :label="$t('apiTesting.automation.requestName')" min-width="200" />
+            <el-table-column label="URL" min-width="250" show-overflow-tooltip>
+              <template #default="scope">
+                {{ scope.row.url || '-' }}
+              </template>
+            </el-table-column>
+            <el-table-column label="Method" width="80">
               <template #default="scope">
                 <el-tag :type="getMethodType(scope.row.method)" size="small">
-                  {{ scope.row.method }}
+                  {{ scope.row.method || 'GET' }}
                 </el-tag>
               </template>
             </el-table-column>
-            <el-table-column prop="status" :label="$t('apiTesting.automation.result')" width="100">
+            <el-table-column :label="$t('apiTesting.automation.result')" width="100">
               <template #default="scope">
-                <el-tag :type="scope.row.passed ? 'success' : 'danger'" size="small">
-                  {{ scope.row.passed ? $t('apiTesting.automation.status.passed') : $t('apiTesting.automation.status.failed') }}
+                <el-tag :type="scope.row.success ? 'success' : 'danger'" size="small">
+                  {{ scope.row.success ? $t('apiTesting.automation.status.passed') : $t('apiTesting.automation.status.failed') }}
                 </el-tag>
               </template>
             </el-table-column>
             <el-table-column prop="status_code" :label="$t('apiTesting.automation.statusCode')" width="100" />
             <el-table-column prop="response_time" :label="$t('apiTesting.automation.responseTime')" width="120">
               <template #default="scope">
-                {{ scope.row.response_time?.toFixed(0) }}ms
+                {{ scope.row.response_time != null ? scope.row.response_time + 'ms' : '-' }}
               </template>
             </el-table-column>
             <el-table-column prop="error" :label="$t('apiTesting.automation.errorMessage')" min-width="200" show-overflow-tooltip />
@@ -476,8 +481,8 @@ const getAverageExecutionTime = (execution) => {
 }
 
 const getPassRate = (execution) => {
-  if (execution.total_requests === 0) return 0
-  return ((execution.passed_requests / execution.total_requests) * 100).toFixed(1)
+  if (!execution || execution.total_count === 0) return 0
+  return ((execution.pass_count / execution.total_count) * 100).toFixed(1)
 }
 
 const getEnvironmentName = (environmentId) => {

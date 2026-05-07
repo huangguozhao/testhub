@@ -6,6 +6,7 @@ import com.testhub.modules.api_testing.domain.ApiEnvironment;
 import com.testhub.modules.api_testing.domain.ApiExecutionRecord;
 import com.testhub.modules.api_testing.domain.ApiRequest;
 import com.testhub.modules.api_testing.domain.ApiTestSuite;
+import com.testhub.modules.api_testing.domain.ApiTestSuiteRequest;
 import com.testhub.modules.api_testing.service.*;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +34,7 @@ public class ApiExecutor {
     private final ApiEnvironmentService apiEnvironmentService;
     private final ApiExecutionRecordService apiExecutionRecordService;
     private final ApiTestSuiteService apiTestSuiteService;
+    private final ApiTestSuiteRequestService apiTestSuiteRequestService;
     private final AssertionEngine assertionEngine;
     private final VariableExtractor variableExtractor;
     private final ApiRequestHistoryService apiRequestHistoryService;
@@ -370,17 +372,18 @@ public class ApiExecutor {
                 }
             }
 
-            // 获取套件下的所有集合
-            List<ApiCollection> collections = apiCollectionService.getCollectionsBySuite(suiteId);
+            // 从api_test_suite_requests表获取套件关联的请求
+            List<ApiTestSuiteRequest> suiteRequests = apiTestSuiteRequestService.getRequestsBySuite(suiteId);
 
             List<RequestResult> requestResults = new ArrayList<>();
             int totalCount = 0;
             int passCount = 0;
 
-            for (ApiCollection collection : collections) {
+            for (ApiTestSuiteRequest suiteRequest : suiteRequests) {
+                if (suiteRequest.getEnabled() != null && !suiteRequest.getEnabled()) continue;
                 ApiRequestService apiRequestService = apiRequestServiceProvider.getObject();
-                List<ApiRequest> requests = apiRequestService.getRequestsByCollection(collection.getId());
-                for (ApiRequest request : requests) {
+                ApiRequest request = apiRequestService.getById(suiteRequest.getRequestId());
+                if (request == null) continue;
                     totalCount++;
                     RequestResult requestResult = new RequestResult();
                     requestResult.setRequestId(request.getId());
