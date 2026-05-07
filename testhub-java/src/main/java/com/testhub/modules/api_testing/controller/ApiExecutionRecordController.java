@@ -3,19 +3,21 @@ package com.testhub.modules.api_testing.controller;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.testhub.common.result.Result;
+import com.testhub.config.MinioConfig;
 import com.testhub.modules.api_testing.domain.ApiExecutionRecord;
 import com.testhub.modules.api_testing.domain.ApiTestSuite;
-import com.testhub.modules.api_testing.http.ApiExecutor;
 import com.testhub.modules.api_testing.service.AllureReportGenerator;
 import com.testhub.modules.api_testing.service.ApiExecutionRecordService;
 import com.testhub.modules.api_testing.service.ApiTestSuiteService;
+import com.testhub.modules.storage.service.FileStorageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -33,6 +35,8 @@ public class ApiExecutionRecordController {
     private final ApiExecutionRecordService apiExecutionRecordService;
     private final ApiTestSuiteService apiTestSuiteService;
     private final AllureReportGenerator allureReportGenerator;
+    private final FileStorageService fileStorageService;
+    private final MinioConfig minioConfig;
     private final ObjectMapper objectMapper;
 
     // 报告生成锁：同一份报告同时只允许一个请求生成，其他请求等待结果
@@ -80,51 +84,38 @@ public class ApiExecutionRecordController {
             return Result.notFound("执行记录不存在");
         }
 
-        String basePath = System.getProperty("user.dir");
-        String resultsDir = basePath + "/media/api-testing/allure-results/execution_" + id;
-        String reportDir = basePath + "/media/api-testing/allure-reports/execution_" + id;
-        String allureReportUrl = "/media/api-testing/allure-reports/execution_" + id + "/index.html";
-        String simpleReportUrl = "/media/api-testing/allure-reports/execution_" + id + "/summary.html";
+        String minioObject = "api-testing/reports/execution_" + id + "/report.html";
 
-        // 先快速检查报告是否已存在（无需加锁）
-        if (Files.exists(Path.of(reportDir, "index.html"))) {
-            return Result.success(Map.of("report_url", allureReportUrl));
-        }
-        if (Files.exists(Path.of(reportDir, "summary.html"))) {
-            return Result.success(Map.of("report_url", simpleReportUrl));
+        // 1. 检查 MinIO 中是否已有报告
+        String bucket = minioConfig.getBucketName();
+        if (fileStorageService.fileExists(bucket, minioObject)) {
+            String url = getReportUrl(minioObject);
+            return Result.success(Map.of("report_url", url));
         }
 
-        // 同一份报告同时只允许一个请求生成，其他请求等待结果
+        // 2. 加锁生成报告（同一份报告同时只允许一个请求生成）
         Object lock = reportLocks.computeIfAbsent(id, k -> new Object());
         synchronized (lock) {
             try {
-                // 双重检查：可能在等待锁期间其他线程已生成完毕
-                if (Files.exists(Path.of(reportDir, "index.html"))) {
-                    return Result.success(Map.of("report_url", allureReportUrl));
-                }
-                if (Files.exists(Path.of(reportDir, "summary.html"))) {
-                    return Result.success(Map.of("report_url", simpleReportUrl));
+                // 双重检查
+                if (fileStorageService.fileExists(bucket, minioObject)) {
+                    String url = getReportUrl(minioObject);
+                    return Result.success(Map.of("report_url", url));
                 }
 
-                Files.createDirectories(Path.of(resultsDir));
-                Files.createDirectories(Path.of(reportDir));
+                // 3. 生成 HTML 报告
+                String html = buildHtmlReport(record);
 
-                // 生成 Allure 结果文件
-                generateAllureResultFiles(record, resultsDir);
+                // 4. 上传到 MinIO
+                byte[] htmlBytes = html.getBytes(StandardCharsets.UTF_8);
+                ByteArrayInputStream inputStream = new ByteArrayInputStream(htmlBytes);
+                fileStorageService.uploadFile(bucket, minioObject, inputStream, "text/html", htmlBytes.length);
 
-                // 使用 Allure 生成报告
-                String reportUrl;
-                boolean allureSuccess = allureReportGenerator.generateReport(resultsDir, reportDir);
-                if (allureSuccess) {
-                    reportUrl = allureReportUrl;
-                    log.info("Allure 报告生成成功: executionId={}", id);
-                } else {
-                    reportUrl = generateSimpleHtmlReport(record, reportDir, id);
-                }
+                log.info("报告已上传到 MinIO: executionId={}, object={}", id, minioObject);
 
-                Map<String, String> result = new HashMap<>();
-                result.put("report_url", reportUrl);
-                return Result.success(result);
+                // 5. 返回 URL
+                String url = getReportUrl(minioObject);
+                return Result.success(Map.of("report_url", url));
 
             } catch (Exception e) {
                 log.error("生成报告失败: {}", e.getMessage(), e);
@@ -136,108 +127,17 @@ public class ApiExecutionRecordController {
     }
 
     /**
-     * 生成 Allure 格式的 JSON 结果文件
+     * 获取报告访问 URL
      */
-    private void generateAllureResultFiles(ApiExecutionRecord record, String resultsDir) throws Exception {
-        List<Map<String, Object>> requestResults = parseResultData(record.getResultData());
-
-        // 获取套件名称
-        String suiteName = record.getSuiteName();
-        if (suiteName == null && record.getSuiteId() != null) {
-            ApiTestSuite suite = apiTestSuiteService.getById(record.getSuiteId());
-            suiteName = suite != null ? suite.getName() : "未知套件";
-        }
-
-        // 生成 container 文件
-        Map<String, Object> container = new LinkedHashMap<>();
-        container.put("uuid", String.valueOf(record.getId()));
-        container.put("name", suiteName);
-        List<String> children = new ArrayList<>();
-        for (int i = 0; i < requestResults.size(); i++) {
-            children.add(record.getId() + "-" + i);
-        }
-        container.put("children", children);
-
-        Path containerPath = Path.of(resultsDir, record.getId() + "-container.json");
-        Files.writeString(containerPath, objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(container));
-
-        // 为每个请求生成 result 文件
-        long baseTime = System.currentTimeMillis();
-        for (int i = 0; i < requestResults.size(); i++) {
-            Map<String, Object> reqResult = requestResults.get(i);
-            Map<String, Object> allureResult = buildAllureResult(record, reqResult, i, suiteName, baseTime);
-
-            Path resultPath = Path.of(resultsDir, record.getId() + "-" + i + "-result.json");
-            Files.writeString(resultPath, objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(allureResult));
-        }
+    private String getReportUrl(String objectName) {
+        // 返回 MinIO 直接访问 URL（需要 bucket 设置为公开访问）
+        return minioConfig.getEndpoint() + "/" + minioConfig.getBucketName() + "/" + objectName;
     }
 
     /**
-     * 构建单个请求的 Allure result 格式
+     * 构建 HTML 报告内容
      */
-    private Map<String, Object> buildAllureResult(ApiExecutionRecord record, Map<String, Object> reqResult,
-                                                   int index, String suiteName, long baseTime) {
-        String name = getStringValue(reqResult, "request_name", "请求 " + (index + 1));
-        String method = getStringValue(reqResult, "method", "GET");
-        String url = getStringValue(reqResult, "url", "");
-        boolean passed = Boolean.TRUE.equals(reqResult.get("success")) || Boolean.TRUE.equals(reqResult.get("passed"));
-        String error = getStringValue(reqResult, "error", null);
-
-        Map<String, Object> result = new LinkedHashMap<>();
-        result.put("uuid", record.getId() + "-" + index);
-        result.put("name", name);
-        result.put("status", passed ? "passed" : "failed");
-        result.put("stage", "finished");
-        result.put("start", baseTime - 1000);
-        result.put("stop", baseTime);
-        result.put("description", "Method: " + method + "\nURL: " + url);
-        result.put("historyId", record.getSuiteId() + "-" + index);
-        result.put("fullName", suiteName + " / " + name);
-
-        // labels
-        result.put("labels", List.of(
-                Map.of("name", "suite", "value", suiteName != null ? suiteName : ""),
-                Map.of("name", "package", "value", "api_testing")
-        ));
-
-        // parameters
-        result.put("parameters", List.of(
-                Map.of("name", "method", "value", method),
-                Map.of("name", "url", "value", url)
-        ));
-
-        // steps
-        List<Map<String, Object>> steps = new ArrayList<>();
-        Map<String, Object> step1 = new LinkedHashMap<>();
-        step1.put("name", "发送请求");
-        step1.put("status", "passed");
-        step1.put("stage", "finished");
-        step1.put("start", baseTime - 1000);
-        step1.put("stop", baseTime - 500);
-        steps.add(step1);
-
-        Map<String, Object> step2 = new LinkedHashMap<>();
-        step2.put("name", "验证响应");
-        step2.put("status", passed ? "passed" : "failed");
-        step2.put("stage", "finished");
-        step2.put("start", baseTime - 500);
-        step2.put("stop", baseTime);
-        steps.add(step2);
-
-        result.put("steps", steps);
-
-        // 错误信息
-        if (error != null && !error.isEmpty()) {
-            result.put("statusDetails", Map.of("message", error, "trace", ""));
-        }
-
-        return result;
-    }
-
-    /**
-     * 生成简单的 HTML 汇总页（Allure 不可用时的降级方案）
-     */
-    private String generateSimpleHtmlReport(ApiExecutionRecord record, String reportDir, Long executionId) throws Exception {
+    private String buildHtmlReport(ApiExecutionRecord record) throws Exception {
         List<Map<String, Object>> results = parseResultData(record.getResultData());
 
         String suiteName = record.getSuiteName();
@@ -269,7 +169,7 @@ public class ApiExecutionRecordController {
             rows.append("</tr>\n");
         }
 
-        String html = """
+        return """
                 <!DOCTYPE html>
                 <html lang="zh">
                 <head>
@@ -324,12 +224,6 @@ public class ApiExecutionRecordController {
                 record.getFailCount() != null ? record.getFailCount() : 0,
                 rows
         );
-
-        Path htmlPath = Path.of(reportDir, "summary.html");
-        Files.writeString(htmlPath, html);
-
-        log.info("生成简单 HTML 报告: executionId={}", executionId);
-        return "/media/api-testing/allure-reports/execution_" + executionId + "/summary.html";
     }
 
     @SuppressWarnings("unchecked")
@@ -352,5 +246,4 @@ public class ApiExecutionRecordController {
         if (str == null) return "";
         return str.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;");
     }
-
 }

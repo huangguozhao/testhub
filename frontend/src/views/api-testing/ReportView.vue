@@ -267,7 +267,8 @@ const generateReport = async (record) => {
     )
     const reportUrl = response.data?.report_url
     if (reportUrl) {
-      const fullUrl = window.location.origin + reportUrl
+      // 支持绝对 URL（MinIO）和相对路径
+      const fullUrl = reportUrl.startsWith('http') ? reportUrl : window.location.origin + reportUrl
       const opened = window.open(fullUrl, '_blank')
       // 浏览器拦截弹窗时，显示链接让用户手动打开
       if (!opened || opened.closed) {

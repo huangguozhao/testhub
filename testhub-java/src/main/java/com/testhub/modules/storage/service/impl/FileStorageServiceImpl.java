@@ -124,9 +124,38 @@ public class FileStorageServiceImpl implements FileStorageService {
                 );
                 log.info("创建存储桶成功: {}", bucket);
             }
+            // 设置公开读取策略
+            setPublicReadPolicy(bucket);
         } catch (Exception e) {
             log.error("创建存储桶失败: {}", bucket, e);
             throw new RuntimeException("创建存储桶失败: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 设置存储桶公开读取策略
+     */
+    private void setPublicReadPolicy(String bucket) {
+        try {
+            String policy = """
+                {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {"AWS": ["*"]},
+                            "Action": ["s3:GetObject"],
+                            "Resource": ["arn:aws:s3:::%s/*"]
+                        }
+                    ]
+                }
+                """.formatted(bucket);
+            minioClient.setBucketPolicy(
+                    SetBucketPolicyArgs.builder().bucket(bucket).config(policy).build()
+            );
+            log.info("设置存储桶公开读取策略成功: {}", bucket);
+        } catch (Exception e) {
+            log.warn("设置存储桶公开读取策略失败: {}", bucket, e);
         }
     }
 }
