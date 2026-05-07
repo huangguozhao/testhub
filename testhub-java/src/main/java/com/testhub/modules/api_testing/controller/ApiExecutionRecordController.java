@@ -16,8 +16,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.ByteArrayInputStream;
-import java.nio.charset.StandardCharsets;
+import java.io.*;
 import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -39,7 +38,6 @@ public class ApiExecutionRecordController {
     private final MinioConfig minioConfig;
     private final ObjectMapper objectMapper;
 
-    // 报告生成锁：同一份报告同时只允许一个请求生成，其他请求等待结果
     private final ConcurrentHashMap<Long, Object> reportLocks = new ConcurrentHashMap<>();
 
     @GetMapping("/project/{projectId}")
@@ -84,38 +82,53 @@ public class ApiExecutionRecordController {
             return Result.notFound("执行记录不存在");
         }
 
-        String minioObject = "api-testing/reports/execution_" + id + "/report.html";
-
-        // 1. 检查 MinIO 中是否已有报告
         String bucket = minioConfig.getBucketName();
-        if (fileStorageService.fileExists(bucket, minioObject)) {
-            String url = getReportUrl(minioObject);
-            return Result.success(Map.of("report_url", url));
+        String prefix = "api-testing/reports/execution_" + id;
+        String indexObject = prefix + "/index.html";
+
+        // 1. 检查 MinIO 中是否已有 Allure 报告
+        if (fileStorageService.fileExists(bucket, indexObject)) {
+            return Result.success(Map.of("report_url", getReportUrl(indexObject)));
         }
 
-        // 2. 加锁生成报告（同一份报告同时只允许一个请求生成）
+        // 2. 加锁生成
         Object lock = reportLocks.computeIfAbsent(id, k -> new Object());
         synchronized (lock) {
             try {
                 // 双重检查
-                if (fileStorageService.fileExists(bucket, minioObject)) {
-                    String url = getReportUrl(minioObject);
-                    return Result.success(Map.of("report_url", url));
+                if (fileStorageService.fileExists(bucket, indexObject)) {
+                    return Result.success(Map.of("report_url", getReportUrl(indexObject)));
                 }
 
-                // 3. 生成 HTML 报告
-                String html = buildHtmlReport(record);
+                String basePath = System.getProperty("user.dir");
+                String resultsDir = basePath + "/media/api-testing/allure-results/execution_" + id;
+                String reportDir = basePath + "/media/api-testing/allure-reports/execution_" + id;
 
-                // 4. 上传到 MinIO
-                byte[] htmlBytes = html.getBytes(StandardCharsets.UTF_8);
-                ByteArrayInputStream inputStream = new ByteArrayInputStream(htmlBytes);
-                fileStorageService.uploadFile(bucket, minioObject, inputStream, "text/html", htmlBytes.length);
+                // 3. 生成 Allure 结果文件
+                Files.createDirectories(Path.of(resultsDir));
+                generateAllureResultFiles(record, resultsDir);
 
-                log.info("报告已上传到 MinIO: executionId={}, object={}", id, minioObject);
+                // 4. 尝试生成 Allure 报告
+                boolean allureSuccess = allureReportGenerator.generateReport(resultsDir, reportDir);
 
-                // 5. 返回 URL
-                String url = getReportUrl(minioObject);
-                return Result.success(Map.of("report_url", url));
+                String reportUrl;
+                if (allureSuccess) {
+                    // 5a. Allure 成功：上传整个报告目录到 MinIO
+                    uploadDirectoryToMinio(bucket, prefix, Path.of(reportDir));
+                    reportUrl = getReportUrl(indexObject);
+                    log.info("Allure 报告已上传到 MinIO: executionId={}", id);
+                } else {
+                    // 5b. Allure 失败：生成简单 HTML 并上传
+                    String html = buildHtmlReport(record);
+                    String simpleObject = prefix + "/summary.html";
+                    byte[] htmlBytes = html.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+                    fileStorageService.uploadFile(bucket, simpleObject,
+                            new ByteArrayInputStream(htmlBytes), "text/html", htmlBytes.length);
+                    reportUrl = getReportUrl(simpleObject);
+                    log.info("简单 HTML 报告已上传到 MinIO: executionId={}", id);
+                }
+
+                return Result.success(Map.of("report_url", reportUrl));
 
             } catch (Exception e) {
                 log.error("生成报告失败: {}", e.getMessage(), e);
@@ -127,19 +140,131 @@ public class ApiExecutionRecordController {
     }
 
     /**
+     * 递归上传目录到 MinIO
+     */
+    private void uploadDirectoryToMinio(String bucket, String prefix, Path dir) throws IOException {
+        if (!Files.isDirectory(dir)) return;
+        try (var stream = Files.walk(dir)) {
+            stream.filter(Files::isRegularFile).forEach(filePath -> {
+                try {
+                    String relativePath = dir.relativize(filePath).toString().replace("\\", "/");
+                    String objectName = prefix + "/" + relativePath;
+                    String contentType = detectContentType(relativePath);
+                    byte[] bytes = Files.readAllBytes(filePath);
+                    fileStorageService.uploadFile(bucket, objectName,
+                            new ByteArrayInputStream(bytes), contentType, bytes.length);
+                } catch (Exception e) {
+                    log.warn("上传文件失败: {}", filePath, e);
+                }
+            });
+        }
+    }
+
+    /**
+     * 检测文件 Content-Type
+     */
+    private String detectContentType(String fileName) {
+        if (fileName.endsWith(".html")) return "text/html";
+        if (fileName.endsWith(".css")) return "text/css";
+        if (fileName.endsWith(".js")) return "application/javascript";
+        if (fileName.endsWith(".json")) return "application/json";
+        if (fileName.endsWith(".png")) return "image/png";
+        if (fileName.endsWith(".svg")) return "image/svg+xml";
+        return "application/octet-stream";
+    }
+
+    /**
      * 获取报告访问 URL
      */
     private String getReportUrl(String objectName) {
-        // 返回 MinIO 直接访问 URL（需要 bucket 设置为公开访问）
         return minioConfig.getEndpoint() + "/" + minioConfig.getBucketName() + "/" + objectName;
     }
 
     /**
-     * 构建 HTML 报告内容
+     * 生成 Allure 格式的 JSON 结果文件
      */
+    private void generateAllureResultFiles(ApiExecutionRecord record, String resultsDir) throws Exception {
+        List<Map<String, Object>> requestResults = parseResultData(record.getResultData());
+
+        String suiteName = record.getSuiteName();
+        if (suiteName == null && record.getSuiteId() != null) {
+            ApiTestSuite suite = apiTestSuiteService.getById(record.getSuiteId());
+            suiteName = suite != null ? suite.getName() : "未知套件";
+        }
+
+        Map<String, Object> container = new LinkedHashMap<>();
+        container.put("uuid", String.valueOf(record.getId()));
+        container.put("name", suiteName);
+        List<String> children = new ArrayList<>();
+        for (int i = 0; i < requestResults.size(); i++) {
+            children.add(record.getId() + "-" + i);
+        }
+        container.put("children", children);
+
+        Path containerPath = Path.of(resultsDir, record.getId() + "-container.json");
+        Files.writeString(containerPath, objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(container));
+
+        long baseTime = System.currentTimeMillis();
+        for (int i = 0; i < requestResults.size(); i++) {
+            Map<String, Object> reqResult = requestResults.get(i);
+            Map<String, Object> allureResult = buildAllureResult(record, reqResult, i, suiteName, baseTime);
+            Path resultPath = Path.of(resultsDir, record.getId() + "-" + i + "-result.json");
+            Files.writeString(resultPath, objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(allureResult));
+        }
+    }
+
+    private Map<String, Object> buildAllureResult(ApiExecutionRecord record, Map<String, Object> reqResult,
+                                                   int index, String suiteName, long baseTime) {
+        String name = getStringValue(reqResult, "request_name", "请求 " + (index + 1));
+        String method = getStringValue(reqResult, "method", "GET");
+        String url = getStringValue(reqResult, "url", "");
+        boolean passed = Boolean.TRUE.equals(reqResult.get("success")) || Boolean.TRUE.equals(reqResult.get("passed"));
+        String error = getStringValue(reqResult, "error", null);
+
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("uuid", record.getId() + "-" + index);
+        result.put("name", name);
+        result.put("status", passed ? "passed" : "failed");
+        result.put("stage", "finished");
+        result.put("start", baseTime - 1000);
+        result.put("stop", baseTime);
+        result.put("description", "Method: " + method + "\nURL: " + url);
+        result.put("historyId", record.getSuiteId() + "-" + index);
+        result.put("fullName", suiteName + " / " + name);
+        result.put("labels", List.of(
+                Map.of("name", "suite", "value", suiteName != null ? suiteName : ""),
+                Map.of("name", "package", "value", "api_testing")
+        ));
+        result.put("parameters", List.of(
+                Map.of("name", "method", "value", method),
+                Map.of("name", "url", "value", url)
+        ));
+
+        List<Map<String, Object>> steps = new ArrayList<>();
+        Map<String, Object> step1 = new LinkedHashMap<>();
+        step1.put("name", "发送请求");
+        step1.put("status", "passed");
+        step1.put("stage", "finished");
+        step1.put("start", baseTime - 1000);
+        step1.put("stop", baseTime - 500);
+        steps.add(step1);
+        Map<String, Object> step2 = new LinkedHashMap<>();
+        step2.put("name", "验证响应");
+        step2.put("status", passed ? "passed" : "failed");
+        step2.put("stage", "finished");
+        step2.put("start", baseTime - 500);
+        step2.put("stop", baseTime);
+        steps.add(step2);
+        result.put("steps", steps);
+
+        if (error != null && !error.isEmpty()) {
+            result.put("statusDetails", Map.of("message", error, "trace", ""));
+        }
+        return result;
+    }
+
     private String buildHtmlReport(ApiExecutionRecord record) throws Exception {
         List<Map<String, Object>> results = parseResultData(record.getResultData());
-
         String suiteName = record.getSuiteName();
         if (suiteName == null && record.getSuiteId() != null) {
             ApiTestSuite suite = apiTestSuiteService.getById(record.getSuiteId());
@@ -156,7 +281,6 @@ public class ApiExecutionRecordController {
             Object statusCode = r.get("status_code");
             Object responseTime = r.get("response_time");
             String error = getStringValue(r, "error", "");
-
             rows.append("<tr class=\"").append(passed ? "passed" : "failed").append("\">");
             rows.append("<td>").append(i + 1).append("</td>");
             rows.append("<td>").append(escapeHtml(name)).append("</td>");
@@ -215,22 +339,19 @@ public class ApiExecutionRecordController {
                 </body>
                 </html>
                 """.formatted(
-                escapeHtml(suiteName),
-                escapeHtml(suiteName),
+                escapeHtml(suiteName), escapeHtml(suiteName),
                 record.getExecutedAt() != null ? record.getExecutedAt().toString() : "-",
                 record.getDuration() != null ? record.getDuration() : 0,
                 record.getTotalCount() != null ? record.getTotalCount() : 0,
                 record.getPassCount() != null ? record.getPassCount() : 0,
-                record.getFailCount() != null ? record.getFailCount() : 0,
-                rows
-        );
+                record.getFailCount() != null ? record.getFailCount() : 0, rows);
     }
 
     @SuppressWarnings("unchecked")
     private List<Map<String, Object>> parseResultData(String resultData) {
         if (resultData == null || resultData.isBlank()) return List.of();
         try {
-            return objectMapper.readValue(resultData, new TypeReference<List<Map<String, Object>>>() {});
+            return objectMapper.readValue(resultData, new TypeReference<>() {});
         } catch (Exception e) {
             log.warn("解析 resultData 失败: {}", e.getMessage());
             return List.of();
