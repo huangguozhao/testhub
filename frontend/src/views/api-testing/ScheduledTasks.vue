@@ -161,31 +161,161 @@
           </el-radio-group>
         </el-form-item>
 
-        <!-- 根据触发器类型显示不同配置 -->
-        <el-form-item v-if="taskForm.trigger_type === 'CRON'" :label="$t('apiTesting.scheduledTask.cronExpression')" required>
-          <el-input v-model="taskForm.cron_expression" placeholder="0 0 * * *" />
-          <div class="cron-help">
-            <el-tooltip
-              raw-content
-              placement="top"
-            >
-              <template #content>
-                <div style="line-height: 1.6; text-align: left;">
-                  <div>{{ $t('apiTesting.scheduledTask.cronHelp.format') }}</div>
-                  <div>• {{ $t('apiTesting.scheduledTask.cronHelp.minute') }}</div>
-                  <div>• {{ $t('apiTesting.scheduledTask.cronHelp.hour') }}</div>
-                  <div>• {{ $t('apiTesting.scheduledTask.cronHelp.day') }}</div>
-                  <div>• {{ $t('apiTesting.scheduledTask.cronHelp.month') }}</div>
-                  <div>• {{ $t('apiTesting.scheduledTask.cronHelp.week') }}</div>
-                  <div style="margin-top: 8px;">{{ $t('apiTesting.scheduledTask.cronHelp.examples') }}</div>
-                  <div>• {{ $t('apiTesting.scheduledTask.cronHelp.daily') }}</div>
-                  <div>• {{ $t('apiTesting.scheduledTask.cronHelp.hourly') }}</div>
-                  <div>• {{ $t('apiTesting.scheduledTask.cronHelp.weekly') }}</div>
-                  <div>• {{ $t('apiTesting.scheduledTask.cronHelp.monthly') }}</div>
-                </div>
-              </template>
-              <span style="cursor: pointer; color: #409EFF;">{{ $t('apiTesting.scheduledTask.cronHelpLink') }}</span>
-            </el-tooltip>
+        <!-- CRON 可视化构建器 -->
+        <el-form-item v-if="taskForm.trigger_type === 'CRON'" label="调度规则" required>
+          <div class="cron-builder">
+            <!-- 模式切换 -->
+            <el-radio-group v-model="cronMode" size="small" style="margin-bottom: 12px;">
+              <el-radio-button value="preset">常用预设</el-radio-button>
+              <el-radio-button value="custom">自定义</el-radio-button>
+              <el-radio-button value="advanced">高级</el-radio-button>
+            </el-radio-group>
+
+            <!-- 常用预设 -->
+            <div v-if="cronMode === 'preset'" class="cron-presets">
+              <el-button
+                v-for="p in cronPresets"
+                :key="p.value"
+                :type="taskForm.cron_expression === p.value ? 'primary' : 'default'"
+                @click="selectCronPreset(p)"
+                size="small"
+              >
+                {{ p.label }}
+              </el-button>
+            </div>
+
+            <!-- 自定义构建 -->
+            <div v-if="cronMode === 'custom'" class="cron-custom">
+              <el-row :gutter="12">
+                <el-col :span="8">
+                  <div class="cron-field-label">分钟</div>
+                  <el-select v-model="cronFields.minuteType" @change="onCronFieldChange" style="width: 100%;">
+                    <el-option label="每分钟" value="*" />
+                    <el-option label="每N分钟" value="*/N" />
+                    <el-option label="指定" value="fixed" />
+                  </el-select>
+                  <el-select
+                    v-if="cronFields.minuteType === '*/N'"
+                    v-model="cronFields.minuteStep"
+                    @change="onCronFieldChange"
+                    style="width: 100%; margin-top: 4px;"
+                  >
+                    <el-option v-for="n in [2,3,5,10,15,20,30]" :key="n" :label="'每' + n + '分钟'" :value="n" />
+                  </el-select>
+                  <el-select
+                    v-if="cronFields.minuteType === 'fixed'"
+                    v-model="cronFields.minuteValue"
+                    @change="onCronFieldChange"
+                    style="width: 100%; margin-top: 4px;"
+                    filterable
+                  >
+                    <el-option v-for="n in 60" :key="n-1" :label="(n-1) + '分'" :value="n-1" />
+                  </el-select>
+                </el-col>
+                <el-col :span="8">
+                  <div class="cron-field-label">小时</div>
+                  <el-select v-model="cronFields.hourType" @change="onCronFieldChange" style="width: 100%;">
+                    <el-option label="每小时" value="*" />
+                    <el-option label="每N小时" value="*/N" />
+                    <el-option label="指定" value="fixed" />
+                  </el-select>
+                  <el-select
+                    v-if="cronFields.hourType === '*/N'"
+                    v-model="cronFields.hourStep"
+                    @change="onCronFieldChange"
+                    style="width: 100%; margin-top: 4px;"
+                  >
+                    <el-option v-for="n in [2,3,4,6,8,12]" :key="n" :label="'每' + n + '小时'" :value="n" />
+                  </el-select>
+                  <el-select
+                    v-if="cronFields.hourType === 'fixed'"
+                    v-model="cronFields.hourValue"
+                    @change="onCronFieldChange"
+                    style="width: 100%; margin-top: 4px;"
+                    filterable
+                  >
+                    <el-option v-for="n in 24" :key="n-1" :label="(n-1) + '时'" :value="n-1" />
+                  </el-select>
+                </el-col>
+                <el-col :span="8">
+                  <div class="cron-field-label">日</div>
+                  <el-select v-model="cronFields.dayType" @change="onCronFieldChange" style="width: 100%;">
+                    <el-option label="每天" value="*" />
+                    <el-option label="指定日期" value="fixed" />
+                  </el-select>
+                  <el-select
+                    v-if="cronFields.dayType === 'fixed'"
+                    v-model="cronFields.dayValue"
+                    @change="onCronFieldChange"
+                    style="width: 100%; margin-top: 4px;"
+                    filterable
+                  >
+                    <el-option v-for="n in 31" :key="n" :label="n + '号'" :value="n" />
+                  </el-select>
+                </el-col>
+              </el-row>
+              <el-row :gutter="12" style="margin-top: 8px;">
+                <el-col :span="12">
+                  <div class="cron-field-label">月</div>
+                  <el-select v-model="cronFields.monthType" @change="onCronFieldChange" style="width: 100%;">
+                    <el-option label="每月" value="*" />
+                    <el-option label="指定月份" value="fixed" />
+                  </el-select>
+                  <el-select
+                    v-if="cronFields.monthType === 'fixed'"
+                    v-model="cronFields.monthValue"
+                    @change="onCronFieldChange"
+                    style="width: 100%; margin-top: 4px;"
+                    filterable
+                  >
+                    <el-option v-for="n in 12" :key="n" :label="n + '月'" :value="n" />
+                  </el-select>
+                </el-col>
+                <el-col :span="12">
+                  <div class="cron-field-label">星期</div>
+                  <el-select v-model="cronFields.weekdayType" @change="onCronFieldChange" style="width: 100%;">
+                    <el-option label="不限" value="?" />
+                    <el-option label="工作日 (周一至周五)" value="MON-FRI" />
+                    <el-option label="周末" value="SAT-SUN" />
+                    <el-option label="指定" value="fixed" />
+                  </el-select>
+                  <el-select
+                    v-if="cronFields.weekdayType === 'fixed'"
+                    v-model="cronFields.weekdayValue"
+                    @change="onCronFieldChange"
+                    style="width: 100%; margin-top: 4px;"
+                  >
+                    <el-option label="周一" value="MON" />
+                    <el-option label="周二" value="TUE" />
+                    <el-option label="周三" value="WED" />
+                    <el-option label="周四" value="THU" />
+                    <el-option label="周五" value="FRI" />
+                    <el-option label="周六" value="SAT" />
+                    <el-option label="周日" value="SUN" />
+                  </el-select>
+                </el-col>
+              </el-row>
+            </div>
+
+            <!-- 高级模式 -->
+            <div v-if="cronMode === 'advanced'">
+              <el-input v-model="taskForm.cron_expression" placeholder="0 0 9 * * ?" />
+              <div style="margin-top: 4px; font-size: 12px; color: #909399;">
+                格式: 秒 分 时 日 月 星期 (Spring CRON 6位)
+              </div>
+            </div>
+
+            <!-- 表达式预览 -->
+            <div class="cron-preview">
+              <div class="cron-preview-expr">
+                <span class="cron-preview-label">表达式:</span>
+                <code>{{ taskForm.cron_expression }}</code>
+              </div>
+              <div class="cron-preview-desc">
+                <span class="cron-preview-label">说明:</span>
+                <span>{{ getCronDescription(taskForm.cron_expression) }}</span>
+              </div>
+            </div>
           </div>
         </el-form-item>
 
@@ -400,7 +530,7 @@ const taskForm = reactive({
   description: '',
   task_type: 'TEST_SUITE',
   trigger_type: 'CRON',
-  cron_expression: '0 0 * * *',
+  cron_expression: '0 0 * * * ?',
   interval_seconds: 3600,
   execute_at: '',
   test_suite: '',
@@ -410,6 +540,35 @@ const taskForm = reactive({
   notify_on_failure: false,
   notify_emails: []
 })
+
+// CRON 构建器
+const cronMode = ref('preset')
+const cronFields = reactive({
+  minuteType: '*',
+  minuteStep: 5,
+  minuteValue: 0,
+  hourType: '*',
+  hourStep: 1,
+  hourValue: 0,
+  dayType: '*',
+  dayValue: 1,
+  monthType: '*',
+  monthValue: 1,
+  weekdayType: '?',
+  weekdayValue: 'MON'
+})
+
+const cronPresets = [
+  { label: '每分钟', value: '0 * * * * ?' },
+  { label: '每5分钟', value: '0 */5 * * * ?' },
+  { label: '每小时', value: '0 0 * * * ?' },
+  { label: '每天凌晨0点', value: '0 0 0 * * ?' },
+  { label: '每天早上9点', value: '0 0 9 * * ?' },
+  { label: '每天下午6点', value: '0 0 18 * * ?' },
+  { label: '每周一早上9点', value: '0 0 9 * * MON' },
+  { label: '工作日早上9点', value: '0 0 9 * * MON-FRI' },
+  { label: '每月1号0点', value: '0 0 0 1 * ?' }
+]
 
 // 生命周期
 onMounted(async () => {
@@ -546,7 +705,7 @@ const resetTaskForm = () => {
     description: '',
     task_type: 'TEST_SUITE',
     trigger_type: 'CRON',
-    cron_expression: '0 0 * * *',
+    cron_expression: '0 0 * * * ?',
     interval_seconds: 3600,
     execute_at: '',
     test_suite: '',
@@ -556,6 +715,14 @@ const resetTaskForm = () => {
     notify_on_failure: false,
     notification_type: 'email',
     notify_emails: []
+  })
+  cronMode.value = 'preset'
+  Object.assign(cronFields, {
+    minuteType: '*', minuteStep: 5, minuteValue: 0,
+    hourType: '*', hourStep: 1, hourValue: 0,
+    dayType: '*', dayValue: 1,
+    monthType: '*', monthValue: 1,
+    weekdayType: '?', weekdayValue: 'MON'
   })
 }
 
@@ -567,6 +734,174 @@ const resetFilters = () => {
     is_enabled: ''
   })
   loadTasks()
+}
+
+// === CRON 构建器方法 ===
+
+// 选择预设
+const selectCronPreset = (preset) => {
+  taskForm.cron_expression = preset.value
+}
+
+// 自定义字段变化时重新生成表达式
+const onCronFieldChange = () => {
+  taskForm.cron_expression = buildCronFromFields()
+}
+
+// 从自定义字段构建 CRON 表达式
+const buildCronFromFields = () => {
+  const minute = cronFields.minuteType === '*/N'
+    ? '*/' + cronFields.minuteStep
+    : cronFields.minuteType === 'fixed'
+      ? String(cronFields.minuteValue)
+      : '*'
+
+  const hour = cronFields.hourType === '*/N'
+    ? '*/' + cronFields.hourStep
+    : cronFields.hourType === 'fixed'
+      ? String(cronFields.hourValue)
+      : '*'
+
+  const day = cronFields.dayType === 'fixed' ? String(cronFields.dayValue) : '*'
+  const month = cronFields.monthType === 'fixed' ? String(cronFields.monthValue) : '*'
+
+  const weekday = cronFields.weekdayType === 'fixed' ? cronFields.weekdayValue : cronFields.weekdayType
+
+  // 如果指定了星期，日字段用 ?；如果指定了日，星期用 ?
+  const dayField = weekday !== '?' ? '?' : day
+  const weekdayField = day !== '*' ? '?' : weekday
+
+  return `0 ${minute} ${hour} ${dayField} ${month} ${weekdayField}`
+}
+
+// 根据表达式匹配预设或切到自定义/高级
+const detectCronMode = (expr) => {
+  if (!expr) {
+    cronMode.value = 'preset'
+    return
+  }
+  // 匹配预设
+  const matched = cronPresets.find(p => p.value === expr)
+  if (matched) {
+    cronMode.value = 'preset'
+    return
+  }
+  // 尝试解析为自定义字段
+  const parts = expr.trim().split(/\s+/)
+  if (parts.length === 6) {
+    cronMode.value = 'custom'
+    parseCronToFields(parts)
+  } else {
+    cronMode.value = 'advanced'
+  }
+}
+
+// 解析 CRON 表达式到自定义字段
+const parseCronToFields = (parts) => {
+  const [,, minute, hour, day, month, weekday] = parts
+
+  // 分钟
+  if (minute === '*') {
+    cronFields.minuteType = '*'
+  } else if (minute.startsWith('*/')) {
+    cronFields.minuteType = '*/N'
+    cronFields.minuteStep = parseInt(minute.slice(2))
+  } else {
+    cronFields.minuteType = 'fixed'
+    cronFields.minuteValue = parseInt(minute)
+  }
+
+  // 小时
+  if (hour === '*') {
+    cronFields.hourType = '*'
+  } else if (hour.startsWith('*/')) {
+    cronFields.hourType = '*/N'
+    cronFields.hourStep = parseInt(hour.slice(2))
+  } else {
+    cronFields.hourType = 'fixed'
+    cronFields.hourValue = parseInt(hour)
+  }
+
+  // 日
+  if (day === '*') {
+    cronFields.dayType = '*'
+  } else if (day !== '?') {
+    cronFields.dayType = 'fixed'
+    cronFields.dayValue = parseInt(day)
+  }
+
+  // 月
+  if (month === '*') {
+    cronFields.monthType = '*'
+  } else {
+    cronFields.monthType = 'fixed'
+    cronFields.monthValue = parseInt(month)
+  }
+
+  // 星期
+  if (weekday === '?') {
+    cronFields.weekdayType = '?'
+  } else if (weekday === 'MON-FRI') {
+    cronFields.weekdayType = 'MON-FRI'
+  } else if (weekday === 'SAT-SUN') {
+    cronFields.weekdayType = 'SAT-SUN'
+  } else {
+    cronFields.weekdayType = 'fixed'
+    cronFields.weekdayValue = weekday
+  }
+}
+
+// CRON 表达式转人类可读描述
+const getCronDescription = (expr) => {
+  if (!expr) return '请选择调度规则'
+  const parts = expr.trim().split(/\s+/)
+  if (parts.length !== 6) return expr
+
+  const [second, minute, hour, day, month, weekday] = parts
+
+  // 每分钟
+  if (minute === '*' && hour === '*') return '每分钟执行'
+  // 每N分钟
+  if (minute.startsWith('*/') && hour === '*') return `每 ${minute.slice(2)} 分钟执行`
+
+  // 构建时间部分
+  let timeStr = ''
+  if (hour === '*' && minute === '*') {
+    timeStr = '每分钟'
+  } else if (hour === '*') {
+    if (minute.startsWith('*/')) {
+      timeStr = `每小时每 ${minute.slice(2)} 分钟`
+    } else {
+      timeStr = `每小时 ${minute} 分`
+    }
+  } else if (hour.startsWith('*/')) {
+    timeStr = `每 ${hour.slice(2)} 小时`
+    if (minute !== '0' && minute !== '*') timeStr += ` ${minute} 分`
+  } else {
+    const h = hour.padStart(2, '0')
+    const m = minute.padStart(2, '0')
+    timeStr = `${h}:${m}`
+  }
+
+  // 构建日期部分
+  let dateStr = ''
+  if (day !== '?' && day !== '*') {
+    dateStr += `每月 ${day} 号`
+  }
+  if (month !== '*') {
+    dateStr += ` ${month} 月`
+  }
+  if (weekday !== '?' && weekday !== '*') {
+    const weekdayNames = {
+      'MON': '周一', 'TUE': '周二', 'WED': '周三', 'THU': '周四',
+      'FRI': '周五', 'SAT': '周六', 'SUN': '周日',
+      'MON-FRI': '工作日', 'SAT-SUN': '周末'
+    }
+    dateStr = weekdayNames[weekday] || weekday
+  }
+
+  if (dateStr) return `${dateStr} ${timeStr} 执行`
+  return `每天 ${timeStr} 执行`
 }
 
 // 提交任务表单
@@ -754,6 +1089,12 @@ const editTask = (task) => {
     notification_type: notificationType,
     notify_emails: notifyEmails
   })
+
+  // 检测 CRON 模式
+  if (task.trigger_type === 'CRON') {
+    detectCronMode(task.cron_expression)
+  }
+
   showCreateDialog.value = true
 }
 
@@ -844,6 +1185,49 @@ const deleteTask = async (task) => {
 .cron-help {
   margin-top: 8px;
   font-size: 12px;
+}
+
+.cron-builder {
+  width: 100%;
+}
+
+.cron-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.cron-field-label {
+  font-size: 12px;
+  color: #606266;
+  margin-bottom: 4px;
+}
+
+.cron-custom {
+  background: #f5f7fa;
+  padding: 12px;
+  border-radius: 6px;
+}
+
+.cron-preview {
+  margin-top: 12px;
+  padding: 10px 14px;
+  background: #ecf5ff;
+  border-radius: 6px;
+  border: 1px solid #d9ecff;
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.cron-preview-label {
+  color: #909399;
+  margin-right: 6px;
+}
+
+.cron-preview-expr code {
+  font-family: 'Courier New', monospace;
+  color: #409eff;
+  font-weight: 600;
 }
 
 .unit {
