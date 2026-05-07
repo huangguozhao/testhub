@@ -428,7 +428,6 @@ public class ApiExecutor {
 
                     // 保存历史记录
                     saveRequestHistory(request, response, variables, null, null);
-                }
             }
 
             result.setRequestResults(requestResults);
