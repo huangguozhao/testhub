@@ -85,10 +85,14 @@ public class ApiExecutionRecordController {
         String bucket = minioConfig.getBucketName();
         String prefix = "api-testing/reports/execution_" + id;
         String indexObject = prefix + "/index.html";
+        String simpleObject = prefix + "/summary.html";
 
-        // 1. 检查 MinIO 中是否已有 Allure 报告
+        // 1. 检查 MinIO 中是否已有报告（Allure 或简单 HTML）
         if (fileStorageService.fileExists(bucket, indexObject)) {
             return Result.success(Map.of("report_url", getReportUrl(indexObject)));
+        }
+        if (fileStorageService.fileExists(bucket, simpleObject)) {
+            return Result.success(Map.of("report_url", getReportUrl(simpleObject)));
         }
 
         // 2. 加锁生成
@@ -98,6 +102,9 @@ public class ApiExecutionRecordController {
                 // 双重检查
                 if (fileStorageService.fileExists(bucket, indexObject)) {
                     return Result.success(Map.of("report_url", getReportUrl(indexObject)));
+                }
+                if (fileStorageService.fileExists(bucket, simpleObject)) {
+                    return Result.success(Map.of("report_url", getReportUrl(simpleObject)));
                 }
 
                 String basePath = System.getProperty("user.dir");
@@ -120,7 +127,6 @@ public class ApiExecutionRecordController {
                 } else {
                     // 5b. Allure 失败：生成简单 HTML 并上传
                     String html = buildHtmlReport(record);
-                    String simpleObject = prefix + "/summary.html";
                     byte[] htmlBytes = html.getBytes(java.nio.charset.StandardCharsets.UTF_8);
                     fileStorageService.uploadFile(bucket, simpleObject,
                             new ByteArrayInputStream(htmlBytes), "text/html", htmlBytes.length);
