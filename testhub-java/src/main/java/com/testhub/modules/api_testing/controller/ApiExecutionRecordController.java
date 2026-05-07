@@ -6,6 +6,7 @@ import com.testhub.common.result.Result;
 import com.testhub.modules.api_testing.domain.ApiExecutionRecord;
 import com.testhub.modules.api_testing.domain.ApiTestSuite;
 import com.testhub.modules.api_testing.http.ApiExecutor;
+import com.testhub.modules.api_testing.service.AllureReportGenerator;
 import com.testhub.modules.api_testing.service.ApiExecutionRecordService;
 import com.testhub.modules.api_testing.service.ApiTestSuiteService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -14,7 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.*;
+import java.io.IOException;
 import java.nio.file.*;
 import java.util.*;
 
@@ -30,6 +31,7 @@ public class ApiExecutionRecordController {
 
     private final ApiExecutionRecordService apiExecutionRecordService;
     private final ApiTestSuiteService apiTestSuiteService;
+    private final AllureReportGenerator allureReportGenerator;
     private final ObjectMapper objectMapper;
 
     @GetMapping("/project/{projectId}")
@@ -86,10 +88,13 @@ public class ApiExecutionRecordController {
             // 生成 Allure 结果文件
             generateAllureResultFiles(record, resultsDir);
 
-            // 尝试使用 Allure 命令行生成报告
-            String reportUrl = tryGenerateAllureReport(resultsDir, reportDir, id);
-
-            if (reportUrl == null) {
+            // 使用 Allure 生成报告
+            String reportUrl;
+            boolean allureSuccess = allureReportGenerator.generateReport(resultsDir, reportDir);
+            if (allureSuccess) {
+                reportUrl = "/media/api-testing/allure-reports/execution_" + id + "/index.html";
+                log.info("Allure 报告生成成功: executionId={}", id);
+            } else {
                 // Allure 不可用，生成简单 HTML 汇总页
                 reportUrl = generateSimpleHtmlReport(record, reportDir, id);
             }
@@ -201,74 +206,6 @@ public class ApiExecutionRecordController {
         }
 
         return result;
-    }
-
-    /**
-     * 尝试使用 Allure 命令行生成报告
-     */
-    private String tryGenerateAllureReport(String resultsDir, String reportDir, Long executionId) {
-        try {
-            String basePath = System.getProperty("user.dir");
-            String allureExecutable = System.getProperty("os.name").toLowerCase().contains("win") ? "allure.bat" : "allure";
-
-            // 查找 Allure 可执行文件
-            List<Path> possiblePaths = List.of(
-                    Path.of(basePath, "allure", "bin", allureExecutable),
-                    Path.of("/usr/local/bin/allure"),
-                    Path.of("/usr/bin/allure")
-            );
-
-            Path allureCmd = null;
-            for (Path path : possiblePaths) {
-                if (Files.exists(path)) {
-                    allureCmd = path;
-                    break;
-                }
-            }
-
-            if (allureCmd == null) {
-                log.warn("Allure 命令行工具未找到，使用简单 HTML 报告");
-                return null;
-            }
-
-            // 清理旧报告
-            Path reportPath = Path.of(reportDir);
-            if (Files.exists(reportPath)) {
-                deleteDirectory(reportPath);
-                Files.createDirectories(reportPath);
-            }
-
-            // 执行 allure generate
-            ProcessBuilder pb = new ProcessBuilder(
-                    allureCmd.toString(), "generate",
-                    "--clean",
-                    "--output", reportDir,
-                    resultsDir
-            );
-            pb.redirectErrorStream(true);
-            Process process = pb.start();
-
-            // 读取输出
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    log.info("[Allure] {}", line);
-                }
-            }
-
-            int exitCode = process.waitFor();
-            if (exitCode == 0) {
-                log.info("Allure 报告生成成功: executionId={}", executionId);
-                return "/media/api-testing/allure-reports/execution_" + executionId + "/index.html";
-            } else {
-                log.warn("Allure 命令执行失败，exitCode={}", exitCode);
-                return null;
-            }
-
-        } catch (Exception e) {
-            log.warn("Allure 报告生成失败: {}", e.getMessage());
-            return null;
-        }
     }
 
     /**
@@ -390,14 +327,4 @@ public class ApiExecutionRecordController {
         return str.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;");
     }
 
-    private void deleteDirectory(Path dir) throws IOException {
-        if (Files.isDirectory(dir)) {
-            try (var entries = Files.list(dir)) {
-                for (Path entry : (Iterable<Path>) entries::iterator) {
-                    deleteDirectory(entry);
-                }
-            }
-        }
-        Files.deleteIfExists(dir);
-    }
 }
