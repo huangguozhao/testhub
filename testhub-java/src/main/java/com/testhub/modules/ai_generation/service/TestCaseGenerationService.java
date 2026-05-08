@@ -175,6 +175,7 @@ public class TestCaseGenerationService {
      */
     @Async
     public void executeGeneration(Long taskId) {
+        log.info("异步生成任务开始执行: taskId={}, thread={}", taskId, Thread.currentThread().getName());
         TestCaseGenerationTask task = taskMapper.selectById(taskId);
         if (task == null) return;
 

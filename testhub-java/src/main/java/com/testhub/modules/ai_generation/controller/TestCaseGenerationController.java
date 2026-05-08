@@ -59,9 +59,7 @@ public class TestCaseGenerationController {
                 for (int i = 0; i < 600; i++) { // 最多轮询5分钟
                     TestCaseGenerationTask task = testCaseGenerationService.getTaskByTaskId(taskId);
                     if (task == null) {
-                        emitter.send(SseEmitter.event()
-                                .name("error")
-                                .data("{\"type\":\"error\",\"message\":\"任务不存在\"}"));
+                        emitter.send("{\"type\":\"error\",\"message\":\"任务不存在\"}");
                         emitter.complete();
                         return;
                     }
@@ -82,9 +80,7 @@ public class TestCaseGenerationController {
                         Map<String, Object> eventData = new java.util.HashMap<>();
                         eventData.put("type", eventType);
                         eventData.put("content", newContent);
-                        emitter.send(SseEmitter.event()
-                                .name("message")
-                                .data(new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(eventData)));
+                        emitter.send(new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(eventData));
                     }
 
                     // 推送状态变更
@@ -103,15 +99,11 @@ public class TestCaseGenerationController {
                             statusData.put("error_message", task.getErrorMessage());
                         }
 
-                        emitter.send(SseEmitter.event()
-                                .name("message")
-                                .data(new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(statusData)));
+                        emitter.send(new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(statusData));
 
                         if ("completed".equals(currentStatus) || "failed".equals(currentStatus)) {
                             // 推送 done 事件
-                            emitter.send(SseEmitter.event()
-                                    .name("message")
-                                    .data("{\"type\":\"done\"}"));
+                            emitter.send("{\"type\":\"done\"}");
                             emitter.complete();
                             return;
                         }
@@ -121,9 +113,7 @@ public class TestCaseGenerationController {
                 }
 
                 // 超时
-                emitter.send(SseEmitter.event()
-                        .name("message")
-                        .data("{\"type\":\"timeout\",\"message\":\"轮询超时\"}"));
+                emitter.send("{\"type\":\"timeout\",\"message\":\"轮询超时\"}");
                 emitter.complete();
 
             } catch (IOException e) {
