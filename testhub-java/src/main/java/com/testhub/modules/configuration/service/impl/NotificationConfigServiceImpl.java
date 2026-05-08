@@ -1,13 +1,13 @@
-package com.testhub.modules.notification.service.impl;
+package com.testhub.modules.configuration.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.testhub.modules.notification.domain.NotificationConfig;
-import com.testhub.modules.notification.dto.NotificationConfigDTO;
-import com.testhub.modules.notification.mapper.NotificationConfigMapper;
-import com.testhub.modules.notification.service.NotificationConfigService;
+import com.testhub.modules.configuration.domain.NotificationConfig;
+import com.testhub.modules.configuration.dto.NotificationConfigDTO;
+import com.testhub.modules.configuration.mapper.NotificationConfigMapper;
+import com.testhub.modules.configuration.service.NotificationConfigService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

@@ -305,7 +305,7 @@ export default {
 
     async enableConfig(configId) {
       try {
-        await api.post(`/requirement-analysis/generation-config/${configId}/enable/`)
+        await api.post(`/requirement-analysis/generation-config/${configId}/enable`)
         ElMessage.success(this.t('generationConfig.enableSuccess'))
         this.loadConfigs()
       } catch (error) {

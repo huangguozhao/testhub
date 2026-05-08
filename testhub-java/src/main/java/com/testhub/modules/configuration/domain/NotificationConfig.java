@@ -1,4 +1,4 @@
-package com.testhub.modules.notification.domain;
+package com.testhub.modules.configuration.domain;
 
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;

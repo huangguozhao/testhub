@@ -3,6 +3,9 @@ server:
 
 spring:
   # Spring MVC 配置
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
   web:
     resources:
       add-mappings: false

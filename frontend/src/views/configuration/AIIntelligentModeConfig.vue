@@ -256,7 +256,7 @@ const getProviderLabel = (modelType) => {
 
 const loadConfigs = async () => {
   try {
-    const response = await api.get('/ui-automation/ai-models/')
+    const response = await api.get('/ui-automation/ai-models')
     if (response.data && Array.isArray(response.data)) {
       configs.value = response.data.map(config => ({
         ...config,
@@ -339,7 +339,7 @@ const saveConfig = async () => {
         delete saveData.api_key
       }
 
-      const response = await api.put(`/ui-automation/ai-models/${editingConfigId.value}/`, saveData)
+      const response = await api.put(`/ui-automation/ai-models/${editingConfigId.value}`, saveData)
 
       // 检查是否禁用了其他配置
       if (response.data.disabled_configs && response.data.disabled_configs.length > 0) {
@@ -351,7 +351,7 @@ const saveConfig = async () => {
       }
     } else {
       // 新增配置
-      const response = await api.post('/ui-automation/ai-models/', saveData)
+      const response = await api.post('/ui-automation/ai-models', saveData)
 
       // 检查是否禁用了其他配置
       if (response.data.disabled_configs && response.data.disabled_configs.length > 0) {
@@ -389,7 +389,7 @@ const deleteConfig = async (configId) => {
   }
 
   try {
-    await api.delete(`/ui-automation/ai-models/${configId}/`)
+    await api.delete(`/ui-automation/ai-models/${configId}`)
     ElMessage.success(t('configuration.aiMode.messages.deleteSuccess'))
     await loadConfigs()
   } catch (error) {
@@ -425,7 +425,7 @@ const toggleActive = async (config) => {
   config.toggling = true
 
   try {
-    await api.patch(`/ui-automation/ai-models/${config.id}/`, {
+    await api.patch(`/ui-automation/ai-models/${config.id}`, {
       is_active: config.is_active
     })
 
@@ -447,7 +447,7 @@ const testConnection = async (config) => {
   try {
     // 测试连接需要更长的超时时间（90秒），因为大模型响应较慢
     await api.post(
-      `/ui-automation/ai-models/${config.id}/test_connection/`,
+      `/ui-automation/ai-models/${config.id}/test-connection`,
       {},
       { timeout: 90000 }  // 90秒超时
     )
@@ -486,7 +486,7 @@ const testConnectionInModal = async () => {
     try {
       // 测试连接需要90秒超时
       await api.post(
-        `/ui-automation/ai-models/${editingConfigId.value}/test_connection/`,
+        `/ui-automation/ai-models/${editingConfigId.value}/test-connection`,
         {},
         { timeout: 90000 }
       )
@@ -515,7 +515,7 @@ const testConnectionInModal = async () => {
   try {
     // 测试连接需要90秒超时
     await api.post(
-      '/ui-automation/ai-models/test_connection/',
+      '/ui-automation/ai-models/test-connection-preview',
       {
         provider: configForm.value.model_type,
         model_name: configForm.value.model_name,

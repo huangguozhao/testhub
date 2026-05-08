@@ -1,7 +1,7 @@
-package com.testhub.modules.notification.mapper;
+package com.testhub.modules.configuration.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.testhub.modules.notification.domain.NotificationConfig;
+import com.testhub.modules.configuration.domain.NotificationConfig;
 import org.apache.ibatis.annotations.Mapper;
 
 /**

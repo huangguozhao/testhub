@@ -1,11 +1,11 @@
-package com.testhub.modules.notification.controller;
+package com.testhub.modules.configuration.controller;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.testhub.common.result.PageResult;
 import com.testhub.common.result.Result;
-import com.testhub.modules.notification.domain.NotificationConfig;
-import com.testhub.modules.notification.dto.NotificationConfigDTO;
-import com.testhub.modules.notification.service.NotificationConfigService;
+import com.testhub.modules.configuration.domain.NotificationConfig;
+import com.testhub.modules.configuration.dto.NotificationConfigDTO;
+import com.testhub.modules.configuration.service.NotificationConfigService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;

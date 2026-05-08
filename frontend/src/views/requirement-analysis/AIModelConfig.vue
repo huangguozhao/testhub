@@ -415,11 +415,14 @@ export default {
     async loadConfigs() {
       try {
         console.log('Loading configs...')
-        const response = await api.get('/requirement-analysis/ai-models/')
+        const response = await api.get('/requirement-analysis/ai-models')
         console.log('API response:', response.data)
         
-        // 处理分页API响应格式 {count: 1, next: null, previous: null, results: [...]}
-        if (response.data && response.data.results && Array.isArray(response.data.results)) {
+        // 处理分页API响应格式 (Java: {records: [...], total: N})
+        if (response.data && response.data.records && Array.isArray(response.data.records)) {
+          this.configs = response.data.records.filter(config => config && config.id)
+          console.log('Loaded configs from records:', this.configs)
+        } else if (response.data && response.data.results && Array.isArray(response.data.results)) {
           this.configs = response.data.results.filter(config => config && config.id)
           console.log('Loaded configs from results:', this.configs)
         } else if (response.data && Array.isArray(response.data)) {
@@ -553,11 +556,11 @@ export default {
           }
           
           console.log('Updating with data:', updateData)
-          await api.patch(`/requirement-analysis/ai-models/${this.editingConfigId}/`, updateData)
+          await api.patch(`/requirement-analysis/ai-models/${this.editingConfigId}`, updateData)
           ElMessage.success(this.t('configuration.aiModel.messages.updateSuccess'))
         } else {
           console.log('Creating with data:', this.configForm)
-          await api.post('/requirement-analysis/ai-models/', this.configForm)
+          await api.post('/requirement-analysis/ai-models', this.configForm)
           ElMessage.success(this.t('configuration.aiModel.messages.saveSuccess'))
         }
         
@@ -625,7 +628,7 @@ export default {
       }
 
       try {
-        await api.delete(`/requirement-analysis/ai-models/${configId}/`)
+        await api.delete(`/requirement-analysis/ai-models/${configId}`)
         ElMessage.success(this.t('configuration.aiModel.messages.deleteSuccess'))
         this.loadConfigs()
       } catch (error) {
@@ -639,7 +642,7 @@ export default {
       this.testingConfigId = config.id
 
       try {
-        const response = await api.post(`/requirement-analysis/ai-models/${config.id}/test_connection/`)
+        const response = await api.post(`/requirement-analysis/ai-models/${config.id}/test-connection`)
         this.testResult = response.data
         this.showTestResult = true
       } catch (error) {

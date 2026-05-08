@@ -1,4 +1,4 @@
-package com.testhub.modules.notification.dto;
+package com.testhub.modules.configuration.dto;
 
 import lombok.Data;
 

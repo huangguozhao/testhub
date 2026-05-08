@@ -1,15 +1,16 @@
-package com.testhub.modules.notification.service;
+package com.testhub.modules.configuration.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.testhub.modules.notification.domain.NotificationConfig;
-import com.testhub.modules.notification.dto.NotificationConfigDTO;
+import com.baomidou.mybatisplus.extension.service.IService;
+import com.testhub.modules.configuration.domain.NotificationConfig;
+import com.testhub.modules.configuration.dto.NotificationConfigDTO;
 
 import java.util.List;
 
 /**
  * 通知配置服务接口
  */
-public interface NotificationConfigService {
+public interface NotificationConfigService extends IService<NotificationConfig> {
 
     /**
      * 创建通知配置

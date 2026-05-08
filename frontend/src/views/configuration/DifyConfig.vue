@@ -132,7 +132,7 @@ const formatDate = (dateString) => {
 
 const loadConfig = async () => {
   try {
-    const response = await api.get('/assistant/config/dify/')
+    const response = await api.get('/assistant/config/dify')
     currentConfig.value = response.data
     form.value = {
       api_url: response.data.api_url,
@@ -154,7 +154,7 @@ const testConnection = async () => {
 
     testing.value = true
     try {
-      const response = await api.post('/assistant/config/dify/test_connection/', {
+      const response = await api.post('/assistant/config/dify/test-connection', {
         api_url: form.value.api_url,
         api_key: form.value.api_key
       })
@@ -194,7 +194,7 @@ const saveConfig = async () => {
 
       if (currentConfig.value) {
         // Update existing config
-        await api.patch(`/assistant/config/dify/${currentConfig.value.id}/`, dataToSave)
+        await api.patch(`/assistant/config/dify/${currentConfig.value.id}`, dataToSave)
         ElMessage.success(t('configuration.dify.messages.updateSuccess'))
       } else {
         // Create new config - API key is required
@@ -203,7 +203,7 @@ const saveConfig = async () => {
           saving.value = false
           return
         }
-        await api.post('/assistant/config/dify/', dataToSave)
+        await api.post('/assistant/config/dify', dataToSave)
         ElMessage.success(t('configuration.dify.messages.saveSuccess'))
       }
 
