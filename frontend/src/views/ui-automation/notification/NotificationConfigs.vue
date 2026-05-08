@@ -63,6 +63,9 @@
                 </el-row>
 
                 <div class="form-actions">
+                  <el-button @click="testWebhookBot('feishu')" :loading="testingBot === 'feishu'">
+                    测试连接
+                  </el-button>
                   <el-button type="primary" @click="saveWebhookBot('feishu')">
                     {{ $t('uiAutomation.notification.configs.saveFeishuConfig') }}
                   </el-button>
@@ -116,6 +119,9 @@
                 </el-row>
 
                 <div class="form-actions">
+                  <el-button @click="testWebhookBot('wechat')" :loading="testingBot === 'wechat'">
+                    测试连接
+                  </el-button>
                   <el-button type="primary" @click="saveWebhookBot('wechat')">
                     {{ $t('uiAutomation.notification.configs.saveWechatConfig') }}
                   </el-button>
@@ -182,6 +188,9 @@
                 </el-row>
 
                 <div class="form-actions">
+                  <el-button @click="testWebhookBot('dingtalk')" :loading="testingBot === 'dingtalk'">
+                    测试连接
+                  </el-button>
                   <el-button type="primary" @click="saveWebhookBot('dingtalk')">
                     {{ $t('uiAutomation.notification.configs.saveDingtalkConfig') }}
                   </el-button>
@@ -201,7 +210,8 @@ import {ElMessage} from 'element-plus'
 import {
   getUnifiedNotificationConfigs,
   createUnifiedNotificationConfig,
-  updateUnifiedNotificationConfig
+  updateUnifiedNotificationConfig,
+  testNotificationWebhook
 } from '@/api/core.js'
 import { useI18n } from 'vue-i18n'
 
@@ -215,6 +225,7 @@ export default {
     const wechatFormRef = ref(null)
     const dingtalkFormRef = ref(null)
     const activeTab = ref('feishu')
+    const testingBot = ref(null)
 
     // Webhook机器人配置
     const webhookBots = reactive({
@@ -362,6 +373,31 @@ export default {
       }
     }
 
+    // 测试Webhook连接
+    const testWebhookBot = async (botType) => {
+      testingBot.value = botType
+      try {
+        const configType = getConfigType(botType)
+        const response = await getUnifiedNotificationConfigs({ configType: configType })
+        if (!response.data.records || response.data.records.length === 0) {
+          ElMessage.warning('请先保存配置再测试')
+          return
+        }
+        const configId = response.data.records[0].id
+        const res = await testNotificationWebhook(configId, botType)
+        if (res.data.success) {
+          ElMessage.success(res.data.message)
+        } else {
+          ElMessage.error(res.data.message)
+        }
+      } catch (error) {
+        console.error('测试Webhook连接失败:', error)
+        ElMessage.error('测试失败: ' + (error.response?.data?.message || error.message))
+      } finally {
+        testingBot.value = null
+      }
+    }
+
     // 获取Webhook机器人配置
     const fetchWebhookConfig = async (botType) => {
       try {
@@ -417,7 +453,9 @@ export default {
       dingtalkFormRef,
       activeTab,
       webhookBots,
+      testingBot,
       saveWebhookBot,
+      testWebhookBot,
       fetchWebhookConfig,
       fetchAllWebhookConfigs
     }

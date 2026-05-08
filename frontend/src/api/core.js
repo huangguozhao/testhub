@@ -63,3 +63,12 @@ export function getActiveNotificationConfigs() {
     method: 'get'
   })
 }
+
+// 测试Webhook连接
+export function testNotificationWebhook(id, botType) {
+  return request({
+    url: `/notification-configs/${id}/test-webhook`,
+    method: 'post',
+    params: { botType }
+  })
+}

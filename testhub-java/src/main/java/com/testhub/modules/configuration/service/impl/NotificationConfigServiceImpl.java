@@ -11,10 +11,16 @@ import com.testhub.modules.configuration.mapper.NotificationConfigMapper;
 import com.testhub.modules.configuration.service.NotificationConfigService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
-import java.util.List;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
 /**
  * 通知配置服务实现
@@ -26,6 +32,7 @@ public class NotificationConfigServiceImpl extends ServiceImpl<NotificationConfi
         implements NotificationConfigService {
 
     private final ObjectMapper objectMapper;
+    private final RestTemplate restTemplate;
 
     @Override
     @Transactional
@@ -136,6 +143,135 @@ public class NotificationConfigServiceImpl extends ServiceImpl<NotificationConfi
             config.setIsActive(isActive);
             this.updateById(config);
             log.info("{}通知配置: id={}", isActive ? "启用" : "禁用", id);
+        }
+    }
+
+    @Override
+    public Map<String, Object> testWebhook(Long id, String botType) {
+        Map<String, Object> result = new HashMap<>();
+        NotificationConfig config = this.getById(id);
+        if (config == null) {
+            result.put("success", false);
+            result.put("message", "配置不存在");
+            return result;
+        }
+
+        if (config.getWebhookBots() == null || config.getWebhookBots().isBlank()) {
+            result.put("success", false);
+            result.put("message", "未配置Webhook机器人");
+            return result;
+        }
+
+        try {
+            Map<String, Map<String, Object>> botsMap = objectMapper.readValue(
+                    config.getWebhookBots(), new com.fasterxml.jackson.core.type.TypeReference<>() {});
+            Map<String, Object> botConfig = botsMap.get(botType);
+            if (botConfig == null) {
+                result.put("success", false);
+                result.put("message", "未找到 " + botType + " 类型的机器人配置");
+                return result;
+            }
+
+            String webhookUrl = (String) botConfig.get("webhook_url");
+            if (webhookUrl == null || webhookUrl.isBlank()) {
+                result.put("success", false);
+                result.put("message", "Webhook URL 为空");
+                return result;
+            }
+
+            String testMessage = "[TestHub] 这是一条测试消息，用于验证 Webhook 配置是否正确。";
+            boolean sent = false;
+
+            switch (botType) {
+                case "feishu":
+                    sent = sendFeishuTest(webhookUrl, testMessage);
+                    break;
+                case "wechat":
+                    sent = sendWechatTest(webhookUrl, testMessage);
+                    break;
+                case "dingtalk":
+                    String secret = (String) botConfig.get("secret");
+                    sent = sendDingtalkTest(webhookUrl, secret, testMessage);
+                    break;
+                default:
+                    result.put("success", false);
+                    result.put("message", "不支持的机器人类型: " + botType);
+                    return result;
+            }
+
+            if (sent) {
+                result.put("success", true);
+                result.put("message", "测试消息发送成功，请检查机器人是否收到");
+            } else {
+                result.put("success", false);
+                result.put("message", "测试消息发送失败，请检查 Webhook URL 是否正确");
+            }
+        } catch (Exception e) {
+            log.error("测试Webhook连接失败: {}", e.getMessage());
+            result.put("success", false);
+            result.put("message", "测试失败: " + e.getMessage());
+        }
+        return result;
+    }
+
+    private boolean sendFeishuTest(String webhook, String message) {
+        try {
+            Map<String, Object> body = new HashMap<>();
+            body.put("msg_type", "text");
+            body.put("content", Map.of("text", message));
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
+            ResponseEntity<String> response = restTemplate.postForEntity(webhook, request, String.class);
+            return response.getStatusCode().is2xxSuccessful();
+        } catch (Exception e) {
+            log.error("发送飞书测试消息失败: {}", e.getMessage());
+            return false;
+        }
+    }
+
+    private boolean sendWechatTest(String webhook, String message) {
+        try {
+            Map<String, Object> body = new HashMap<>();
+            body.put("msgtype", "text");
+            body.put("text", Map.of("content", message));
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
+            ResponseEntity<String> response = restTemplate.postForEntity(webhook, request, String.class);
+            return response.getStatusCode().is2xxSuccessful();
+        } catch (Exception e) {
+            log.error("发送企微测试消息失败: {}", e.getMessage());
+            return false;
+        }
+    }
+
+    private boolean sendDingtalkTest(String webhook, String secret, String message) {
+        try {
+            if (secret != null && !secret.isBlank()) {
+                long timestamp = System.currentTimeMillis();
+                String stringToSign = timestamp + "\n" + secret;
+                Mac mac = Mac.getInstance("HmacSHA256");
+                mac.init(new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "HmacSHA256"));
+                byte[] signData = mac.doFinal(stringToSign.getBytes(StandardCharsets.UTF_8));
+                String sign = Base64.getEncoder().encodeToString(signData);
+                webhook = webhook + "&sign=" + URLEncoder.encode(sign, StandardCharsets.UTF_8);
+            }
+
+            Map<String, Object> body = new HashMap<>();
+            body.put("msgtype", "text");
+            body.put("text", Map.of("content", message));
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
+            ResponseEntity<String> response = restTemplate.postForEntity(webhook, request, String.class);
+            return response.getStatusCode().is2xxSuccessful();
+        } catch (Exception e) {
+            log.error("发送钉钉测试消息失败: {}", e.getMessage());
+            return false;
         }
     }
 

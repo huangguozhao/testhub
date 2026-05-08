@@ -56,4 +56,12 @@ public interface NotificationConfigService extends IService<NotificationConfig> 
      * 启用/禁用配置
      */
     void toggleActive(Long id, Boolean isActive);
+
+    /**
+     * 测试Webhook连接
+     * @param id 配置ID
+     * @param botType 机器人类型 (feishu/wechat/dingtalk)
+     * @return 测试结果
+     */
+    java.util.Map<String, Object> testWebhook(Long id, String botType);
 }

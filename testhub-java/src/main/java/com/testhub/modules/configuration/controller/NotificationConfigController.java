@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 通知配置控制器
@@ -82,5 +83,12 @@ public class NotificationConfigController {
     public Result<Void> toggleActive(@PathVariable Long id, @RequestParam Boolean isActive) {
         notificationConfigService.toggleActive(id, isActive);
         return Result.success();
+    }
+
+    @PostMapping("/{id}/test-webhook")
+    @Operation(summary = "测试Webhook连接")
+    public Result<Map<String, Object>> testWebhook(@PathVariable Long id, @RequestParam String botType) {
+        Map<String, Object> result = notificationConfigService.testWebhook(id, botType);
+        return Result.success(result);
     }
 }
