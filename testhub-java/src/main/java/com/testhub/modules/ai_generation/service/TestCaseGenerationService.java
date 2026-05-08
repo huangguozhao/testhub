@@ -206,11 +206,10 @@ public class TestCaseGenerationService {
             task.setProgress(30);
             taskMapper.updateById(task);
 
-            // 流式生成
+            // 阶段1: 流式生成
             StringBuilder generatedContent = new StringBuilder();
             String generated = aiModelCallService.chatCompletionStream(writerConfig, messages, chunk -> {
                 generatedContent.append(chunk);
-                // 更新流式缓冲区
                 task.setStreamBuffer(generatedContent.toString());
                 task.setStreamPosition(generatedContent.length());
                 task.setLastStreamUpdate(LocalDateTime.now());
@@ -243,7 +242,11 @@ public class TestCaseGenerationService {
                 StringBuilder reviewContent = new StringBuilder();
                 String reviewFeedback = aiModelCallService.chatCompletionStream(reviewerConfig, reviewMessages, chunk -> {
                     reviewContent.append(chunk);
+                    generatedContent.append(chunk);
                     task.setReviewFeedback(reviewContent.toString());
+                    task.setStreamBuffer(generatedContent.toString());
+                    task.setStreamPosition(generatedContent.length());
+                    task.setLastStreamUpdate(LocalDateTime.now());
                     if (reviewContent.length() % 200 < 30) {
                         taskMapper.updateById(task);
                     }
@@ -269,7 +272,11 @@ public class TestCaseGenerationService {
                 StringBuilder finalContent = new StringBuilder();
                 String finalCases = aiModelCallService.chatCompletionStream(writerConfig, reviseMessages, chunk -> {
                     finalContent.append(chunk);
+                    generatedContent.append(chunk);
                     task.setFinalTestCases(finalContent.toString());
+                    task.setStreamBuffer(generatedContent.toString());
+                    task.setStreamPosition(generatedContent.length());
+                    task.setLastStreamUpdate(LocalDateTime.now());
                     if (finalContent.length() % 200 < 30) {
                         taskMapper.updateById(task);
                     }
