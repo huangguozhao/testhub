@@ -788,7 +788,7 @@ export default {
           requestData.project = projectId
         }
 
-        const response = await api.post('/requirement-analysis/testcase-generation/generate/', requestData)
+        const response = await api.post('/requirement-analysis/testcase-generation/generate', requestData)
 
         this.currentTaskId = response.data.task_id
         this.progressText = this.$t('requirementAnalysis.taskCreated')
@@ -818,7 +818,7 @@ export default {
       // 在生产环境中(如Docker部署)，通常通过Nginx反向代理访问，端口应该是80或443(与当前页面一致)
       // 而不是直接访问后端端口8000
       const currentOrigin = window.location.origin
-      const apiUrl = `${currentOrigin}/api/requirement-analysis/testcase-generation/${this.currentTaskId}/stream_progress/`
+      const apiUrl = `${currentOrigin}/api/requirement-analysis/testcase-generation/${this.currentTaskId}/stream_progress`
 
       console.log('SSE连接URL:', apiUrl)
 
@@ -946,7 +946,7 @@ export default {
     async fetchFinalResult() {
       try {
         // 修复URL：去掉多余的/api/前缀（axios baseURL已经包含/api）
-        const response = await api.get(`/requirement-analysis/testcase-generation/${this.currentTaskId}/progress/`)
+        const response = await api.get(`/requirement-analysis/testcase-generation/${this.currentTaskId}/progress`)
         const task = response.data
 
         this.generationResult = task
@@ -1009,7 +1009,7 @@ export default {
       this.pollInterval = setInterval(async () => {
         try {
           // 修复URL：去掉多余的/api/前缀（axios baseURL已经包含/api）
-          const response = await api.get(`/requirement-analysis/testcase-generation/${this.currentTaskId}/progress/`)
+          const response = await api.get(`/requirement-analysis/testcase-generation/${this.currentTaskId}/progress`)
           const task = response.data
 
           console.log(`${this.$t('requirementAnalysis.taskStatus')}: ${task.status}, ${this.$t('requirementAnalysis.progress')}: ${task.progress}%`)
@@ -1183,7 +1183,7 @@ export default {
     async saveToTestCaseRecords() {
       try {
         // 调用后端API保存到记录
-        const response = await api.post(`/requirement-analysis/testcase-generation/${this.generationResult.task_id}/save_to_records/`)
+        const response = await api.post(`/requirement-analysis/testcase-generation/${this.generationResult.task_id}/save_to_records`)
 
         if (response.data.already_saved) {
           ElMessage.info(this.$t('requirementAnalysis.alreadySaved'))
