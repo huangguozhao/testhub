@@ -92,9 +92,9 @@ const rules = {
 const loadConfig = async () => {
   try {
     const res = await getAppConfig()
-    if (res.data.success && res.data.data) {
-      Object.assign(form, res.data.data)
-      Object.assign(currentConfig, res.data.data)
+    if (res.data) {
+      Object.assign(form, res.data)
+      Object.assign(currentConfig, res.data)
     }
   } catch (error) {
     console.error('加载配置失败:', error)
@@ -111,11 +111,11 @@ const handleSave = async () => {
     saving.value = true
 
     const res = await updateAppConfig(form)
-    if (res.data.success) {
+    if (res.data) {
       ElMessage.success('配置保存成功')
       await loadConfig()
     } else {
-      ElMessage.error(res.data.message || '配置保存失败')
+      ElMessage.error('配置保存失败')
     }
   } catch (error) {
     if (error !== false) { // 不是表单验证错误

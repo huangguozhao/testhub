@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.testhub.modules.configuration.domain.NotificationConfig;
 import com.testhub.modules.configuration.dto.NotificationConfigDTO;
 import com.testhub.modules.configuration.mapper.NotificationConfigMapper;
@@ -24,13 +25,15 @@ import java.util.List;
 public class NotificationConfigServiceImpl extends ServiceImpl<NotificationConfigMapper, NotificationConfig>
         implements NotificationConfigService {
 
+    private final ObjectMapper objectMapper;
+
     @Override
     @Transactional
     public NotificationConfig createConfig(NotificationConfigDTO dto) {
         NotificationConfig config = new NotificationConfig();
         config.setName(dto.getName());
         config.setConfigType(dto.getConfigType());
-        config.setWebhookBots(dto.getWebhookBots());
+        config.setWebhookBots(serializeWebhookBots(dto.getWebhookBots()));
         config.setIsDefault(dto.getIsDefault() != null && dto.getIsDefault());
         config.setIsActive(dto.getIsActive() != null ? dto.getIsActive() : true);
         config.setRemark(dto.getRemark());
@@ -55,7 +58,7 @@ public class NotificationConfigServiceImpl extends ServiceImpl<NotificationConfi
 
         config.setName(dto.getName());
         config.setConfigType(dto.getConfigType());
-        config.setWebhookBots(dto.getWebhookBots());
+        config.setWebhookBots(serializeWebhookBots(dto.getWebhookBots()));
         config.setIsActive(dto.getIsActive());
         config.setRemark(dto.getRemark());
 
@@ -141,5 +144,16 @@ public class NotificationConfigServiceImpl extends ServiceImpl<NotificationConfi
         config.setIsDefault(false);
         this.update(config, new LambdaQueryWrapper<NotificationConfig>()
                 .eq(NotificationConfig::getIsDefault, true));
+    }
+
+    private String serializeWebhookBots(Object webhookBots) {
+        if (webhookBots == null) return null;
+        if (webhookBots instanceof String) return (String) webhookBots;
+        try {
+            return objectMapper.writeValueAsString(webhookBots);
+        } catch (Exception e) {
+            log.error("序列化webhookBots失败: {}", e.getMessage());
+            return webhookBots.toString();
+        }
     }
 }

@@ -299,13 +299,14 @@ export default {
         console.log('Prompts API response:', response.data)
         
         // 处理分页API响应格式
-        if (response.data && response.data.results && Array.isArray(response.data.results)) {
+        if (response.data && response.data.records && Array.isArray(response.data.records)) {
+          // MyBatis-Plus 分页格式 (Java后端)
+          this.configs = response.data.records
+        } else if (response.data && response.data.results && Array.isArray(response.data.results)) {
+          // Django REST Framework 分页格式
           this.configs = response.data.results
-          console.log('Loaded configs from results:', this.configs)
         } else if (response.data && Array.isArray(response.data)) {
-          // 直接数组格式的fallback
           this.configs = response.data
-          console.log('Loaded configs from direct array:', this.configs)
         } else {
           console.warn('Unexpected API response format:', response.data)
           this.configs = []

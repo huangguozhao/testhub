@@ -21,9 +21,9 @@ public class NotificationConfigDTO {
     private String configType;
 
     /**
-     * Webhook机器人配置 (JSON)
+     * Webhook机器人配置 (JSON对象，前端发送的是对象，需要序列化为字符串存储)
      */
-    private String webhookBots;
+    private Object webhookBots;
 
     /**
      * 是否默认
