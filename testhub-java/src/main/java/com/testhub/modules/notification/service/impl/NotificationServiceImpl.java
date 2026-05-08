@@ -245,19 +245,20 @@ public class NotificationServiceImpl extends ServiceImpl<NotificationLogMapper, 
         // 收集所有待发送的 webhook 机器人
         List<Map<String, Object>> allBots = new java.util.ArrayList<>();
 
-        // 从通知配置中获取机器人
-        if (config != null && config.getWebhookConfig() != null) {
+        // 从通知配置的 webhookBots 中获取机器人
+        if (config != null && config.getWebhookBots() != null) {
             try {
-                Map<String, Object> configMap = objectMapper.readValue(config.getWebhookConfig(), Map.class);
-                String webhook = (String) configMap.get("webhook");
-                if (webhook != null && !webhook.isBlank()) {
-                    Map<String, Object> bot = new java.util.HashMap<>();
-                    bot.put("type", config.getConfigType());
-                    bot.put("name", config.getName());
-                    bot.put("webhook_url", webhook);
-                    bot.put("secret", configMap.get("secret"));
-                    bot.put("enabled", true);
-                    allBots.add(bot);
+                Map<String, Map<String, Object>> botsMap = objectMapper.readValue(
+                        config.getWebhookBots(), new TypeReference<>() {});
+                for (Map.Entry<String, Map<String, Object>> entry : botsMap.entrySet()) {
+                    Map<String, Object> botConfig = entry.getValue();
+                    String webhookUrl = (String) botConfig.get("webhook_url");
+                    if (webhookUrl != null && !webhookUrl.isBlank()
+                            && !Boolean.FALSE.equals(botConfig.get("enabled"))) {
+                        Map<String, Object> bot = new java.util.HashMap<>(botConfig);
+                        bot.put("type", entry.getKey());
+                        allBots.add(bot);
+                    }
                 }
             } catch (Exception e) {
                 log.warn("解析通知配置失败: {}", e.getMessage());
@@ -470,8 +471,19 @@ public class NotificationServiceImpl extends ServiceImpl<NotificationLogMapper, 
         String configType = config.getConfigType();
 
         try {
-            Map<String, Object> webhookConfig = objectMapper.readValue(config.getWebhookConfig(), Map.class);
-            String webhook = (String) webhookConfig.get("webhook");
+            // 从 webhookBots JSON 中提取对应机器人的 webhook
+            Map<String, Map<String, Object>> botsMap = objectMapper.readValue(
+                    config.getWebhookBots(), new TypeReference<>() {});
+            String botKey = configType;
+            if (botKey != null && botKey.startsWith("webhook_")) {
+                botKey = botKey.substring("webhook_".length());
+            }
+            Map<String, Object> botConfig = botsMap.get(botKey);
+            if (botConfig == null) {
+                log.warn("webhookBots 中未找到机器人: {}", botKey);
+                return false;
+            }
+            String webhook = (String) botConfig.get("webhook_url");
 
             switch (configType) {
                 case "webhook_feishu":
@@ -479,7 +491,7 @@ public class NotificationServiceImpl extends ServiceImpl<NotificationLogMapper, 
                 case "webhook_wechat":
                     return sendWechatNotification(webhook, title, content);
                 case "webhook_dingtalk":
-                    String secret = (String) webhookConfig.get("secret");
+                    String secret = (String) botConfig.get("secret");
                     return sendDingtalkNotification(webhook, secret, title, content);
                 default:
                     log.warn("不支持的通知类型: {}", configType);

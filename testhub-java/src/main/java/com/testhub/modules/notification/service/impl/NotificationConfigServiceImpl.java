@@ -30,7 +30,7 @@ public class NotificationConfigServiceImpl extends ServiceImpl<NotificationConfi
         NotificationConfig config = new NotificationConfig();
         config.setName(dto.getName());
         config.setConfigType(dto.getConfigType());
-        config.setWebhookConfig(dto.getWebhookConfig());
+        config.setWebhookBots(dto.getWebhookBots());
         config.setIsDefault(dto.getIsDefault() != null && dto.getIsDefault());
         config.setIsActive(dto.getIsActive() != null ? dto.getIsActive() : true);
         config.setRemark(dto.getRemark());
@@ -55,7 +55,7 @@ public class NotificationConfigServiceImpl extends ServiceImpl<NotificationConfi
 
         config.setName(dto.getName());
         config.setConfigType(dto.getConfigType());
-        config.setWebhookConfig(dto.getWebhookConfig());
+        config.setWebhookBots(dto.getWebhookBots());
         config.setIsActive(dto.getIsActive());
         config.setRemark(dto.getRemark());
 

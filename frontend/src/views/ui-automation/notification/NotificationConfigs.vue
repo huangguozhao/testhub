@@ -277,9 +277,9 @@ export default {
         // 检查是否已存在对应类型的机器人配置
         let webhookConfigId = null
         try {
-          const response = await getUnifiedNotificationConfigs({ config_type: configType })
-          if (response.data.results && response.data.results.length > 0) {
-            webhookConfigId = response.data.results[0].id
+          const response = await getUnifiedNotificationConfigs({ configType: configType })
+          if (response.data.records && response.data.records.length > 0) {
+            webhookConfigId = response.data.records[0].id
           }
         } catch (error) {
           console.log(t('uiAutomation.notification.configs.messages.noExistingConfig'))
@@ -290,8 +290,8 @@ export default {
 
         if (webhookConfigId) {
           // 更新现有配置 - 需要先获取现有配置，然后更新webhook_bots
-          const configResponse = await getUnifiedNotificationConfigs({ config_type: configType })
-          const existingConfig = configResponse.data.results[0]
+          const configResponse = await getUnifiedNotificationConfigs({ configType: configType })
+          const existingConfig = configResponse.data.records[0]
 
           // 合并现有的webhook_bots和其他字段
           const updatedWebhookBots = existingConfig.webhook_bots || {}
@@ -366,9 +366,9 @@ export default {
     const fetchWebhookConfig = async (botType) => {
       try {
         const configType = getConfigType(botType)
-        const response = await getUnifiedNotificationConfigs({ config_type: configType })
-        if (response.data.results && response.data.results.length > 0) {
-          const config = response.data.results[0]
+        const response = await getUnifiedNotificationConfigs({ configType: configType })
+        if (response.data.records && response.data.records.length > 0) {
+          const config = response.data.records[0]
 
           if (config.webhook_bots && config.webhook_bots[botType]) {
             const bot = config.webhook_bots[botType]
@@ -479,25 +479,32 @@ export default {
   border-radius: var(--th-radius-xl, 12px);
   border: 1px solid var(--th-border, #e5e5e5);
   box-shadow: var(--th-shadow-md, 0 2px 8px rgba(0, 0, 0, 0.06));
-  overflow: hidden;
+}
+
+.notification-tabs :deep(.el-tabs__header) {
+  margin: 0;
 }
 
 .notification-tabs :deep(.el-tabs__nav-wrap) {
   background: var(--th-bg-secondary, #fafafa);
   border-bottom: 1px solid var(--th-border, #e5e5e5);
+  overflow: visible;
 }
 
 .notification-tabs :deep(.el-tabs__nav-scroll) {
-  padding: 0;
+  padding: 0 var(--th-space-xl, 20px);
 }
 
 .notification-tabs :deep(.el-tabs__nav) {
   display: flex;
+  width: 100%;
   background: var(--th-bg-secondary, #fafafa);
 }
 
 .notification-tabs :deep(.el-tabs__item) {
-  padding: var(--th-space-lg, 16px) var(--th-space-2xl, 24px);
+  flex: 1;
+  text-align: center;
+  padding: 14px 16px;
   font-size: var(--th-font-size-base, 14px);
   font-weight: 500;
   color: var(--th-text-secondary, #666);

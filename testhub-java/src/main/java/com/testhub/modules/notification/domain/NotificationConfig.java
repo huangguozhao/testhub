@@ -24,13 +24,16 @@ public class NotificationConfig extends BaseEntity {
     private String configType;
 
     /**
-     * Webhook配置 (JSON格式)
-     * 飞书: {"webhook": "https://open.feishu.cn/open-apis/bot/v2/hook/xxx", "secret": "xxx"}
-     * 企微: {"webhook": "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=xxx"}
-     * 钉钉: {"webhook": "https://oapi.dingtalk.com/robot/send?access_token=xxx", "secret": "xxx"}
-     * 邮件: {"smtp_host": "smtp.xxx.com", "smtp_port": 465, "username": "xxx", "password": "xxx", "from": "xxx@xxx.com"}
+     * Webhook机器人配置 (JSON格式)
+     * 结构: {"botType": {"name": "机器人名称", "webhook_url": "https://...", "enabled": true, ...}}
+     * 示例:
+     * {
+     *   "feishu": {"name": "飞书机器人", "webhook_url": "https://open.feishu.cn/...", "enabled": true, "enable_ui_automation": true, "enable_api_testing": true},
+     *   "wechat": {"name": "企微机器人", "webhook_url": "https://qyapi.weixin.qq.com/...", "enabled": true},
+     *   "dingtalk": {"name": "钉钉机器人", "webhook_url": "https://oapi.dingtalk.com/...", "secret": "xxx", "enabled": true}
+     * }
      */
-    private String webhookConfig;
+    private String webhookBots;
 
     /**
      * 是否默认: 0=否, 1=是

@@ -1,14 +1,14 @@
 /**
- * 核心功能模块相关 API
+ * 核心功能模块相关 API (Java 后端)
  */
 import request from '@/utils/api'
 
 // ==================== 统一通知配置 ====================
 
-// 获取所有通知配置
+// 获取所有通知配置 (分页)
 export function getUnifiedNotificationConfigs(params) {
   return request({
-    url: '/core/notification-configs/',
+    url: '/notification-configs',
     method: 'get',
     params
   })
@@ -17,7 +17,7 @@ export function getUnifiedNotificationConfigs(params) {
 // 获取通知配置详情
 export function getUnifiedNotificationConfigDetail(id) {
   return request({
-    url: `/core/notification-configs/${id}/`,
+    url: `/notification-configs/${id}`,
     method: 'get'
   })
 }
@@ -25,7 +25,7 @@ export function getUnifiedNotificationConfigDetail(id) {
 // 创建通知配置
 export function createUnifiedNotificationConfig(data) {
   return request({
-    url: '/core/notification-configs/',
+    url: '/notification-configs',
     method: 'post',
     data
   })
@@ -34,7 +34,7 @@ export function createUnifiedNotificationConfig(data) {
 // 更新通知配置
 export function updateUnifiedNotificationConfig(id, data) {
   return request({
-    url: `/core/notification-configs/${id}/`,
+    url: `/notification-configs/${id}`,
     method: 'put',
     data
   })
@@ -43,7 +43,7 @@ export function updateUnifiedNotificationConfig(id, data) {
 // 删除通知配置
 export function deleteUnifiedNotificationConfig(id) {
   return request({
-    url: `/core/notification-configs/${id}/`,
+    url: `/notification-configs/${id}`,
     method: 'delete'
   })
 }
@@ -51,7 +51,7 @@ export function deleteUnifiedNotificationConfig(id) {
 // 设置为默认配置
 export function setDefaultNotificationConfig(id) {
   return request({
-    url: `/core/notification-configs/${id}/set_default/`,
+    url: `/notification-configs/${id}/set-default`,
     method: 'post'
   })
 }
@@ -59,7 +59,7 @@ export function setDefaultNotificationConfig(id) {
 // 获取所有启用的配置
 export function getActiveNotificationConfigs() {
   return request({
-    url: '/core/notification-configs/active_configs/',
+    url: '/notification-configs/active',
     method: 'get'
   })
 }

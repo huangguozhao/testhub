@@ -21,9 +21,9 @@ public class NotificationConfigDTO {
     private String configType;
 
     /**
-     * Webhook配置 (JSON)
+     * Webhook机器人配置 (JSON)
      */
-    private String webhookConfig;
+    private String webhookBots;
 
     /**
      * 是否默认
