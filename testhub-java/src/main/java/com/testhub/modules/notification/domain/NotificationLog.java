@@ -19,6 +19,11 @@ public class NotificationLog extends BaseEntity {
     private Long taskId;
 
     /**
+     * 任务名称快照
+     */
+    private String taskName;
+
+    /**
      * 任务类型: api_test, ui_automation, app_automation
      */
     private String taskType;

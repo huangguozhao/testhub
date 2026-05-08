@@ -15,9 +15,21 @@ public interface NotificationService {
     NotificationLog sendNotification(SendNotificationDTO dto);
 
     /**
-     * 发送执行结果通知
+     * 发送执行结果通知 (通知所有启用的配置)
      */
     void sendExecutionNotification(Long taskId, String taskType, boolean success, String message);
+
+    /**
+     * 根据任务的通知设置发送执行结果通知
+     * 会检查 TaskNotificationSetting，按配置发送邮件和/或 Webhook
+     *
+     * @param taskId      定时任务ID
+     * @param taskName    任务名称
+     * @param taskType    任务类型
+     * @param success     是否成功
+     * @param message     执行详情
+     */
+    void sendExecutionNotificationForTask(Long taskId, String taskName, String taskType, boolean success, String message);
 
     /**
      * 分页查询通知日志

@@ -70,67 +70,63 @@
             prop="task_name"
             :label="$t('notification.logs.columns.taskName')"
             min-width="150"
-            sortable="custom"
         />
         <el-table-column
-            prop="task_type_display"
+            prop="task_type"
             :label="$t('notification.logs.columns.taskType')"
             min-width="100"
         >
           <template #default="{ row }">
-            <el-tag
-                type="info"
-                size="small"
-            >
-              {{ row.task_type_display }}
-            </el-tag>
+            <span v-if="row.task_type">
+              <el-tag type="info" size="small">
+                {{ getTaskTypeDisplay(row.task_type) }}
+              </el-tag>
+            </span>
+            <span v-else>-</span>
           </template>
         </el-table-column>
         <el-table-column
-            prop="notification_type_display"
+            prop="channel"
             :label="$t('notification.logs.columns.notificationType')"
             min-width="120"
         >
           <template #default="{ row }">
             <el-tag
-                :type="getNotificationTypeTagType(row.notification_type_display)"
+                :type="getChannelTagType(row.channel)"
                 size="small"
             >
-              {{ row.notification_type_display }}
+              {{ getChannelDisplay(row.channel) }}
             </el-tag>
           </template>
         </el-table-column>
         <el-table-column
-            prop="notification_target_display"
             :label="$t('notification.logs.columns.notificationTarget')"
             min-width="150"
         >
           <template #default="{ row }">
-            <span>{{ row.notification_target_display || '-' }}</span>
+            <span>{{ formatRecipientDisplay(row.recipient_info) }}</span>
           </template>
         </el-table-column>
         <el-table-column
             prop="created_at"
             :label="$t('notification.logs.columns.notificationTime')"
             min-width="180"
-            sortable="custom"
         >
           <template #default="{ row }">
             {{ formatDate(row.created_at) }}
           </template>
         </el-table-column>
         <el-table-column
-            prop="status_display"
+            prop="status"
             :label="$t('notification.logs.columns.status')"
             min-width="100"
-            sortable="custom"
         >
           <template #default="{ row }">
             <el-tag
-                :type="getStatusTagType(row.status_display)"
+                :type="getStatusTagType(row.status)"
                 size="small"
             >
-              {{ row.status_display }}
+              {{ getStatusDisplay(row.status) }}
             </el-tag>
           </template>
         </el-table-column>
@@ -185,25 +181,25 @@
         <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item :label="$t('notification.logs.detailDialog.taskName')">
-              <span>{{ selectedLog.task_name }}</span>
+              <span>{{ selectedLog.task_name || (selectedLog.task_id ? 'ID: ' + selectedLog.task_id : '-') }}</span>
             </el-form-item>
           </el-col>
           <el-col :span="12">
             <el-form-item :label="$t('notification.logs.detailDialog.taskType')">
-              <span>{{ selectedLog.task_type_display }}</span>
+              <span>{{ selectedLog.task_type ? getTaskTypeDisplay(selectedLog.task_type) : '-' }}</span>
             </el-form-item>
           </el-col>
           <el-col :span="12">
             <el-form-item :label="$t('notification.logs.detailDialog.notificationType')">
-              <el-tag :type="getNotificationTypeTagType(selectedLog.notification_type_display)">
-                {{ selectedLog.notification_type_display }}
+              <el-tag :type="getChannelTagType(selectedLog.channel)">
+                {{ getChannelDisplay(selectedLog.channel) }}
               </el-tag>
             </el-form-item>
           </el-col>
           <el-col :span="12">
             <el-form-item :label="$t('notification.logs.detailDialog.status')">
-              <el-tag :type="getStatusTagType(selectedLog.status_display)">
-                {{ selectedLog.status_display }}
+              <el-tag :type="getStatusTagType(selectedLog.status)">
+                {{ getStatusDisplay(selectedLog.status) }}
               </el-tag>
             </el-form-item>
           </el-col>
@@ -217,20 +213,9 @@
               <span>{{ selectedLog.sent_at ? formatDate(selectedLog.sent_at) : '-' }}</span>
             </el-form-item>
           </el-col>
-          <el-col :span="24" v-if="selectedLog.notification_target_display && selectedLog.notification_target_display.length > 0">
+          <el-col :span="24" v-if="selectedLog.recipient_info">
             <el-form-item :label="$t('notification.logs.detailDialog.notificationTarget')">
-              <div class="notification-targets">
-                <el-tag
-                    v-for="(target, index) in selectedLog.notification_target_display"
-                    :key="index"
-                    class="target-tag"
-                    size="small"
-                    :type="getTargetTagType(target.type)"
-                >
-                  {{ target.display }}（{{ target.name }}）
-                </el-tag>
-                <span v-if="!selectedLog.notification_target_display || selectedLog.notification_target_display.length === 0">-</span>
-              </div>
+              <span>{{ formatRecipientDisplay(selectedLog.recipient_info) }}</span>
             </el-form-item>
           </el-col>
           <el-col :span="24">
@@ -243,7 +228,7 @@
                   </div>
                 </div>
                 <div v-else class="notification-content-raw">
-                  <pre>{{ selectedLog.notification_content || '-' }}</pre>
+                  <pre>{{ selectedLog.content || '-' }}</pre>
                 </div>
               </div>
             </el-form-item>
@@ -318,18 +303,9 @@ export default {
       try {
         const params = {
           current: pagination.currentPage,
-          size: pagination.pageSize,
-          ordering: sortParams.order === 'ascending' ? sortParams.prop : `-${sortParams.prop}`
+          size: pagination.pageSize
         }
 
-        // 添加搜索条件
-        if (searchForm.taskName) {
-          params.search = searchForm.taskName
-        }
-        if (searchForm.dateRange && searchForm.dateRange.length === 2) {
-          params.start_date = searchForm.dateRange[0]
-          params.end_date = searchForm.dateRange[1]
-        }
         if (searchForm.status) {
           params.status = searchForm.status
         }
@@ -407,85 +383,83 @@ export default {
     // 获取状态标签类型
     const getStatusTagType = (status) => {
       const typeMap = {
-        '发送成功': 'success',
         'success': 'success',
-        '发送失败': 'danger',
         'failed': 'danger',
-        '待发送': 'info',
         'pending': 'info',
-        '发送中': 'warning',
         'sending': 'warning',
-        '已取消': 'info',
         'cancelled': 'info'
       }
       return typeMap[status] || 'info'
     }
 
-    // 获取通知类型标签类型
-    const getNotificationTypeTagType = (typeDisplay) => {
-      const typeMap = {
-        '邮箱通知': '',
-        'Webhook机器人': 'primary',
-        '两种都发送': 'warning'
+    // 获取状态显示文本
+    const getStatusDisplay = (status) => {
+      const map = {
+        'success': '成功',
+        'failed': '失败',
+        'pending': '待发送',
+        'sending': '发送中',
+        'cancelled': '已取消'
       }
-      return typeMap[typeDisplay] || 'info'
+      return map[status] || status || '-'
     }
 
-    // 获取通知对象标签类型
-    const getTargetTagType = (targetType) => {
-      const typeMap = {
-        'wechat': 'success',
-        'feishu': 'primary',
-        'dingtalk': 'warning',
-        'email': 'info'
+    // 获取任务类型显示文本
+    const getTaskTypeDisplay = (taskType) => {
+      const map = {
+        'api_test': '接口测试',
+        'ui_automation': 'UI自动化',
+        'app_automation': 'APP自动化'
       }
-      return typeMap[targetType] || 'info'
+      return map[taskType] || taskType || '-'
+    }
+
+    // 获取通知渠道显示文本
+    const getChannelDisplay = (channel) => {
+      const map = {
+        'email': '邮件通知',
+        'feishu': '飞书通知',
+        'wechat': '企微通知',
+        'dingtalk': '钉钉通知'
+      }
+      return map[channel] || channel || '-'
+    }
+
+    // 获取通知渠道标签类型
+    const getChannelTagType = (channel) => {
+      const map = {
+        'email': '',
+        'feishu': 'primary',
+        'wechat': 'success',
+        'dingtalk': 'warning'
+      }
+      return map[channel] || 'info'
     }
 
     // 格式化收件人显示
-    const formatRecipients = (recipients) => {
-      if (!recipients) return '-'
-
-      if (typeof recipients === 'string') {
-        return recipients.length > 20 ? recipients.substring(0, 20) + '...' : recipients
+    const formatRecipientDisplay = (recipientInfo) => {
+      if (!recipientInfo) return '-'
+      try {
+        const info = typeof recipientInfo === 'string' ? JSON.parse(recipientInfo) : recipientInfo
+        if (Array.isArray(info)) {
+          if (info.length === 0) return '-'
+          if (typeof info[0] === 'string') return info.join(', ')
+          return info.map(item => item.email || item.name || '-').join(', ')
+        }
+        if (typeof info === 'object') return info.email || info.name || '-'
+        return String(info)
+      } catch {
+        return recipientInfo
       }
-
-      if (Array.isArray(recipients)) {
-        if (recipients.length === 0) return '-'
-        if (recipients.length === 1) return recipients[0]
-        return `${recipients[0]} +${recipients.length - 1}`
-      }
-
-      return '-'
-    }
-
-    // 格式化收件人信息
-    const formatRecipientInfo = (recipientInfo) => {
-      if (!recipientInfo) return []
-      if (Array.isArray(recipientInfo)) {
-        return recipientInfo.map(item =>
-            item.email ? `${item.name} <${item.email}>` : item.name
-        )
-      }
-      return [recipientInfo]
-    }
-
-    // 格式化Webhook信息
-    const formatWebhookInfo = (webhookInfo) => {
-      if (!webhookInfo) return []
-      if (Array.isArray(webhookInfo)) {
-        return webhookInfo.map(item => item.name || item.type)
-      }
-      return [webhookInfo.name || webhookInfo.type]
     }
 
     // 解析通知内容为结构化数据
     const parsedNotificationContent = computed(() => {
-      if (!selectedLog.value || !selectedLog.value.notification_content) {
+      if (!selectedLog.value || !selectedLog.value.content) {
         return null
       }
 
-      const content = selectedLog.value.notification_content
+      const content = selectedLog.value.content
 
       try {
         const jsonContent = JSON.parse(content)
@@ -587,11 +561,11 @@ export default {
       handleDetailDialogClose,
       formatDate,
       getStatusTagType,
-      getNotificationTypeTagType,
-      getTargetTagType,
-      formatRecipients,
-      formatRecipientInfo,
-      formatWebhookInfo
+      getStatusDisplay,
+      getTaskTypeDisplay,
+      getChannelDisplay,
+      getChannelTagType,
+      formatRecipientDisplay
     }
   }
 }

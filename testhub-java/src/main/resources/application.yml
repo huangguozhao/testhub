@@ -44,6 +44,22 @@ spring:
       max-file-size: 100MB
       max-request-size: 100MB
 
+  # 邮件配置 (通过环境变量覆盖)
+  mail:
+    host: ${MAIL_HOST:smtp.qq.com}
+    port: ${MAIL_PORT:465}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    default-encoding: UTF-8
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          ssl:
+            enable: true
+
   # JSON 配置
   jackson:
     date-format: yyyy-MM-dd HH:mm:ssXXX

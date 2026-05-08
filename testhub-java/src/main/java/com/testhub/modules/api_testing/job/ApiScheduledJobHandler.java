@@ -3,6 +3,7 @@ package com.testhub.modules.api_testing.job;
 import com.testhub.modules.api_testing.domain.ApiScheduledTask;
 import com.testhub.modules.api_testing.service.ApiScheduledTaskService;
 import com.testhub.modules.api_testing.service.ApiTestSuiteService;
+import com.testhub.modules.notification.service.NotificationService;
 import com.xxl.job.core.context.XxlJobHelper;
 import com.xxl.job.core.handler.annotation.XxlJob;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ public class ApiScheduledJobHandler {
 
     private final ApiScheduledTaskService apiScheduledTaskService;
     private final ApiTestSuiteService apiTestSuiteService;
+    private final NotificationService notificationService;
 
     /**
      * API定时任务执行入口
@@ -31,6 +33,7 @@ public class ApiScheduledJobHandler {
     public void execute() {
         String param = XxlJobHelper.getJobParam();
         log.info("XXL-JOB 触发 API 定时任务: param={}", param);
+        Long taskId = null;
 
         try {
             if (param == null || param.isBlank()) {
@@ -40,7 +43,6 @@ public class ApiScheduledJobHandler {
             }
 
             // 解析参数 (格式: taskId)
-            Long taskId;
             try {
                 taskId = Long.parseLong(param.trim());
             } catch (NumberFormatException e) {
@@ -69,10 +71,30 @@ public class ApiScheduledJobHandler {
             apiScheduledTaskService.executeTaskNow(taskId);
 
             log.info("定时任务执行完成: id={}", taskId);
+
+            // 发送成功通知
+            try {
+                notificationService.sendExecutionNotificationForTask(
+                        taskId, task.getName(), "api_test", true, "定时任务执行完成");
+            } catch (Exception notifyEx) {
+                log.warn("发送成功通知失败: {}", notifyEx.getMessage());
+            }
+
             XxlJobHelper.handleSuccess();
 
         } catch (Exception e) {
             log.error("定时任务执行失败: {}", e.getMessage(), e);
+
+            // 发送失败通知
+            try {
+                ApiScheduledTask failedTask = apiScheduledTaskService.getById(taskId);
+                String taskName = failedTask != null ? failedTask.getName() : "Unknown";
+                notificationService.sendExecutionNotificationForTask(
+                        taskId, taskName, "api_test", false, "执行失败: " + e.getMessage());
+            } catch (Exception notifyEx) {
+                log.warn("发送失败通知失败: {}", notifyEx.getMessage());
+            }
+
             XxlJobHelper.handleFail("执行失败: " + e.getMessage());
         }
     }
