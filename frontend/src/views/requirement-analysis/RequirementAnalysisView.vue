@@ -500,7 +500,7 @@ export default {
   methods: {
     async loadProjects() {
       try {
-        const response = await api.get('/projects/')
+        const response = await api.get('/projects')
         this.projects = response.data.results || response.data
       } catch (error) {
         console.error(this.$t('requirementAnalysis.loadProjectsFailed'), error)
@@ -510,7 +510,7 @@ export default {
     async checkConfigStatus() {
       try {
         this.checkingConfig = true
-        const response = await api.get('/requirement-analysis/config/check/')
+        const response = await api.get('/requirement-analysis/config/check')
         this.configStatus = response.data
 
         // 判断逻辑：只有当"用例编写模型"、"用例评审模型"、"用例编写提示词"和"用例评审提示词"都配置且启用时，才不显示弹框

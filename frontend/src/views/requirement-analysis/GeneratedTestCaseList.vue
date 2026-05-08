@@ -764,8 +764,8 @@ export default {
     // 获取项目列表
     async fetchProjects() {
       try {
-        const response = await api.get('/projects/list/')
-        this.projects = response.data.results || []
+        const response = await api.get('/projects')
+        this.projects = response.data || []
       } catch (error) {
         console.error(this.$t('generatedTestCases.fetchProjectsFailed'), error)
       }
@@ -790,7 +790,7 @@ export default {
       }
 
       try {
-        const response = await api.get(`/versions/projects/${projectId}/versions/`)
+        const response = await api.get(`/versions/projects/${projectId}/versions`)
         this.projectVersions = response.data || []
       } catch (error) {
         console.error(this.$t('generatedTestCases.fetchProjectVersionsFailed'), error)
