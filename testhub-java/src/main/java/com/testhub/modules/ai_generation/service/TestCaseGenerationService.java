@@ -49,7 +49,7 @@ public class TestCaseGenerationService {
         // 查找 writer 模型配置
         AIModelConfig writerConfig = aiModelConfigMapper.selectOne(
                 new LambdaQueryWrapper<AIModelConfig>()
-                        .eq(AIModelConfig::getRole, "testcase_writer")
+                        .eq(AIModelConfig::getRole, "writer")
                         .eq(AIModelConfig::getIsActive, true)
                         .last("LIMIT 1"));
         if (writerConfig != null) {
@@ -59,7 +59,7 @@ public class TestCaseGenerationService {
         // 查找 reviewer 模型配置
         AIModelConfig reviewerConfig = aiModelConfigMapper.selectOne(
                 new LambdaQueryWrapper<AIModelConfig>()
-                        .eq(AIModelConfig::getRole, "testcase_reviewer")
+                        .eq(AIModelConfig::getRole, "reviewer")
                         .eq(AIModelConfig::getIsActive, true)
                         .last("LIMIT 1"));
         if (reviewerConfig != null) {

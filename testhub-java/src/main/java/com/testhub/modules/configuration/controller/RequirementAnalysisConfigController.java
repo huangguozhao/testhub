@@ -36,7 +36,7 @@ public class RequirementAnalysisConfigController {
         // 检查用例编写模型
         AIModelConfig writerModel = aiModelConfigMapper.selectOne(
                 new LambdaQueryWrapper<AIModelConfig>()
-                        .eq(AIModelConfig::getRole, "testcase_writer")
+                        .eq(AIModelConfig::getRole, "writer")
                         .eq(AIModelConfig::getIsActive, true)
                         .last("LIMIT 1"));
         result.put("writer_model", buildModelStatus(writerModel));
@@ -44,7 +44,7 @@ public class RequirementAnalysisConfigController {
         // 检查用例评审模型
         AIModelConfig reviewerModel = aiModelConfigMapper.selectOne(
                 new LambdaQueryWrapper<AIModelConfig>()
-                        .eq(AIModelConfig::getRole, "testcase_reviewer")
+                        .eq(AIModelConfig::getRole, "reviewer")
                         .eq(AIModelConfig::getIsActive, true)
                         .last("LIMIT 1"));
         result.put("reviewer_model", buildModelStatus(reviewerModel));
