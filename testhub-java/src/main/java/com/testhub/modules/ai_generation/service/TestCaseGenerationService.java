@@ -7,8 +7,9 @@ import com.testhub.modules.configuration.domain.AIModelConfig;
 import com.testhub.modules.configuration.domain.PromptConfig;
 import com.testhub.modules.configuration.mapper.AIModelConfigMapper;
 import com.testhub.modules.configuration.mapper.PromptConfigMapper;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -17,13 +18,25 @@ import java.util.*;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class TestCaseGenerationService {
 
     private final TestCaseGenerationTaskMapper taskMapper;
     private final AIModelConfigMapper aiModelConfigMapper;
     private final PromptConfigMapper promptConfigMapper;
     private final AIModelCallService aiModelCallService;
+    private final TestCaseGenerationService self;
+
+    public TestCaseGenerationService(TestCaseGenerationTaskMapper taskMapper,
+                                     AIModelConfigMapper aiModelConfigMapper,
+                                     PromptConfigMapper promptConfigMapper,
+                                     AIModelCallService aiModelCallService,
+                                     @Lazy @Autowired TestCaseGenerationService self) {
+        this.taskMapper = taskMapper;
+        this.aiModelConfigMapper = aiModelConfigMapper;
+        this.promptConfigMapper = promptConfigMapper;
+        this.aiModelCallService = aiModelCallService;
+        this.self = self;
+    }
 
     /**
      * 创建生成任务
@@ -89,8 +102,8 @@ public class TestCaseGenerationService {
         taskMapper.insert(task);
         log.info("创建用例生成任务: taskId={}", task.getTaskId());
 
-        // 启动后台生成
-        executeGeneration(task.getId());
+        // 启动后台生成（通过 self 调用以触发 @Async 代理）
+        self.executeGeneration(task.getId());
 
         return task;
     }
