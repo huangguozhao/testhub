@@ -174,7 +174,7 @@ const fetchTestCases = async () => {
       project: projectFilter.value,
       priority: priorityFilter.value
     }
-    const response = await api.get('/testcases/', { params })
+    const response = await api.get('/testcases', { params })
     testcases.value = response.data.results || []
     total.value = response.data.count || 0
   } catch (error) {
@@ -219,7 +219,7 @@ const deleteTestCase = async (testcase) => {
       type: 'warning'
     })
     
-    await api.delete(`/testcases/${testcase.id}/`)
+    await api.delete(`/testcases/${testcase.id}`)
     ElMessage.success(t('testcase.deleteSuccess'))
     fetchTestCases()
   } catch (error) {
@@ -264,7 +264,7 @@ const batchDeleteTestCases = async () => {
     // 逐个删除选中的测试用例
     for (const testcase of selectedTestCases.value) {
       try {
-        await api.delete(`/testcases/${testcase.id}/`)
+        await api.delete(`/testcases/${testcase.id}`)
         successCount++
       } catch (error) {
         console.error(`Delete test case ${testcase.id} failed:`, error)
@@ -351,7 +351,7 @@ const exportToExcel = async () => {
       let allData = []
 
       while (hasMore) {
-        const response = await api.get('/testcases/', {
+        const response = await api.get('/testcases', {
           params: {
             page: page,
             page_size: pageSize,

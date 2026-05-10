@@ -62,7 +62,7 @@ const testcase = ref(null)
 
 const fetchTestCase = async () => {
   try {
-    const response = await api.get(`/testcases/${route.params.id}/`)
+    const response = await api.get(`/testcases/${route.params.id}`)
     testcase.value = response.data
   } catch (error) {
     ElMessage.error(t('testcase.fetchDetailFailed'))

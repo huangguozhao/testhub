@@ -794,7 +794,7 @@ export default {
           status: 'draft'
         }
 
-        await api.post('/testcases/', caseData)
+        await api.post('/testcases', caseData)
         ElMessage.success(this.$t('taskDetail.adoptSuccess', { count: 1 }))
 
         // 不再移除已采纳的用例，保留在列表中供多次采纳

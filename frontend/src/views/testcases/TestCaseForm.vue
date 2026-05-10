@@ -204,7 +204,7 @@ const handleSubmit = async () => {
     if (valid) {
       submitting.value = true
       try {
-        await api.post('/testcases/', form)
+        await api.post('/testcases', form)
         ElMessage.success(t('testcase.createSuccess'))
         router.push('/ai-generation/testcases')
       } catch (error) {

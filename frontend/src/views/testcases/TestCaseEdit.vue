@@ -217,7 +217,7 @@ const onVersionChange = () => {
 
 const fetchTestCase = async () => {
   try {
-    const response = await api.get(`/testcases/${route.params.id}/`)
+    const response = await api.get(`/testcases/${route.params.id}`)
     const testcase = response.data
 
     // Fill form data
@@ -262,7 +262,7 @@ const handleSubmit = async () => {
           expected_result: convertNewlineToBr(form.expected_result || '')
         }
 
-        await api.put(`/testcases/${route.params.id}/`, submitData)
+        await api.put(`/testcases/${route.params.id}`, submitData)
         ElMessage.success(t('testcase.updateSuccess'))
         router.push(`/ai-generation/testcases/${route.params.id}`)
       } catch (error) {

@@ -886,7 +886,7 @@ export default {
         }
         
         // 调用API创建测试用例
-        await api.post('/testcases/', submitData)
+        await api.post('/testcases', submitData)
         
         // 将AI生成的用例状态更新为"已采纳"
         try {
