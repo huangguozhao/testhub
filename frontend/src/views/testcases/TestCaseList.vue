@@ -175,8 +175,8 @@ const fetchTestCases = async () => {
       priority: priorityFilter.value
     }
     const response = await api.get('/testcases', { params })
-    testcases.value = response.data.results || []
-    total.value = response.data.count || 0
+    testcases.value = response.data.records || response.data.results || []
+    total.value = response.data.total || response.data.count || 0
   } catch (error) {
     ElMessage.error(t('testcase.fetchListFailed'))
   } finally {
@@ -361,7 +361,7 @@ const exportToExcel = async () => {
           }
         })
 
-        const results = response.data.results || []
+        const results = response.data.records || response.data.results || []
         allData.push(...results)
 
         // 检查是否还有更多数据
