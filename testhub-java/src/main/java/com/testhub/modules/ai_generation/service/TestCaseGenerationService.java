@@ -196,30 +196,20 @@ public class TestCaseGenerationService {
                 throw new RuntimeException("未配置测试用例编写模型");
             }
 
-            // 构建消息
-            List<Map<String, String>> messages = new ArrayList<>();
             String systemPrompt = writerPrompt != null ? writerPrompt.getContent()
                     : "你是一位资深的测试用例编写专家，能够根据需求精确生成高质量的测试用例。";
-            messages.add(Map.of("role", "system", "content", systemPrompt));
-            messages.add(Map.of("role", "user", "content",
-                    "请根据以下需求生成详细的测试用例：\n\n" + task.getRequirementText()
-                            + "\\n\n请以JSON数组格式输出，每个用例包含：case_id, title, priority, precondition, test_steps, expected_result"));
 
             task.setProgress(30);
             taskMapper.updateById(task);
 
-            // 阶段1: 流式生成
+            // 阶段1: 流式生成（支持分批续写）
             StringBuilder generatedContent = new StringBuilder();
-            String generated = aiModelCallService.chatCompletionStream(writerConfig, messages, chunk -> {
-                generatedContent.append(chunk);
-                task.setStreamBuffer(generatedContent.toString());
-                task.setStreamPosition(generatedContent.length());
-                task.setLastStreamUpdate(LocalDateTime.now());
-                if (generatedContent.length() % 500 < 50) {
-                    taskMapper.updateById(task);
-                }
-            });
+            generateWithBatching(writerConfig, systemPrompt,
+                    "请根据以下需求生成详细的测试用例：\n\n" + task.getRequirementText()
+                            + "\n\n请以JSON数组格式输出，每个用例包含：case_id, title, priority, precondition, test_steps, expected_result",
+                    generatedContent, task, "stream");
 
+            String generated = generatedContent.toString();
             task.setGeneratedTestCases(generated);
             task.setProgress(60);
             taskMapper.updateById(task);
@@ -236,50 +226,30 @@ public class TestCaseGenerationService {
                 task.setProgress(70);
                 taskMapper.updateById(task);
 
-                List<Map<String, String>> reviewMessages = new ArrayList<>();
-                reviewMessages.add(Map.of("role", "system", "content", reviewerPrompt.getContent()));
-                reviewMessages.add(Map.of("role", "user", "content",
-                        "请评审以下测试用例，给出改进建议：\n\n" + generated));
-
                 StringBuilder reviewContent = new StringBuilder();
-                String reviewFeedback = aiModelCallService.chatCompletionStream(reviewerConfig, reviewMessages, chunk -> {
-                    reviewContent.append(chunk);
-                    task.setReviewFeedback(reviewContent.toString());
-                    task.setReviewPosition(reviewContent.length());
-                    task.setLastStreamUpdate(LocalDateTime.now());
-                    if (reviewContent.length() % 200 < 30) {
-                        taskMapper.updateById(task);
-                    }
-                });
+                generateWithBatching(reviewerConfig, reviewerPrompt.getContent(),
+                        "请评审以下测试用例，给出改进建议：\n\n" + generated,
+                        reviewContent, task, "review");
 
+                String reviewFeedback = reviewContent.toString();
                 task.setReviewFeedback(reviewFeedback);
                 task.setProgress(80);
                 taskMapper.updateById(task);
                 log.info("任务 {} 评审完成", task.getTaskId());
 
-                // 阶段3: 改进
+                // 阶段3: 改进（支持分批续写）
                 task.setStatus("revising");
                 task.setProgress(85);
                 taskMapper.updateById(task);
 
-                List<Map<String, String>> reviseMessages = new ArrayList<>();
-                reviseMessages.add(Map.of("role", "system", "content", systemPrompt));
-                reviseMessages.add(Map.of("role", "user", "content",
+                StringBuilder finalContent = new StringBuilder();
+                generateWithBatching(writerConfig, systemPrompt,
                         "原始需求：\n" + task.getRequirementText()
                                 + "\n\n评审意见：\n" + reviewFeedback
-                                + "\n\n请根据评审意见改进以下测试用例，以JSON数组格式输出：\n" + generated));
+                                + "\n\n请根据评审意见改进以下测试用例，以JSON数组格式输出：\n" + generated,
+                        finalContent, task, "final");
 
-                StringBuilder finalContent = new StringBuilder();
-                String finalCases = aiModelCallService.chatCompletionStream(writerConfig, reviseMessages, chunk -> {
-                    finalContent.append(chunk);
-                    task.setFinalTestCases(finalContent.toString());
-                    task.setFinalPosition(finalContent.length());
-                    task.setLastStreamUpdate(LocalDateTime.now());
-                    if (finalContent.length() % 200 < 30) {
-                        taskMapper.updateById(task);
-                    }
-                });
-
+                String finalCases = finalContent.toString();
                 task.setFinalTestCases(finalCases);
                 log.info("任务 {} 改进完成", task.getTaskId());
             } else {
@@ -302,5 +272,109 @@ public class TestCaseGenerationService {
             task.setCompletedAt(LocalDateTime.now());
             taskMapper.updateById(task);
         }
+    }
+
+    /**
+     * 分批生成：检测JSON是否完整，不完整则自动续写
+     *
+     * @param config    AI模型配置
+     * @param sysPrompt 系统提示词
+     * @param userMsg   用户消息
+     * @param buffer    内容累加器
+     * @param task      任务实体（用于更新DB）
+     * @param phase     阶段标识: stream/review/final
+     */
+    private void generateWithBatching(AIModelConfig config, String sysPrompt, String userMsg,
+                                      StringBuilder buffer, TestCaseGenerationTask task, String phase) {
+        int maxBatches = 5; // 最多续写5轮
+        List<Map<String, String>> messages = new ArrayList<>();
+        messages.add(Map.of("role", "system", "content", sysPrompt));
+        messages.add(Map.of("role", "user", "content", userMsg));
+
+        for (int batch = 0; batch < maxBatches; batch++) {
+            int startPos = buffer.length();
+
+            // 流式调用，实时更新DB
+            aiModelCallService.chatCompletionStream(config, messages, chunk -> {
+                buffer.append(chunk);
+                switch (phase) {
+                    case "stream" -> {
+                        task.setStreamBuffer(buffer.toString());
+                        task.setStreamPosition(buffer.length());
+                    }
+                    case "review" -> {
+                        task.setReviewFeedback(buffer.toString());
+                        task.setReviewPosition(buffer.length());
+                    }
+                    case "final" -> {
+                        task.setFinalTestCases(buffer.toString());
+                        task.setFinalPosition(buffer.length());
+                    }
+                }
+                task.setLastStreamUpdate(LocalDateTime.now());
+                if (buffer.length() % 500 < 50) {
+                    taskMapper.updateById(task);
+                }
+            });
+
+            String content = buffer.toString();
+            log.info("任务 {} {}阶段第{}批完成, 总长度={}", task.getTaskId(), phase, batch + 1, content.length());
+
+            // 检查JSON数组是否完整
+            if (isJsonArrayComplete(content)) {
+                log.info("任务 {} {}阶段JSON完整, 共{}批", task.getTaskId(), phase, batch + 1);
+                break;
+            }
+
+            // JSON不完整，追加续写消息
+            if (batch < maxBatches - 1) {
+                log.info("任务 {} {}阶段JSON不完整, 准备续写第{}批", task.getTaskId(), phase, batch + 2);
+                messages = new ArrayList<>();
+                messages.add(Map.of("role", "system", "content", sysPrompt));
+                messages.add(Map.of("role", "user", "content",
+                        userMsg + "\n\n注意：你之前的输出被截断了，当前已生成的内容如下（可能末尾不完整）：\n"
+                                + content
+                                + "\n\n请从截断处继续输出，不要重复已有内容，直接继续JSON数组的后续部分，直到数组闭合。"));
+            }
+        }
+
+        // 最终DB更新
+        switch (phase) {
+            case "stream" -> {
+                task.setStreamBuffer(buffer.toString());
+                task.setStreamPosition(buffer.length());
+            }
+            case "review" -> {
+                task.setReviewFeedback(buffer.toString());
+                task.setReviewPosition(buffer.length());
+            }
+            case "final" -> {
+                task.setFinalTestCases(buffer.toString());
+                task.setFinalPosition(buffer.length());
+            }
+        }
+        taskMapper.updateById(task);
+    }
+
+    /**
+     * 检查JSON数组是否完整（找到闭合的 ]）
+     */
+    private boolean isJsonArrayComplete(String content) {
+        if (content == null || content.isBlank()) return false;
+        String trimmed = content.trim();
+        // 必须以 ] 结尾（允许后面有空白）
+        if (!trimmed.endsWith("]")) return false;
+        // 简单括号匹配：统计 [ 和 ] 的数量
+        int open = 0, close = 0;
+        boolean inString = false, escaped = false;
+        for (char c : trimmed.toCharArray()) {
+            if (escaped) { escaped = false; continue; }
+            if (c == '\\') { escaped = true; continue; }
+            if (c == '"') { inString = !inString; continue; }
+            if (inString) continue;
+            if (c == '[') open++;
+            else if (c == ']') close++;
+        }
+        return open > 0 && open == close;
     }
 }
