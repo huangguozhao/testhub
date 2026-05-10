@@ -774,7 +774,7 @@ export default {
     // 获取所有版本列表
     async fetchAllVersions() {
       try {
-        const response = await api.get('/versions/')
+        const response = await api.get('/versions')
         this.allVersions = response.data.results || response.data || []
       } catch (error) {
         console.error(this.$t('generatedTestCases.fetchVersionsFailed'), error)

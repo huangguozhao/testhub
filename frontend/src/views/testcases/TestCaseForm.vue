@@ -165,7 +165,7 @@ const rules = {
 
 const fetchProjects = async () => {
   try {
-    const response = await api.get('/projects/list/')
+    const response = await api.get('/projects')
     projects.value = response.data.results || []
   } catch (error) {
     ElMessage.error(t('testcase.fetchProjectsFailed'))

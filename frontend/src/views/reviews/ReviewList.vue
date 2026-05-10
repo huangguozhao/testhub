@@ -207,7 +207,7 @@ const fetchReviews = async () => {
 
 const fetchProjects = async () => {
   try {
-    const response = await api.get('/projects/')
+    const response = await api.get('/projects')
     projects.value = response.data.results || response.data || []
   } catch (error) {
     console.error('获取项目列表失败:', error)
@@ -216,7 +216,7 @@ const fetchProjects = async () => {
 
 const fetchUsers = async () => {
   try {
-    const response = await api.get('/auth/users/')
+    const response = await api.get('/users')
     users.value = response.data.results || response.data || []
   } catch (error) {
     console.error('获取用户列表失败:', error)

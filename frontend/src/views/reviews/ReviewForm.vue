@@ -222,7 +222,7 @@ const filteredTestcases = computed(() => {
 
 const fetchProjects = async () => {
   try {
-    const response = await api.get('/projects/')
+    const response = await api.get('/projects')
     projects.value = response.data.results || response.data
   } catch (error) {
     ElMessage.error(t('reviewForm.fetchProjectsFailed'))
@@ -231,7 +231,7 @@ const fetchProjects = async () => {
 
 const fetchProjectUsers = async () => {
   try {
-    const response = await api.get('/auth/users/')
+    const response = await api.get('/users')
     projectUsers.value = response.data.results || response.data || []
     console.log('All users:', projectUsers.value)
   } catch (error) {

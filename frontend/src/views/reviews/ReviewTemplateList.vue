@@ -255,7 +255,7 @@ const fetchTemplates = async () => {
 
 const fetchProjects = async () => {
   try {
-    const response = await api.get('/projects/')
+    const response = await api.get('/projects')
     projects.value = response.data.results || response.data || []
   } catch (error) {
     ElMessage.error(t('reviewTemplate.fetchProjectsFailed'))
@@ -264,7 +264,7 @@ const fetchProjects = async () => {
 
 const fetchProjectUsers = async () => {
   try {
-    const response = await api.get('/auth/users/')
+    const response = await api.get('/users')
     projectUsers.value = response.data.results || response.data || []
   } catch (error) {
     console.error('获取用户列表失败:', error)

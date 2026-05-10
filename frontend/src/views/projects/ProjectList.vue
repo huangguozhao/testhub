@@ -164,7 +164,7 @@ const fetchProjects = async () => {
       search: searchText.value,
       status: statusFilter.value
     }
-    const response = await api.get('/projects/', { params })
+    const response = await api.get('/projects', { params })
     projects.value = response.data.results
     total.value = response.data.count
   } catch (error) {
@@ -233,7 +233,7 @@ const handleSubmit = async () => {
           await api.put(`/projects/${form.id}/`, form)
           ElMessage.success(t('project.updateSuccess'))
         } else {
-          await api.post('/projects/', form)
+          await api.post('/projects', form)
           ElMessage.success(t('project.createSuccess'))
         }
         showCreateDialog.value = false

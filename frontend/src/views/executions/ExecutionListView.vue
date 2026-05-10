@@ -327,9 +327,9 @@ const fetchTestPlans = async () => {
 const fetchBasicData = async () => {
   try {
     const [projectsRes, versionsRes, usersRes] = await Promise.all([
-      api.get('/projects/'), // 只显示用户参与的项目
-      api.get('/versions/'),
-      api.get('/users/users/') // 修正用户API路径
+      api.get('/projects'), // 只显示用户参与的项目
+      api.get('/versions'),
+      api.get('/users') // 修正用户API路径
     ])
     
     projects.value = (projectsRes.data.results || projectsRes.data || []).filter(item => item !== null && item !== undefined)

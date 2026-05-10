@@ -179,7 +179,7 @@ const workloadChartRef = ref(null)
 // Fetch projects
 const fetchProjects = async () => {
   try {
-    const response = await api.get('/projects/')
+    const response = await api.get('/projects')
     projects.value = response.data.results || []
   } catch (error) {
     console.error(t('report.fetchProjectsFailed'), error)

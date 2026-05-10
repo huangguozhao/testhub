@@ -217,7 +217,7 @@ const fetchVersions = async () => {
       projects: projectFilter.value,
       is_baseline: baselineFilter.value
     }
-    const response = await api.get('/versions/', { params })
+    const response = await api.get('/versions', { params })
     versions.value = response.data.results || []
     total.value = response.data.count || 0
   } catch (error) {
@@ -229,7 +229,7 @@ const fetchVersions = async () => {
 
 const fetchProjects = async () => {
   try {
-    const response = await api.get('/projects/')
+    const response = await api.get('/projects')
     projects.value = response.data.results || response.data || []
   } catch (error) {
     ElMessage.error(t('version.fetchProjectsFailed'))
@@ -279,7 +279,7 @@ const saveVersion = async () => {
       await api.put(`/versions/${editingVersionId.value}/`, versionForm)
       ElMessage.success(t('version.updateSuccess'))
     } else {
-      await api.post('/versions/', versionForm)
+      await api.post('/versions', versionForm)
       ElMessage.success(t('version.createSuccess'))
     }
 
