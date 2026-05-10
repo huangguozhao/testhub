@@ -192,13 +192,13 @@ public class AIModelCallService {
             JsonNode type = root.get("type");
             if (type != null && "content_block_delta".equals(type.asText())) {
                 JsonNode delta = root.get("delta");
-                if (delta != null && delta.has("text")) return delta.get("text").asText();
+                if (delta != null && delta.has("text") && delta.get("text").isTextual()) return delta.get("text").asText();
             }
         } else {
             JsonNode choices = root.get("choices");
             if (choices != null && choices.isArray() && !choices.isEmpty()) {
                 JsonNode delta = choices.get(0).get("delta");
-                if (delta != null && delta.has("content")) return delta.get("content").asText();
+                if (delta != null && delta.has("content") && delta.get("content").isTextual()) return delta.get("content").asText();
             }
         }
         return null;

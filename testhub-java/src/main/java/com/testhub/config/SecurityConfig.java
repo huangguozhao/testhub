@@ -53,7 +53,8 @@ public class SecurityConfig {
                                 "/swagger-ui.html",
                                 "/v3/api-docs/**",
                                 "/actuator/**",
-                                "/media/**"
+                                "/media/**",
+                                "/api/requirement-analysis/testcase-generation/*/stream_progress"
                         ).permitAll()
                         // 其他请求需要认证
                         .anyRequest().authenticated())

@@ -27,8 +27,10 @@ public class CachingRequestResponseFilter implements Filter {
             HttpServletRequest httpRequest = (HttpServletRequest) request;
             HttpServletResponse httpResponse = (HttpServletResponse) response;
 
-            // 只对API请求进行包装
-            if (httpRequest.getRequestURI().startsWith("/api/")) {
+            String uri = httpRequest.getRequestURI();
+
+            // SSE端点不能使用响应缓存（会破坏流式传输）
+            if (uri.startsWith("/api/") && !uri.contains("/stream_progress")) {
                 ContentCachingRequestWrapper wrappedRequest = new ContentCachingRequestWrapper(httpRequest);
                 ContentCachingResponseWrapper wrappedResponse = new ContentCachingResponseWrapper(httpResponse);
 

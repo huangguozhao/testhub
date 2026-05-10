@@ -51,6 +51,8 @@ public class TestCaseGenerationService {
         task.setOutputMode((String) request.getOrDefault("output_mode", "stream"));
         task.setStreamBuffer("");
         task.setStreamPosition(0);
+        task.setReviewPosition(0);
+        task.setFinalPosition(0);
         task.setCreatedBy(userId);
 
         // 关联项目
@@ -242,10 +244,8 @@ public class TestCaseGenerationService {
                 StringBuilder reviewContent = new StringBuilder();
                 String reviewFeedback = aiModelCallService.chatCompletionStream(reviewerConfig, reviewMessages, chunk -> {
                     reviewContent.append(chunk);
-                    generatedContent.append(chunk);
                     task.setReviewFeedback(reviewContent.toString());
-                    task.setStreamBuffer(generatedContent.toString());
-                    task.setStreamPosition(generatedContent.length());
+                    task.setReviewPosition(reviewContent.length());
                     task.setLastStreamUpdate(LocalDateTime.now());
                     if (reviewContent.length() % 200 < 30) {
                         taskMapper.updateById(task);
@@ -272,10 +272,8 @@ public class TestCaseGenerationService {
                 StringBuilder finalContent = new StringBuilder();
                 String finalCases = aiModelCallService.chatCompletionStream(writerConfig, reviseMessages, chunk -> {
                     finalContent.append(chunk);
-                    generatedContent.append(chunk);
                     task.setFinalTestCases(finalContent.toString());
-                    task.setStreamBuffer(generatedContent.toString());
-                    task.setStreamPosition(generatedContent.length());
+                    task.setFinalPosition(finalContent.length());
                     task.setLastStreamUpdate(LocalDateTime.now());
                     if (finalContent.length() % 200 < 30) {
                         taskMapper.updateById(task);

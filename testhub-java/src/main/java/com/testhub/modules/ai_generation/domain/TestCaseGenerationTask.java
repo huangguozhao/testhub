@@ -21,6 +21,8 @@ public class TestCaseGenerationTask {
 
     private String streamBuffer;
     private Integer streamPosition;
+    private Integer reviewPosition;
+    private Integer finalPosition;
     private LocalDateTime lastStreamUpdate;
 
     private Long projectId;
