@@ -1,8 +1,12 @@
 package com.testhub.modules.ai_generation.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.testhub.modules.ai_generation.domain.TestCase;
 import com.testhub.modules.ai_generation.domain.TestCaseGenerationTask;
 import com.testhub.modules.ai_generation.mapper.TestCaseGenerationTaskMapper;
+import com.testhub.modules.ai_generation.mapper.TestCaseMapper;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.testhub.modules.configuration.domain.AIModelConfig;
 import com.testhub.modules.configuration.domain.PromptConfig;
 import com.testhub.modules.configuration.mapper.AIModelConfigMapper;
@@ -24,17 +28,20 @@ public class TestCaseGenerationService {
     private final AIModelConfigMapper aiModelConfigMapper;
     private final PromptConfigMapper promptConfigMapper;
     private final AIModelCallService aiModelCallService;
+    private final TestCaseMapper testCaseMapper;
     private final TestCaseGenerationService self;
 
     public TestCaseGenerationService(TestCaseGenerationTaskMapper taskMapper,
                                      AIModelConfigMapper aiModelConfigMapper,
                                      PromptConfigMapper promptConfigMapper,
                                      AIModelCallService aiModelCallService,
+                                     TestCaseMapper testCaseMapper,
                                      @Lazy @Autowired TestCaseGenerationService self) {
         this.taskMapper = taskMapper;
         this.aiModelConfigMapper = aiModelConfigMapper;
         this.promptConfigMapper = promptConfigMapper;
         this.aiModelCallService = aiModelCallService;
+        this.testCaseMapper = testCaseMapper;
         this.self = self;
     }
 
@@ -167,6 +174,34 @@ public class TestCaseGenerationService {
             content = task.getGeneratedTestCases();
         }
 
+        // 解析JSON测试用例并导入到tc_test_case表
+        int importedCount = 0;
+        try {
+            List<Map<String, Object>> testCases = parseTestCasesFromContent(content);
+            Long projectId = task.getProjectId();
+
+            for (Map<String, Object> tc : testCases) {
+                TestCase testCase = new TestCase();
+                testCase.setProjectId(projectId);
+                testCase.setTitle((String) tc.getOrDefault("title", "未命名用例"));
+                testCase.setDescription((String) tc.get("case_id"));
+                testCase.setPrecondition((String) tc.get("precondition"));
+                testCase.setExpectedResult((String) tc.get("expected_result"));
+
+                // 映射优先级: P0→critical, P1→high, P2→medium, P3→low
+                String priority = (String) tc.getOrDefault("priority", "P2");
+                testCase.setPriority(mapPriority(priority));
+
+                testCase.setType("functional");
+                testCase.setStatus("draft");
+                testCaseMapper.insert(testCase);
+                importedCount++;
+            }
+            log.info("任务 {} 导入 {} 条用例到测试用例管理系统", taskId, importedCount);
+        } catch (Exception e) {
+            log.error("任务 {} 解析或导入用例失败: {}", taskId, e.getMessage(), e);
+        }
+
         task.setIsSavedToRecords(1);
         task.setSavedAt(LocalDateTime.now());
         taskMapper.updateById(task);
@@ -175,7 +210,91 @@ public class TestCaseGenerationService {
         result.put("success", true);
         result.put("message", "已保存到记录");
         result.put("task_id", taskId);
+        result.put("imported_count", importedCount);
         return result;
+    }
+
+    /**
+     * 从AI生成的内容中解析测试用例列表
+     */
+    private List<Map<String, Object>> parseTestCasesFromContent(String content) {
+        List<Map<String, Object>> allCases = new ArrayList<>();
+        if (content == null || content.isBlank()) return allCases;
+
+        ObjectMapper mapper = new ObjectMapper();
+
+        // 策略1: 从 ```json...``` 代码块中提取
+        java.util.regex.Pattern codeBlockPattern = java.util.regex.Pattern.compile("```json\\s*([\\s\\S]*?)```");
+        java.util.regex.Matcher matcher = codeBlockPattern.matcher(content);
+        while (matcher.find()) {
+            String jsonContent = matcher.group(1).trim();
+            try {
+                JsonNode node = mapper.readTree(jsonContent);
+                if (node.isArray()) {
+                    for (JsonNode item : node) {
+                        Map<String, Object> tc = mapper.convertValue(item, Map.class);
+                        allCases.add(tc);
+                    }
+                }
+            } catch (Exception ignored) {}
+        }
+        if (!allCases.isEmpty()) return allCases;
+
+        // 策略2: 用括号计数提取JSON数组
+        int i = 0;
+        while (i < content.length()) {
+            if (content.charAt(i) == '[') {
+                int depth = 0;
+                boolean inString = false, escaped = false;
+                int start = i;
+                for (int j = i; j < content.length(); j++) {
+                    char c = content.charAt(j);
+                    if (escaped) { escaped = false; continue; }
+                    if (c == '\\') { escaped = true; continue; }
+                    if (c == '"') { inString = !inString; continue; }
+                    if (inString) continue;
+                    if (c == '[') depth++;
+                    else if (c == ']') {
+                        depth--;
+                        if (depth == 0) {
+                            String arrStr = content.substring(start, j + 1);
+                            try {
+                                JsonNode node = mapper.readTree(arrStr);
+                                if (node.isArray()) {
+                                    for (JsonNode item : node) {
+                                        if (item.isObject()) {
+                                            Map<String, Object> tc = mapper.convertValue(item, Map.class);
+                                            allCases.add(tc);
+                                        }
+                                    }
+                                }
+                            } catch (Exception ignored) {}
+                            i = j + 1;
+                            break;
+                        }
+                    }
+                }
+                if (depth != 0) i++;
+            } else {
+                i++;
+            }
+        }
+
+        return allCases;
+    }
+
+    /**
+     * 映射优先级: P0→critical, P1→high, P2→medium, P3→low
+     */
+    private String mapPriority(String priority) {
+        if (priority == null) return "medium";
+        return switch (priority.toUpperCase()) {
+            case "P0" -> "critical";
+            case "P1" -> "high";
+            case "P2" -> "medium";
+            case "P3" -> "low";
+            default -> "medium";
+        };
     }
 
     /**
