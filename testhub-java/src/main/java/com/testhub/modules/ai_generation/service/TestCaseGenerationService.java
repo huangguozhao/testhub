@@ -49,6 +49,12 @@ public class TestCaseGenerationService {
         task.setStatus("pending");
         task.setProgress(0);
         task.setOutputMode((String) request.getOrDefault("output_mode", "stream"));
+
+        // 期望用例数量
+        Object countObj = request.get("test_case_count");
+        if (countObj != null) {
+            task.setTestCaseCount(Integer.valueOf(countObj.toString()));
+        }
         task.setStreamBuffer("");
         task.setStreamPosition(0);
         task.setReviewPosition(0);
@@ -202,10 +208,17 @@ public class TestCaseGenerationService {
             task.setProgress(30);
             taskMapper.updateById(task);
 
+            // 构建数量约束指令
+            String countInstruction = "";
+            if (task.getTestCaseCount() != null && task.getTestCaseCount() > 0) {
+                countInstruction = "\n\n请严格生成大约 " + task.getTestCaseCount() + " 条测试用例，不多不少。";
+            }
+
             // 阶段1: 流式生成（支持分批续写）
             StringBuilder generatedContent = new StringBuilder();
             generateWithBatching(writerConfig, systemPrompt,
                     "请根据以下需求生成详细的测试用例：\n\n" + task.getRequirementText()
+                            + countInstruction
                             + "\n\n请以JSON数组格式输出，每个用例包含：case_id, title, priority, precondition, test_steps, expected_result",
                     generatedContent, task, "stream");
 
@@ -245,6 +258,7 @@ public class TestCaseGenerationService {
                 StringBuilder finalContent = new StringBuilder();
                 generateWithBatching(writerConfig, systemPrompt,
                         "原始需求：\n" + task.getRequirementText()
+                                + countInstruction
                                 + "\n\n评审意见：\n" + reviewFeedback
                                 + "\n\n请根据评审意见改进以下测试用例，以JSON数组格式输出：\n" + generated,
                         finalContent, task, "final");
@@ -357,24 +371,49 @@ public class TestCaseGenerationService {
     }
 
     /**
-     * 检查JSON数组是否完整（找到闭合的 ]）
+     * 检查JSON数组是否完整
+     * 支持检测内容中的完整JSON数组，即使后面有markdown等额外内容
      */
     private boolean isJsonArrayComplete(String content) {
         if (content == null || content.isBlank()) return false;
-        String trimmed = content.trim();
-        // 必须以 ] 结尾（允许后面有空白）
-        if (!trimmed.endsWith("]")) return false;
-        // 简单括号匹配：统计 [ 和 ] 的数量
-        int open = 0, close = 0;
+
+        // 策略1: 尝试从 ```json...``` 代码块中提取并检查
+        java.util.regex.Pattern codeBlockPattern = java.util.regex.Pattern.compile("```json\\s*([\\s\\S]*?)```");
+        java.util.regex.Matcher matcher = codeBlockPattern.matcher(content);
+        while (matcher.find()) {
+            String jsonContent = matcher.group(1).trim();
+            if (isJsonArrayContent(jsonContent)) {
+                return true;
+            }
+        }
+
+        // 策略2: 在整个内容中查找完整的JSON数组
+        // 找到第一个 [ 然后检查是否有匹配的 ]
+        return isJsonArrayContent(content);
+    }
+
+    /**
+     * 检查给定字符串中是否包含完整的JSON数组
+     */
+    private boolean isJsonArrayContent(String content) {
+        if (content == null || content.isBlank()) return false;
+
+        int open = 0;
         boolean inString = false, escaped = false;
-        for (char c : trimmed.toCharArray()) {
+        boolean foundOpen = false;
+
+        for (char c : content.toCharArray()) {
             if (escaped) { escaped = false; continue; }
             if (c == '\\') { escaped = true; continue; }
             if (c == '"') { inString = !inString; continue; }
             if (inString) continue;
-            if (c == '[') open++;
-            else if (c == ']') close++;
+            if (c == '[') { open++; foundOpen = true; }
+            else if (c == ']') {
+                open--;
+                // 当所有括号都闭合时，JSON数组完整
+                if (foundOpen && open == 0) return true;
+            }
         }
-        return open > 0 && open == close;
+        return false;
     }
 }

@@ -148,6 +148,19 @@
               </select>
             </div>
 
+            <div class="form-group">
+              <label>{{ $t('requirementAnalysis.testCaseCount') }}</label>
+              <select v-model="manualInput.testCaseCount" class="form-select">
+                <option :value="null">{{ $t('requirementAnalysis.testCaseCountAuto') }}</option>
+                <option :value="10">{{ $t('requirementAnalysis.testCaseCountApprox') }} 10 {{ $t('requirementAnalysis.testCaseCountUnit') }}</option>
+                <option :value="20">{{ $t('requirementAnalysis.testCaseCountApprox') }} 20 {{ $t('requirementAnalysis.testCaseCountUnit') }}</option>
+                <option :value="30">{{ $t('requirementAnalysis.testCaseCountApprox') }} 30 {{ $t('requirementAnalysis.testCaseCountUnit') }}</option>
+                <option :value="50">{{ $t('requirementAnalysis.testCaseCountApprox') }} 50 {{ $t('requirementAnalysis.testCaseCountUnit') }}</option>
+                <option :value="80">{{ $t('requirementAnalysis.testCaseCountApprox') }} 80 {{ $t('requirementAnalysis.testCaseCountUnit') }}</option>
+                <option :value="100">{{ $t('requirementAnalysis.testCaseCountApprox') }} 100 {{ $t('requirementAnalysis.testCaseCountUnit') }}</option>
+              </select>
+            </div>
+
             <button
               class="generate-manual-btn"
               @click="generateFromManualInput"
@@ -273,7 +286,7 @@
               <span class="stream-title">{{ $t('requirementAnalysis.realtimeGeneratedContent') }}</span>
               <span class="stream-status">{{ $t('requirementAnalysis.characters', { count: streamedContent.length }) }}</span>
             </div>
-            <div class="stream-content" v-html="formatMarkdown(streamedContent)"></div>
+            <div class="stream-content" v-html="renderTestCaseContent(streamedContent)"></div>
           </div>
 
           <!-- 评审内容显示区域 -->
@@ -294,7 +307,7 @@
               </span>
               <span class="stream-status">{{ $t('requirementAnalysis.characters', { count: finalTestCases.length }) }}</span>
             </div>
-            <div class="stream-content final-testcases" v-html="formatMarkdown(finalTestCases)"></div>
+            <div class="stream-content final-testcases" v-html="renderTestCaseContent(finalTestCases)"></div>
           </div>
 
           <div class="progress-steps">
@@ -386,7 +399,8 @@ export default {
       manualInput: {
         title: '',
         description: '',
-        selectedProject: ''
+        selectedProject: '',
+        testCaseCount: null  // 期望用例数量，null表示自动
       },
 
       // 文件上传
@@ -407,6 +421,8 @@ export default {
       streamedReviewContent: '',  // 流式接收的评审内容
       finalTestCases: '',  // 最终版用例
       hasShownCompletionMessage: false,  // 是否已经显示过完成消息
+      _sseReconnectCount: 0,  // SSE重连次数
+      _fetchingFinalResult: false,  // 防止fetchFinalResult重复调用
       showReviewStep: true,  // 是否显示评审步骤（根据生成配置决定）
 
       // 生成结果
@@ -697,7 +713,8 @@ export default {
         this.manualInput.title,
         requirementText,
         this.manualInput.selectedProject,
-        this.globalOutputMode  // 使用全局输出模式
+        this.globalOutputMode,  // 使用全局输出模式
+        this.manualInput.testCaseCount  // 期望用例数量
       )
     },
 
@@ -747,7 +764,7 @@ export default {
       }
     },
 
-    async startGeneration(title, requirementText, projectId, outputMode = 'stream') {
+    async startGeneration(title, requirementText, projectId, outputMode = 'stream', testCaseCount = null) {
       // 在开始生成前，主动刷新token确保生成过程中不会过期
       try {
         const userStore = useUserStore()
@@ -771,6 +788,8 @@ export default {
       this.finalTestCases = ''  // 清空最终版用例
       this.streamedReviewContent = ''  // 清空评审内容
       this.hasShownCompletionMessage = false  // 重置完成消息标志位
+      this._fetchingFinalResult = false  // 重置fetchFinalResult锁
+      this._sseReconnectCount = 0  // 重置SSE重连计数
       this.showResults = false  // 隐藏上一次的结果
 
       try {
@@ -786,6 +805,11 @@ export default {
         // 如果选择了项目，添加到请求中
         if (projectId) {
           requestData.project = projectId
+        }
+
+        // 如果指定了用例数量，添加到请求中
+        if (testCaseCount) {
+          requestData.test_case_count = testCaseCount
         }
 
         const response = await api.post('/requirement-analysis/testcase-generation/generate', requestData)
@@ -812,6 +836,15 @@ export default {
     startStreamingProgress() {
       // 使用SSE进行流式进度获取
       // EventSource 不支持自定义 headers，通过 query 参数传递 token
+
+      // 重连时清除缓冲区（新连接会从头发送所有数据，避免重复）
+      if (this.streamedContent || this.streamedReviewContent || this.finalTestCases) {
+        console.log('[SSE] 重连模式，清除已有缓冲区内容')
+        this.streamedContent = ''
+        this.streamedReviewContent = ''
+        this.finalTestCases = ''
+      }
+
       const currentOrigin = window.location.origin
       const token = localStorage.getItem('access_token') || ''
       const apiUrl = `${currentOrigin}/api/requirement-analysis/testcase-generation/${this.currentTaskId}/stream_progress?token=${encodeURIComponent(token)}`
@@ -866,10 +899,12 @@ export default {
             // Final status
             console.log('[SSE] 收到状态更新:', data.status)
             if (data.status === 'completed') {
+              this.currentStep = 4
               this.progressText = this.$t('requirementAnalysis.statusCompleted')
               // Fetch final result
               this.fetchFinalResult()
             } else if (data.status === 'failed') {
+              this.currentStep = 4
               this.progressText = this.$t('requirementAnalysis.statusFailed')
               this.handleGenerationError()
             }
@@ -902,10 +937,9 @@ export default {
           url: this.eventSource.url
         })
 
-        // 如果任务已经完成或不在生成中，不要降级
+        // 如果任务已经完成或不在生成中，不要重连
         if (this.showResults || !this.isGenerating) {
-          console.log('[Polling] 任务已完成或不在生成中，不降级到轮询')
-          // 清理EventSource
+          console.log('[SSE] 任务已完成或不在生成中，关闭连接')
           if (this.eventSource) {
             this.eventSource.close()
             this.eventSource = null
@@ -913,34 +947,55 @@ export default {
           return
         }
 
-        // readyState=2表示连接已关闭，readyState=0表示连接中断
-        // EventSource会自动重连（readyState=0），除非是致命错误（readyState=2）
-        if (this.eventSource.readyState === 2) {
-          console.error('SSE连接永久关闭，降级到轮询模式')
+        // 关闭旧连接，手动重连（刷新token）
+        // 浏览器自动重连会使用相同的URL（含过期token），导致401
+        if (this.eventSource) {
           this.eventSource.close()
           this.eventSource = null
+        }
+
+        this._sseReconnectCount++
+        console.log(`[SSE] 连接断开 (第${this._sseReconnectCount}次)，刷新token后重连...`)
+
+        // 超过3次重连失败，降级到轮询
+        if (this._sseReconnectCount > 3) {
+          console.error('[SSE] 重连次数过多，降级到轮询模式')
           ElMessage.warning(this.$t('requirementAnalysis.streamConnectionInterrupted'))
           this.startPolling()
-        } else if (this.eventSource.readyState === 0) {
-          // EventSource正在重连，等待一段时间后检查
-          console.log('SSE正在重连...')
-          setTimeout(() => {
-            // 如果5秒后还是断开状态，降级到轮询
-            if (this.eventSource && this.eventSource.readyState === 0) {
-              console.error('SSE重连失败，降级到轮询模式')
-              this.eventSource.close()
-              this.eventSource = null
-              ElMessage.warning(this.$t('requirementAnalysis.streamConnectionInterrupted'))
-              this.startPolling()
+          return
+        }
+
+        const userStore = useUserStore()
+        if (userStore.isTokenExpired && userStore.refreshToken) {
+          userStore.refreshAccessToken().then(() => {
+            console.log('[SSE] Token刷新成功，重新建立SSE连接')
+            if (this.isGenerating && !this.showResults) {
+              this.startStreamingProgress()
             }
-          }, 5000)
+          }).catch((err) => {
+            console.error('[SSE] Token刷新失败，降级到轮询:', err)
+            ElMessage.warning(this.$t('requirementAnalysis.streamConnectionInterrupted'))
+            this.startPolling()
+          })
+        } else {
+          // Token未过期，可能是网络问题，直接重连
+          if (this.isGenerating && !this.showResults) {
+            this.startStreamingProgress()
+          }
         }
       }
     },
 
     async fetchFinalResult() {
+      // 防止重复调用
+      if (this._fetchingFinalResult) {
+        console.log('[fetchFinalResult] 已在执行中，跳过')
+        return
+      }
+      this._fetchingFinalResult = true
+
       try {
-        // 修复URL：去掉多余的/api/前缀（axios baseURL已经包含/api）
+        // api.js拦截器会自动处理401并刷新token，这里直接调用即可
         const response = await api.get(`/requirement-analysis/testcase-generation/${this.currentTaskId}/progress`)
         const task = response.data
 
@@ -954,8 +1009,6 @@ export default {
         // 设置最终版用例（如果还没有通过流式接收完整）
         if (task.final_test_cases) {
           console.log('[Task] 从task对象获取最终用例')
-          // 无论this.finalTestCases是否已有值，都用最新的final_test_cases覆盖
-          // 这样确保完整输出模式下也能正确显示最终版用例
           this.finalTestCases = task.final_test_cases
         }
 
@@ -983,8 +1036,28 @@ export default {
         }
       } catch (error) {
         console.error('Failed to fetch final result:', error)
-        ElMessage.error(this.$t('requirementAnalysis.fetchResultFailed'))
+        // API获取失败（如token过期），但SSE数据已收到，仍然展示结果
+        // 不要回到输入表单页面
+        this.showResults = true
         this.isGenerating = false
+        this.currentStep = 4
+        if (!this.generationResult) {
+          // 构造一个最小的generationResult用于展示
+          this.generationResult = {
+            task_id: this.currentTaskId,
+            status: 'completed',
+            progress: 100,
+            final_test_cases: this.finalTestCases,
+            review_feedback: this.streamedReviewContent,
+            generated_test_cases: this.streamedContent
+          }
+        }
+        if (!this.hasShownCompletionMessage) {
+          ElMessage.warning(this.$t('requirementAnalysis.fetchResultFailed') || '获取完整结果失败，已展示流式接收的内容')
+          this.hasShownCompletionMessage = true
+        }
+      } finally {
+        this._fetchingFinalResult = false
       }
     },
 
@@ -1089,30 +1162,52 @@ export default {
         // 过滤掉总结和建议部分，只保留测试用例内容
         const filteredContent = this.filterTestCasesOnly(finalTestCases);
 
-        // 尝试解析表格格式的测试用例（参考AutoGenTestCase的做法）
-        const tableFormat = this.parseTableFormat(filteredContent);
-
         let worksheetData = [];
 
-        if (tableFormat.length > 0) {
-          // 如果解析到表格格式，直接使用，但要确保表头正确
-          worksheetData = tableFormat;
+        // 优先尝试解析JSON格式
+        const jsonCases = this.parseJsonTestCases(filteredContent);
+        if (jsonCases && jsonCases.length > 0) {
+          worksheetData.push([
+            this.$t('requirementAnalysis.excelTestCaseNumber'),
+            this.$t('requirementAnalysis.excelTestScenario'),
+            this.$t('requirementAnalysis.excelPriority'),
+            this.$t('requirementAnalysis.excelPrecondition'),
+            this.$t('requirementAnalysis.excelTestSteps'),
+            this.$t('requirementAnalysis.excelExpectedResult')
+          ]);
+          jsonCases.forEach((tc, index) => {
+            worksheetData.push([
+              tc.case_id || tc.caseid || tc.caseId || tc.id || `TC${index + 1}`,
+              tc.title || tc.name || '',
+              tc.priority || 'P1',
+              tc.precondition || tc.pre_conditions || '',
+              tc.test_steps || tc.steps || tc.testSteps || '',
+              tc.expected_result || tc.expected || tc.expectedResult || ''
+            ]);
+          });
+        } else {
+          // 尝试解析表格格式的测试用例
+          const tableFormat = this.parseTableFormat(filteredContent);
 
-          // 检查并修正表头
-          if (worksheetData.length > 0) {
-            const header = worksheetData[0];
-            for (let i = 0; i < header.length; i++) {
-              if (header[i] && header[i].includes('测试步骤')) {
-                header[i] = header[i].replace('测试步骤', '操作步骤');
-              }
-              if (header[i] && header[i].includes('Test Steps')) {
-                header[i] = header[i].replace('Test Steps', '操作步骤');
+          if (tableFormat.length > 0) {
+            worksheetData = tableFormat;
+
+            // 检查并修正表头
+            if (worksheetData.length > 0) {
+              const header = worksheetData[0];
+              for (let i = 0; i < header.length; i++) {
+                if (header[i] && header[i].includes('测试步骤')) {
+                  header[i] = header[i].replace('测试步骤', '操作步骤');
+                }
+                if (header[i] && header[i].includes('Test Steps')) {
+                  header[i] = header[i].replace('Test Steps', '操作步骤');
+                }
               }
             }
+          } else {
+            // 否则尝试解析结构化格式
+            worksheetData = this.parseStructuredFormat(filteredContent);
           }
-        } else {
-          // 否则尝试解析结构化格式
-          worksheetData = this.parseStructuredFormat(filteredContent);
         }
 
         // 将所有单元格中的<br>标签转换为换行符
@@ -1273,6 +1368,156 @@ export default {
       html = html.replace(/\n/g, '<br>');
 
       return html;
+    },
+
+    // 从内容中解析JSON测试用例数组（支持多个代码块合并，自动去重）
+    parseJsonTestCases(content) {
+      if (!content) return null;
+
+      const allCases = [];
+      const seenIds = new Set();
+
+      const addUnique = (cases) => {
+        cases.forEach(tc => {
+          const id = tc.case_id || tc.caseid || tc.caseId || tc.id;
+          if (id && seenIds.has(id)) return;
+          if (id) seenIds.add(id);
+          allCases.push(tc);
+        });
+      };
+
+      // 尝试1: 从 ```json ... ``` 代码块中提取
+      // 使用贪婪匹配 [\s\S]*? 但在代码块内不会有 ``` 所以是安全的
+      const codeBlockRegex = /```json\s*([\s\S]*?)```/g;
+      let codeMatch;
+      while ((codeMatch = codeBlockRegex.exec(content)) !== null) {
+        try {
+          const parsed = JSON.parse(codeMatch[1].trim());
+          if (Array.isArray(parsed)) {
+            addUnique(parsed);
+          }
+        } catch (e) { /* 该代码块JSON不完整，跳过 */ }
+      }
+      if (allCases.length > 0) return allCases;
+
+      // 尝试2: 用括号计数算法提取JSON数组（处理大型嵌套JSON）
+      const findJsonArrays = (text) => {
+        const results = [];
+        let i = 0;
+        while (i < text.length) {
+          if (text[i] === '[') {
+            let depth = 0;
+            let inString = false;
+            let escaped = false;
+            let start = i;
+            for (let j = i; j < text.length; j++) {
+              const c = text[j];
+              if (escaped) { escaped = false; continue; }
+              if (c === '\\') { escaped = true; continue; }
+              if (c === '"') { inString = !inString; continue; }
+              if (inString) continue;
+              if (c === '[') depth++;
+              else if (c === ']') {
+                depth--;
+                if (depth === 0) {
+                  results.push(text.substring(start, j + 1));
+                  i = j + 1;
+                  break;
+                }
+              }
+            }
+            if (depth !== 0) i++;
+          } else {
+            i++;
+          }
+        }
+        return results;
+      };
+
+      const arrays = findJsonArrays(content);
+      for (const arr of arrays) {
+        try {
+          const parsed = JSON.parse(arr);
+          if (Array.isArray(parsed) && parsed.length > 0 && typeof parsed[0] === 'object') {
+            addUnique(parsed);
+          }
+        } catch (e) { /* JSON不完整，跳过 */ }
+      }
+      if (allCases.length > 0) return allCases;
+
+      return null;
+    },
+
+    // 将测试用例数组渲染为HTML表格
+    renderTestCaseTable(testCases) {
+      if (!testCases || testCases.length === 0) return '';
+
+      const priorityColors = {
+        'P0': '#e74c3c', 'P1': '#e67e22', 'P2': '#f1c40f', 'P3': '#95a5a6',
+        'High': '#e74c3c', 'Medium': '#e67e22', 'Low': '#f1c40f'
+      };
+
+      let html = '<div class="tc-table-wrapper"><table class="tc-table">';
+      html += `<thead><tr>
+        <th class="tc-col-id">用例编号</th>
+        <th class="tc-col-title">标题</th>
+        <th class="tc-col-priority">优先级</th>
+        <th class="tc-col-precondition">前置条件</th>
+        <th class="tc-col-steps">测试步骤</th>
+        <th class="tc-col-expected">预期结果</th>
+      </tr></thead><tbody>`;
+
+      testCases.forEach((tc, index) => {
+        const caseId = tc.case_id || tc.caseid || tc.caseId || tc.id || `TC${index + 1}`;
+        const title = tc.title || tc.name || '';
+        const priority = tc.priority || 'P1';
+        const precondition = tc.precondition || tc.pre_conditions || '';
+        const steps = tc.test_steps || tc.steps || tc.testSteps || '';
+        const expected = tc.expected_result || tc.expected || tc.expectedResult || '';
+
+        const pColor = priorityColors[priority] || '#95a5a6';
+
+        html += `<tr>
+          <td class="tc-col-id">${this.escapeHtml(caseId)}</td>
+          <td class="tc-col-title">${this.escapeHtml(title)}</td>
+          <td class="tc-col-priority"><span class="tc-priority-badge" style="background:${pColor}">${this.escapeHtml(priority)}</span></td>
+          <td class="tc-col-precondition">${this.formatCellContent(precondition)}</td>
+          <td class="tc-col-steps">${this.formatCellContent(steps)}</td>
+          <td class="tc-col-expected">${this.formatCellContent(expected)}</td>
+        </tr>`;
+      });
+
+      html += '</tbody></table></div>';
+      html += `<div class="tc-table-footer">共 ${testCases.length} 条测试用例</div>`;
+      return html;
+    },
+
+    // 格化单元格内容（换行转<br>）
+    formatCellContent(text) {
+      if (!text) return '';
+      return this.escapeHtml(text).replace(/\n/g, '<br>');
+    },
+
+    // HTML转义
+    escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    },
+
+    // 渲染测试用例内容（优先表格，降级为markdown）
+    renderTestCaseContent(content) {
+      if (!content) return '';
+
+      // 尝试解析为JSON表格
+      const testCases = this.parseJsonTestCases(content);
+      if (testCases) {
+        return this.renderTestCaseTable(testCases);
+      }
+
+      // 降级：使用markdown渲染
+      return this.formatMarkdown(content);
     },
 
     // 将HTML的<br>标签转换为换行符（用于Excel导出）
@@ -2277,6 +2522,105 @@ export default {
   background: none;
   padding: 0;
   border: none;
+}
+
+/* 测试用例表格样式 */
+.tc-table-wrapper {
+  overflow-x: auto;
+  margin: 8px 0;
+  border-radius: var(--th-radius-lg, 8px);
+  border: 1px solid var(--th-border, #e5e5e5);
+}
+
+.tc-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.tc-table thead {
+  background: var(--th-bg-secondary, #f7f7f8);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.tc-table th {
+  padding: 10px 12px;
+  text-align: left;
+  font-weight: 600;
+  color: var(--th-text-primary, #1a1a1a);
+  border-bottom: 2px solid var(--th-border, #e5e5e5);
+  white-space: nowrap;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.tc-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--th-border-light, #f0f0f0);
+  color: var(--th-text-secondary, #666);
+  vertical-align: top;
+}
+
+.tc-table tbody tr:hover {
+  background: var(--th-bg-hover, #fafafa);
+}
+
+.tc-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.tc-col-id {
+  width: 100px;
+  font-family: 'Courier New', monospace;
+  font-weight: 500;
+  color: var(--th-accent, #1a1a1a);
+}
+
+.tc-col-title {
+  min-width: 160px;
+  font-weight: 500;
+  color: var(--th-text-primary, #1a1a1a);
+}
+
+.tc-col-priority {
+  width: 70px;
+  text-align: center;
+}
+
+.tc-priority-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.tc-col-precondition {
+  min-width: 140px;
+  font-size: 12px;
+}
+
+.tc-col-steps {
+  min-width: 200px;
+  font-size: 12px;
+}
+
+.tc-col-expected {
+  min-width: 180px;
+  font-size: 12px;
+}
+
+.tc-table-footer {
+  text-align: right;
+  padding: 8px 4px;
+  font-size: 12px;
+  color: var(--th-text-tertiary, #999);
 }
 
 .progress-steps {

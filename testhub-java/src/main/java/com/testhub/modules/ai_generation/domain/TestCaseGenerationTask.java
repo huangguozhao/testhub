@@ -18,6 +18,7 @@ public class TestCaseGenerationTask {
     private String status;
     private Integer progress;
     private String outputMode;
+    private Integer testCaseCount;
 
     private String streamBuffer;
     private Integer streamPosition;
