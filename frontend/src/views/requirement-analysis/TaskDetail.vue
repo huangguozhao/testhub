@@ -363,6 +363,42 @@ export default {
       // 复用RequirementAnalysisView中的解析逻辑
       if (!content) return []
 
+      // 尝试解析JSON格式（从markdown代码块中提取）
+      try {
+        // 提取 ```json...``` 代码块中的内容
+        const codeBlockMatch = content.match(/```json\s*([\s\S]*?)```/)
+        if (codeBlockMatch) {
+          const jsonContent = codeBlockMatch[1].trim()
+          const parsed = JSON.parse(jsonContent)
+          if (Array.isArray(parsed)) {
+            return parsed.map(item => ({
+              caseId: item.case_id || '',
+              scenario: item.title || '',
+              precondition: item.precondition || '',
+              steps: item.test_steps || '',
+              expected: item.expected_result || '',
+              priority: item.priority || 'P2'
+            }))
+          }
+        }
+
+        // 尝试直接解析整个内容为JSON
+        const directParsed = JSON.parse(content)
+        if (Array.isArray(directParsed)) {
+          return directParsed.map(item => ({
+            caseId: item.case_id || '',
+            scenario: item.title || '',
+            precondition: item.precondition || '',
+            steps: item.test_steps || '',
+            expected: item.expected_result || '',
+            priority: item.priority || 'P2'
+          }))
+        }
+      } catch (e) {
+        // JSON解析失败，继续尝试其他格式
+        console.log('JSON解析失败，尝试其他格式:', e.message)
+      }
+
       // 去除markdown加粗标记，保留纯净文本
       let cleanContent = content.replace(/\*\*([^*]+)\*\*/g, '$1')
 
