@@ -239,7 +239,7 @@ const handleSubmit = async () => {
       submitting.value = true
       try {
         if (isEdit.value) {
-          await api.put(`/projects/${form.id}/`, form)
+          await api.put(`/projects/${form.id}`, form)
           ElMessage.success(t('project.updateSuccess'))
         } else {
           await api.post('/projects', form)
@@ -265,7 +265,7 @@ const deleteProject = async (project) => {
       type: 'warning'
     })
 
-    await api.delete(`/projects/${project.id}/`)
+    await api.delete(`/projects/${project.id}`)
     ElMessage.success(t('project.deleteSuccess'))
     fetchProjects()
   } catch (error) {

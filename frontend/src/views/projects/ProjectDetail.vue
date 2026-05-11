@@ -83,7 +83,7 @@ const showAddEnvDialog = ref(false)
 
 const fetchProject = async () => {
   try {
-    const response = await api.get(`/projects/${route.params.id}/`)
+    const response = await api.get(`/projects/${route.params.id}`)
     project.value = response.data
   } catch (error) {
     ElMessage.error(t('project.fetchDetailFailed'))
@@ -116,7 +116,7 @@ const formatDate = (dateString) => {
 
 const removeMember = async (member) => {
   try {
-    await api.delete(`/projects/${route.params.id}/members/${member.id}/`)
+    await api.delete(`/projects/${route.params.id}/members/${member.id}`)
     ElMessage.success(t('project.memberDeleteSuccess'))
     fetchProject()
   } catch (error) {
