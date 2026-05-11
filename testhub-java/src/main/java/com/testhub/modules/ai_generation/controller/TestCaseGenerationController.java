@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -24,6 +25,31 @@ public class TestCaseGenerationController {
 
     private final TestCaseGenerationService testCaseGenerationService;
     private final ExecutorService sseExecutor = Executors.newCachedThreadPool();
+
+    @GetMapping
+    @Operation(summary = "获取任务列表")
+    public Result<Map<String, Object>> listTasks(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int page_size,
+            @RequestParam(required = false) String status) {
+        Long userId = 1L; // TODO: 从认证上下文获取
+        Map<String, Object> result = testCaseGenerationService.listTasks(page, page_size, status, userId);
+        return Result.success(result);
+    }
+
+    @GetMapping("/{taskId}")
+    @Operation(summary = "获取任务详情")
+    public Result<TestCaseGenerationTask> getTaskDetail(@PathVariable String taskId) {
+        TestCaseGenerationTask task = testCaseGenerationService.getTaskDetail(taskId);
+        return Result.success(task);
+    }
+
+    @DeleteMapping("/{taskId}")
+    @Operation(summary = "删除任务")
+    public Result<Void> deleteTask(@PathVariable String taskId) {
+        testCaseGenerationService.deleteTask(taskId);
+        return Result.success();
+    }
 
     @PostMapping("/generate")
     @Operation(summary = "创建生成任务")
@@ -228,6 +254,62 @@ public class TestCaseGenerationController {
     @Operation(summary = "保存到正式用例记录")
     public Result<Map<String, Object>> saveToRecords(@PathVariable String taskId) {
         Map<String, Object> result = testCaseGenerationService.saveToRecords(taskId);
+        return Result.success(result);
+    }
+
+    @PostMapping("/{taskId}/batch_adopt")
+    @Operation(summary = "批量采纳任务的所有测试用例")
+    public Result<Map<String, Object>> batchAdopt(@PathVariable String taskId) {
+        Map<String, Object> result = testCaseGenerationService.batchAdopt(taskId);
+        return Result.success(result);
+    }
+
+    @PostMapping("/{taskId}/batch_discard")
+    @Operation(summary = "批量弃用任务的所有测试用例")
+    public Result<Map<String, Object>> batchDiscard(@PathVariable String taskId) {
+        Map<String, Object> result = testCaseGenerationService.batchDiscard(taskId);
+        return Result.success(result);
+    }
+
+    @PostMapping("/{taskId}/batch-adopt-selected")
+    @Operation(summary = "选择性批量采纳")
+    public Result<Map<String, Object>> batchAdoptSelected(
+            @PathVariable String taskId,
+            @RequestBody Map<String, Object> request) {
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> testCases = (List<Map<String, Object>>) request.get("test_cases");
+        Map<String, Object> result = testCaseGenerationService.batchAdoptSelected(taskId, testCases);
+        return Result.success(result);
+    }
+
+    @PostMapping("/{taskId}/discard-selected-cases")
+    @Operation(summary = "弃用选中的用例")
+    public Result<Map<String, Object>> discardSelectedCases(
+            @PathVariable String taskId,
+            @RequestBody Map<String, Object> request) {
+        @SuppressWarnings("unchecked")
+        List<Integer> caseIndices = (List<Integer>) request.get("case_indices");
+        Map<String, Object> result = testCaseGenerationService.discardSelectedCases(taskId, caseIndices);
+        return Result.success(result);
+    }
+
+    @PostMapping("/{taskId}/update-test-cases")
+    @Operation(summary = "更新测试用例")
+    public Result<Map<String, Object>> updateTestCases(
+            @PathVariable String taskId,
+            @RequestBody Map<String, Object> request) {
+        String finalTestCases = (String) request.get("final_test_cases");
+        Map<String, Object> result = testCaseGenerationService.updateTestCases(taskId, finalTestCases);
+        return Result.success(result);
+    }
+
+    @PostMapping("/{taskId}/discard-single-case")
+    @Operation(summary = "弃用单个用例")
+    public Result<Map<String, Object>> discardSingleCase(
+            @PathVariable String taskId,
+            @RequestBody Map<String, Object> request) {
+        int caseIndex = (int) request.get("case_index");
+        Map<String, Object> result = testCaseGenerationService.discardSingleCase(taskId, caseIndex);
         return Result.success(result);
     }
 }

@@ -124,6 +124,53 @@ public class TestCaseGenerationService {
     }
 
     /**
+     * 分页查询任务列表
+     */
+    public Map<String, Object> listTasks(int page, int pageSize, String status, Long userId) {
+        LambdaQueryWrapper<TestCaseGenerationTask> wrapper = new LambdaQueryWrapper<>();
+        if (status != null && !status.isEmpty()) {
+            wrapper.eq(TestCaseGenerationTask::getStatus, status);
+        }
+        wrapper.orderByDesc(TestCaseGenerationTask::getCreatedAt);
+
+        long total = taskMapper.selectCount(wrapper);
+        List<TestCaseGenerationTask> tasks = taskMapper.selectList(
+                wrapper.last("LIMIT " + pageSize + " OFFSET " + (page - 1) * pageSize));
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("count", total);
+        result.put("results", tasks);
+        return result;
+    }
+
+    /**
+     * 获取单个任务详情
+     */
+    public TestCaseGenerationTask getTaskDetail(String taskId) {
+        TestCaseGenerationTask task = taskMapper.selectOne(
+                new LambdaQueryWrapper<TestCaseGenerationTask>()
+                        .eq(TestCaseGenerationTask::getTaskId, taskId));
+        if (task == null) {
+            throw new RuntimeException("任务不存在: " + taskId);
+        }
+        return task;
+    }
+
+    /**
+     * 删除任务
+     */
+    public void deleteTask(String taskId) {
+        TestCaseGenerationTask task = taskMapper.selectOne(
+                new LambdaQueryWrapper<TestCaseGenerationTask>()
+                        .eq(TestCaseGenerationTask::getTaskId, taskId));
+        if (task == null) {
+            throw new RuntimeException("任务不存在: " + taskId);
+        }
+        taskMapper.deleteById(task.getId());
+        log.info("删除任务: taskId={}", taskId);
+    }
+
+    /**
      * 获取任务进度
      */
     public Map<String, Object> getProgress(String taskId) {
@@ -153,6 +200,154 @@ public class TestCaseGenerationService {
         return taskMapper.selectOne(
                 new LambdaQueryWrapper<TestCaseGenerationTask>()
                         .eq(TestCaseGenerationTask::getTaskId, taskId));
+    }
+
+    /**
+     * 批量采纳任务的所有测试用例
+     */
+    public Map<String, Object> batchAdopt(String taskId) {
+        TestCaseGenerationTask task = getTaskDetail(taskId);
+        String content = task.getFinalTestCases();
+        if (content == null || content.isBlank()) {
+            content = task.getGeneratedTestCases();
+        }
+
+        int importedCount = 0;
+        try {
+            List<Map<String, Object>> testCases = parseTestCasesFromContent(content);
+            Long projectId = task.getProjectId();
+
+            for (Map<String, Object> tc : testCases) {
+                TestCase testCase = new TestCase();
+                testCase.setProjectId(projectId);
+                testCase.setTitle((String) tc.getOrDefault("title", "未命名用例"));
+                testCase.setDescription((String) tc.get("case_id"));
+                testCase.setPrecondition((String) tc.get("precondition"));
+                testCase.setExpectedResult((String) tc.get("expected_result"));
+
+                String priority = (String) tc.getOrDefault("priority", "P2");
+                testCase.setPriority(mapPriority(priority));
+                testCase.setType("functional");
+                testCase.setStatus("active");
+                testCaseMapper.insert(testCase);
+                importedCount++;
+            }
+            log.info("任务 {} 批量采纳 {} 条用例", taskId, importedCount);
+        } catch (Exception e) {
+            log.error("任务 {} 批量采纳失败: {}", taskId, e.getMessage(), e);
+            throw new RuntimeException("批量采纳失败: " + e.getMessage());
+        }
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("success", true);
+        result.put("message", "批量采纳成功");
+        result.put("imported_count", importedCount);
+        return result;
+    }
+
+    /**
+     * 批量弃用任务的所有测试用例（删除任务）
+     */
+    public Map<String, Object> batchDiscard(String taskId) {
+        deleteTask(taskId);
+        Map<String, Object> result = new HashMap<>();
+        result.put("success", true);
+        result.put("message", "批量弃用成功");
+        result.put("task_deleted", true);
+        return result;
+    }
+
+    /**
+     * 选择性批量采纳
+     */
+    public Map<String, Object> batchAdoptSelected(String taskId, List<Map<String, Object>> testCases) {
+        TestCaseGenerationTask task = getTaskDetail(taskId);
+        Long projectId = task.getProjectId();
+        int importedCount = 0;
+
+        for (Map<String, Object> tc : testCases) {
+            TestCase testCase = new TestCase();
+            testCase.setProjectId(projectId);
+            testCase.setTitle((String) tc.getOrDefault("title", "未命名用例"));
+            testCase.setDescription((String) tc.get("case_id"));
+            testCase.setPrecondition((String) tc.get("precondition"));
+            testCase.setExpectedResult((String) tc.get("expected_result"));
+
+            String priority = (String) tc.getOrDefault("priority", "P2");
+            testCase.setPriority(mapPriority(priority));
+            testCase.setType((String) tc.getOrDefault("type", "functional"));
+            testCase.setStatus((String) tc.getOrDefault("status", "draft"));
+            testCaseMapper.insert(testCase);
+            importedCount++;
+        }
+
+        log.info("任务 {} 选择性采纳 {} 条用例", taskId, importedCount);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("success", true);
+        result.put("message", "选择性采纳成功");
+        result.put("imported_count", importedCount);
+        return result;
+    }
+
+    /**
+     * 弃用选中的用例（从生成结果中移除）
+     */
+    public Map<String, Object> discardSelectedCases(String taskId, List<Integer> caseIndices) {
+        TestCaseGenerationTask task = getTaskDetail(taskId);
+        String content = task.getFinalTestCases();
+        if (content == null || content.isBlank()) {
+            content = task.getGeneratedTestCases();
+        }
+
+        List<Map<String, Object>> testCases = parseTestCasesFromContent(content);
+        List<Map<String, Object>> remainingCases = new ArrayList<>();
+
+        for (int i = 0; i < testCases.size(); i++) {
+            if (!caseIndices.contains(i)) {
+                remainingCases.add(testCases.get(i));
+            }
+        }
+
+        // 更新任务的最终测试用例
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            String updatedContent = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(remainingCases);
+            task.setFinalTestCases(updatedContent);
+            taskMapper.updateById(task);
+        } catch (Exception e) {
+            log.error("更新任务用例失败: {}", e.getMessage());
+            throw new RuntimeException("弃用失败: " + e.getMessage());
+        }
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("success", true);
+        result.put("message", "弃用成功");
+        result.put("discarded_count", caseIndices.size());
+        result.put("remaining_count", remainingCases.size());
+        result.put("task_deleted", remainingCases.isEmpty());
+        return result;
+    }
+
+    /**
+     * 更新测试用例
+     */
+    public Map<String, Object> updateTestCases(String taskId, String finalTestCases) {
+        TestCaseGenerationTask task = getTaskDetail(taskId);
+        task.setFinalTestCases(finalTestCases);
+        taskMapper.updateById(task);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("success", true);
+        result.put("message", "更新成功");
+        return result;
+    }
+
+    /**
+     * 弃用单个用例
+     */
+    public Map<String, Object> discardSingleCase(String taskId, int caseIndex) {
+        return discardSelectedCases(taskId, List.of(caseIndex));
     }
 
     /**

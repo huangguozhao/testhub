@@ -344,7 +344,7 @@ export default {
     async loadTaskDetail() {
       try {
         // 获取任务基本信息
-        const taskResponse = await api.get(`/requirement-analysis/testcase-generation/${this.taskId}/`)
+        const taskResponse = await api.get(`/requirement-analysis/testcase-generation/${this.taskId}`)
         this.task = taskResponse.data
 
         // 解析最终测试用例
@@ -551,7 +551,7 @@ export default {
           status: 'draft'
         }))
 
-        await api.post(`/requirement-analysis/testcase-generation/${this.taskId}/batch-adopt-selected/`, {
+        await api.post(`/requirement-analysis/testcase-generation/${this.taskId}/batch-adopt-selected`, {
           test_cases: casesData
         })
 
@@ -600,7 +600,7 @@ export default {
           return globalIndex
         }).filter(index => index !== -1) // 过滤掉未找到的(-1)
 
-        const response = await api.post(`/requirement-analysis/testcase-generation/${this.taskId}/discard-selected-cases/`, {
+        const response = await api.post(`/requirement-analysis/testcase-generation/${this.taskId}/discard-selected-cases`, {
           case_indices: caseIndices
         })
 
@@ -706,7 +706,7 @@ export default {
         const updatedTestCases = this.generateTestCasesString()
 
         // 调用后端API保存（使用自定义action接口）
-        await api.post(`/requirement-analysis/testcase-generation/${this.taskId}/update-test-cases/`, {
+        await api.post(`/requirement-analysis/testcase-generation/${this.taskId}/update-test-cases`, {
           final_test_cases: updatedTestCases
         })
 
@@ -827,7 +827,7 @@ export default {
         const globalIndex = (this.currentPage - 1) * this.pageSize + index
 
         // 调用后端API弃用单个测试用例
-        const response = await api.post(`/requirement-analysis/testcase-generation/${this.taskId}/discard-single-case/`, {
+        const response = await api.post(`/requirement-analysis/testcase-generation/${this.taskId}/discard-single-case`, {
           case_index: globalIndex
         })
 

@@ -479,21 +479,21 @@ export default {
     async loadTasks() {
       this.isLoading = true
       try {
-        let url = '/requirement-analysis/testcase-generation/'
+        let url = '/requirement-analysis/testcase-generation'
         const params = new URLSearchParams()
-        
+
         // 添加分页参数
         params.append('page', String(this.pagination.currentPage))
         params.append('page_size', String(this.pagination.pageSize))
-        
+
         if (this.selectedStatus) {
           params.append('status', this.selectedStatus)
         }
-        
+
         if (params.toString()) {
           url += '?' + params.toString()
         }
-        
+
         const response = await api.get(url)
         
         if (response.data.results) {
@@ -566,7 +566,7 @@ export default {
         // 逐个删除选中的任务
         for (const taskId of this.selectedTasks) {
           try {
-            await api.delete(`/requirement-analysis/testcase-generation/${taskId}/`)
+            await api.delete(`/requirement-analysis/testcase-generation/${taskId}`)
             successCount++
           } catch (error) {
             console.error(`删除任务 ${taskId} 失败:`, error)
@@ -602,7 +602,7 @@ export default {
     async loadAllStats() {
       try {
         // 构建统计请求URL
-        let url = '/requirement-analysis/testcase-generation/'
+        let url = '/requirement-analysis/testcase-generation'
         const params = new URLSearchParams()
         
         // 获取所有数据来进行统计
@@ -722,8 +722,8 @@ export default {
 
       try {
         // 调用后端API批量采纳该任务的所有测试用例
-        // await api.post(`/requirement-analysis/testcase-generation/${task.task_id}/batch-adopt/`)
-        await api.post(`/requirement-analysis/testcase-generation/${task.task_id}/batch_adopt/`)
+        // await api.post(`/requirement-analysis/testcase-generation/${task.task_id}/batch-adopt`)
+        await api.post(`/requirement-analysis/testcase-generation/${task.task_id}/batch_adopt`)
         ElMessage.success(this.$t('generatedTestCases.adoptSuccess'))
         this.loadTasks()
       } catch (error) {
@@ -739,8 +739,8 @@ export default {
 
       try {
         // 调用后端API批量删除该任务的所有测试用例
-        // await api.post(`/requirement-analysis/testcase-generation/${task.task_id}/batch-discard/`)
-        await api.post(`/requirement-analysis/testcase-generation/${task.task_id}/batch_discard/`)
+        // await api.post(`/requirement-analysis/testcase-generation/${task.task_id}/batch-discard`)
+        await api.post(`/requirement-analysis/testcase-generation/${task.task_id}/batch_discard`)
         ElMessage.success(this.$t('generatedTestCases.discardSuccess'))
         this.loadTasks()
       } catch (error) {
@@ -1210,7 +1210,7 @@ export default {
 .testcases-table {
   border: 1px solid var(--th-border, #e5e5e5);
   border-radius: var(--th-radius-lg, 8px);
-  overflow: hidden;
+  overflow-x: auto;
 }
 
 .table-header {
