@@ -28,8 +28,8 @@
           <div class="members-section">
             <el-button type="primary" @click="showAddMemberDialog = true">{{ $t('project.addMember') }}</el-button>
             <el-table :data="project?.members || []" style="width: 100%; margin-top: 20px;">
-              <el-table-column prop="user.username" :label="$t('project.username')" />
-              <el-table-column prop="user.email" :label="$t('project.email')" />
+              <el-table-column prop="username" :label="$t('project.username')" />
+              <el-table-column prop="email" :label="$t('project.email')" />
               <el-table-column prop="role" :label="$t('project.role')" />
               <el-table-column prop="joined_at" :label="$t('project.joinedAt')">
                 <template #default="{ row }">
@@ -116,7 +116,7 @@ const formatDate = (dateString) => {
 
 const removeMember = async (member) => {
   try {
-    await api.delete(`/projects/${route.params.id}/members/${member.id}`)
+    await api.delete(`/projects/${route.params.id}/members/${member.userId}`)
     ElMessage.success(t('project.memberDeleteSuccess'))
     fetchProject()
   } catch (error) {

@@ -1,0 +1,38 @@
+{
+  "uuid" : "11-2",
+  "name" : "PostUser",
+  "status" : "passed",
+  "stage" : "finished",
+  "start" : 1778392748253,
+  "stop" : 1778392749253,
+  "description" : "Method: POST\nURL: https://httpbin.org/post",
+  "historyId" : "4-2",
+  "fullName" : "test / PostUser",
+  "labels" : [ {
+    "value" : "test",
+    "name" : "suite"
+  }, {
+    "value" : "api_testing",
+    "name" : "package"
+  } ],
+  "parameters" : [ {
+    "value" : "POST",
+    "name" : "method"
+  }, {
+    "value" : "https://httpbin.org/post",
+    "name" : "url"
+  } ],
+  "steps" : [ {
+    "name" : "发送请求",
+    "status" : "passed",
+    "stage" : "finished",
+    "start" : 1778392748253,
+    "stop" : 1778392748753
+  }, {
+    "name" : "验证响应",
+    "status" : "passed",
+    "stage" : "finished",
+    "start" : 1778392748753,
+    "stop" : 1778392749253
+  } ]
+}

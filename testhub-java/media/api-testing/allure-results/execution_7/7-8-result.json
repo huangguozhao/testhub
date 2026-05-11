@@ -1,0 +1,38 @@
+{
+  "uuid" : "7-8",
+  "name" : "UseExtractedVar",
+  "status" : "passed",
+  "stage" : "finished",
+  "start" : 1778141695733,
+  "stop" : 1778141696733,
+  "description" : "Method: GET\nURL: https://httpbin.org/anything/{{serverOrigin}}",
+  "historyId" : "4-8",
+  "fullName" : "test / UseExtractedVar",
+  "labels" : [ {
+    "name" : "suite",
+    "value" : "test"
+  }, {
+    "name" : "package",
+    "value" : "api_testing"
+  } ],
+  "parameters" : [ {
+    "name" : "method",
+    "value" : "GET"
+  }, {
+    "name" : "url",
+    "value" : "https://httpbin.org/anything/{{serverOrigin}}"
+  } ],
+  "steps" : [ {
+    "name" : "发送请求",
+    "status" : "passed",
+    "stage" : "finished",
+    "start" : 1778141695733,
+    "stop" : 1778141696233
+  }, {
+    "name" : "验证响应",
+    "status" : "passed",
+    "stage" : "finished",
+    "start" : 1778141696233,
+    "stop" : 1778141696733
+  } ]
+}

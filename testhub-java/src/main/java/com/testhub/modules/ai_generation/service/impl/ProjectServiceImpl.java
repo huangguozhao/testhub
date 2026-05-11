@@ -115,7 +115,17 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
 
     @Override
     public Project getProjectDetail(Long projectId) {
-        return projectMapper.selectProjectWithCreator(projectId);
+        Project project = projectMapper.selectProjectWithCreator(projectId);
+        if (project != null) {
+            // 填充成员信息
+            List<ProjectMember> members = projectMemberMapper.selectByProjectId(projectId);
+            project.setMembers(members);
+
+            // 填充环境信息
+            List<ProjectEnvironment> environments = projectEnvironmentMapper.selectByProjectId(projectId);
+            project.setEnvironments(environments);
+        }
+        return project;
     }
 
     @Override

@@ -1,0 +1,38 @@
+{
+  "uuid" : "10-6",
+  "name" : "ExtractToken",
+  "status" : "passed",
+  "stage" : "finished",
+  "start" : 1778168351131,
+  "stop" : 1778168352131,
+  "description" : "Method: POST\nURL: https://httpbin.org/post",
+  "historyId" : "4-6",
+  "fullName" : "test / ExtractToken",
+  "labels" : [ {
+    "value" : "test",
+    "name" : "suite"
+  }, {
+    "value" : "api_testing",
+    "name" : "package"
+  } ],
+  "parameters" : [ {
+    "value" : "POST",
+    "name" : "method"
+  }, {
+    "value" : "https://httpbin.org/post",
+    "name" : "url"
+  } ],
+  "steps" : [ {
+    "name" : "发送请求",
+    "status" : "passed",
+    "stage" : "finished",
+    "start" : 1778168351131,
+    "stop" : 1778168351631
+  }, {
+    "name" : "验证响应",
+    "status" : "passed",
+    "stage" : "finished",
+    "start" : 1778168351631,
+    "stop" : 1778168352131
+  } ]
+}

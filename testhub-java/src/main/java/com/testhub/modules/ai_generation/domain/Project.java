@@ -5,6 +5,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import com.testhub.modules.system.domain.BaseEntity;
 
+import java.util.List;
+
 @Data
 @EqualsAndHashCode(callSuper = true)
 @TableName("prj_project")
@@ -65,4 +67,10 @@ public class Project extends BaseEntity {
 
     @TableField(exist = false)
     private Long testCaseCount;
+
+    @TableField(exist = false)
+    private List<ProjectMember> members;
+
+    @TableField(exist = false)
+    private List<ProjectEnvironment> environments;
 }

@@ -1,0 +1,19 @@
+"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
+"Method: GET
+URL: https://httpbin.org/get","1000","GET /get","","Sun May 10 13:59:08 CST 2026","passed","Sun May 10 13:59:09 CST 2026","","test","",""
+"Method: GET
+URL: https://httpbin.org/get","1000","ExtractOrigin","","Sun May 10 13:59:08 CST 2026","passed","Sun May 10 13:59:09 CST 2026","","test","",""
+"Method: POST
+URL: https://httpbin.org/post","1000","PostUser","","Sun May 10 13:59:08 CST 2026","passed","Sun May 10 13:59:09 CST 2026","","test","",""
+"Method: GET
+URL: https://httpbin.org/anything/{{serverOrigin}}","1000","UseExtractedVar","","Sun May 10 13:59:08 CST 2026","passed","Sun May 10 13:59:09 CST 2026","","test","",""
+"Method: POST
+URL: https://httpbin.org/post","1000","ExtractToken","","Sun May 10 13:59:08 CST 2026","passed","Sun May 10 13:59:09 CST 2026","","test","",""
+"Method: GET
+URL: https://httpbin.org/get","1000","TestAssertionPass","","Sun May 10 13:59:08 CST 2026","passed","Sun May 10 13:59:09 CST 2026","","test","",""
+"Method: GET
+URL: https://httpbin.org/get","1000","TestAssertion","","Sun May 10 13:59:08 CST 2026","passed","Sun May 10 13:59:09 CST 2026","","test","",""
+"Method: GET
+URL: https://httpbin.org/get","1000","TestAssertion","","Sun May 10 13:59:08 CST 2026","passed","Sun May 10 13:59:09 CST 2026","","test","",""
+"Method: GET
+URL: https://httpbin.org/get","1000","GetUser","","Sun May 10 13:59:08 CST 2026","passed","Sun May 10 13:59:09 CST 2026","","test","",""

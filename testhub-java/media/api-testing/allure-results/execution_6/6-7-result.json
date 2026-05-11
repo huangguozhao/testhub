@@ -1,0 +1,38 @@
+{
+  "uuid" : "6-7",
+  "name" : "ExtractOrigin",
+  "status" : "passed",
+  "stage" : "finished",
+  "start" : 1778124791580,
+  "stop" : 1778124792580,
+  "description" : "Method: GET\nURL: ",
+  "historyId" : "4-7",
+  "fullName" : "test / ExtractOrigin",
+  "labels" : [ {
+    "value" : "test",
+    "name" : "suite"
+  }, {
+    "value" : "api_testing",
+    "name" : "package"
+  } ],
+  "parameters" : [ {
+    "value" : "GET",
+    "name" : "method"
+  }, {
+    "value" : "",
+    "name" : "url"
+  } ],
+  "steps" : [ {
+    "name" : "发送请求",
+    "status" : "passed",
+    "stage" : "finished",
+    "start" : 1778124791580,
+    "stop" : 1778124792080
+  }, {
+    "name" : "验证响应",
+    "status" : "passed",
+    "stage" : "finished",
+    "start" : 1778124792080,
+    "stop" : 1778124792580
+  } ]
+}

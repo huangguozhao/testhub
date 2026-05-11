@@ -1,0 +1,38 @@
+{
+  "uuid" : "11-1",
+  "name" : "GET /get",
+  "status" : "passed",
+  "stage" : "finished",
+  "start" : 1778392748253,
+  "stop" : 1778392749253,
+  "description" : "Method: GET\nURL: https://httpbin.org/get",
+  "historyId" : "4-1",
+  "fullName" : "test / GET /get",
+  "labels" : [ {
+    "value" : "test",
+    "name" : "suite"
+  }, {
+    "value" : "api_testing",
+    "name" : "package"
+  } ],
+  "parameters" : [ {
+    "value" : "GET",
+    "name" : "method"
+  }, {
+    "value" : "https://httpbin.org/get",
+    "name" : "url"
+  } ],
+  "steps" : [ {
+    "name" : "发送请求",
+    "status" : "passed",
+    "stage" : "finished",
+    "start" : 1778392748253,
+    "stop" : 1778392748753
+  }, {
+    "name" : "验证响应",
+    "status" : "passed",
+    "stage" : "finished",
+    "start" : 1778392748753,
+    "stop" : 1778392749253
+  } ]
+}
