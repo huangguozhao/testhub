@@ -237,11 +237,13 @@ export const useUserStore = defineStore('user', () => {
       console.error('Token refresh failed:', error)
 
       // 只有在 refresh token 确实无效时才 logout
-      // 判断依据：401 状态码或明确的 token 无效消息
+      // 判断依据：HTTP 401、业务码 2001、或明确的 token 无效消息
+      const responseData = error.response?.data
       const shouldLogout = error.response?.status === 401 ||
-        error.response?.data?.message?.includes('令牌') ||
-        error.response?.data?.message?.includes('token') ||
-        error.response?.data?.message?.includes('过期')
+        responseData?.code === 2001 ||
+        responseData?.message?.includes('令牌') ||
+        responseData?.message?.includes('token') ||
+        responseData?.message?.includes('过期')
 
       if (shouldLogout) {
         console.log('Refresh token 无效或已过期，需要重新登录')
