@@ -27,7 +27,7 @@
     <select id="selectProjectsByUserId" resultMap="BaseResultMap">
         SELECT p.* FROM prj_project p
         INNER JOIN prj_project_member pm ON p.id = pm.project_id
-        WHERE pm.user_id = #{userId} AND p.status = 'active'
+        WHERE pm.user_id = #{userId} AND p.status = 'active' AND p.is_deleted = 0
         ORDER BY p.created_at DESC
     </select>
 
@@ -45,6 +45,7 @@
         INNER JOIN prj_project_member pm ON p.id = pm.project_id
         WHERE pm.user_id = #{userId}
           AND p.status = 'active'
+          AND p.is_deleted = 0
           AND (p.name LIKE CONCAT('%', #{keyword}, '%')
                OR p.description LIKE CONCAT('%', #{keyword}, '%'))
         ORDER BY p.created_at DESC

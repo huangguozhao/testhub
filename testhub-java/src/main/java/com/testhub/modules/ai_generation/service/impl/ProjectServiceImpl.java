@@ -98,7 +98,10 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
         if (project == null) {
             throw new BusinessException("项目不存在");
         }
-        projectMapper.deleteById(projectId);
+
+        // 软删除：设置 is_deleted = 1
+        project.setIsDeleted(1);
+        projectMapper.updateById(project);
     }
 
     /**
