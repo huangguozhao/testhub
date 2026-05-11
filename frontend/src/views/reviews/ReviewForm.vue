@@ -378,10 +378,10 @@ const saveReview = async () => {
     }
 
     if (isEdit.value) {
-      await api.put(`/reviews/reviews/${route.params.id}/`, data)
+      await api.put(`/reviews/${route.params.id}`, data)
       ElMessage.success(t('reviewForm.updateSuccess'))
     } else {
-      await api.post('/reviews/reviews/', data)
+      await api.post('/reviews', data)
       ElMessage.success(t('reviewForm.createSuccess'))
     }
 
@@ -449,7 +449,7 @@ const findMatchingTemplate = (review, templateList) => {
 
 const fetchReviewData = async (reviewId) => {
   try {
-    const response = await api.get(`/reviews/reviews/${reviewId}/`)
+    const response = await api.get(`/reviews/${reviewId}`)
     const review = response.data
 
     // 填充表单数据

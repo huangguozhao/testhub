@@ -4535,3 +4535,650 @@ URL: GET /api/projects/6
 响应体:
 {"code":200,"message":"success","data":{"id":6,"created_at":"2026-04-29T21:26:42","updated_at":"2026-04-29T21:26:42","created_by":null,"updated_by":null,"is_deleted":0,"name":"我的测试项目1777469202","description":"这是一个测试项目","status":"active","owner_id":3,"icon":null,"sort_order":0,"include_test_cases":true,"include_automated_tests":false,"owner_name":null,"creator_username":"admin","creator_real_name":"管理员","member_count":null,"test_case_count":null},"timestamp":1778509255516}
 ==================================
+2026-05-11T23:16:44.346+08:00  INFO 13340 --- [testhub] [main] com.testhub.TesthubApplication           : Starting TesthubApplication using Java 17.0.14 with PID 13340 (D:\Project\testhub_platform\testhub-java\target\classes started by Victor in D:\Project\testhub_platform\testhub-java)
+2026-05-11T23:16:44.350+08:00 DEBUG 13340 --- [testhub] [main] com.testhub.TesthubApplication           : Running with Spring Boot v3.2.5, Spring v6.1.6
+2026-05-11T23:16:44.352+08:00  INFO 13340 --- [testhub] [main] com.testhub.TesthubApplication           : No active profile set, falling back to 1 default profile: "default"
+2026-05-11T23:16:51.995+08:00  INFO 13340 --- [testhub] [main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2026-05-11T23:16:52.004+08:00  INFO 13340 --- [testhub] [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2026-05-11T23:16:52.142+08:00  INFO 13340 --- [testhub] [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 81 ms. Found 0 Redis repository interfaces.
+2026-05-11T23:16:55.000+08:00  INFO 13340 --- [testhub] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2026-05-11T23:16:55.073+08:00  INFO 13340 --- [testhub] [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-05-11T23:16:55.074+08:00  INFO 13340 --- [testhub] [main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.20]
+2026-05-11T23:16:55.462+08:00  INFO 13340 --- [testhub] [main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-05-11T23:16:55.463+08:00  INFO 13340 --- [testhub] [main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 10546 ms
+2026-05-11T23:16:58.662+08:00 DEBUG 13340 --- [testhub] [main] c.t.m.s.s.JwtAuthenticationFilter        : Filter 'jwtAuthenticationFilter' configured for use
+2026-05-11T23:17:00.852+08:00  INFO 13340 --- [testhub] [main] com.testhub.config.MinioConfig           : ========== MinIO 初始化配置 ==========
+2026-05-11T23:17:00.853+08:00  INFO 13340 --- [testhub] [main] com.testhub.config.MinioConfig           : Endpoint: http://localhost:9800
+2026-05-11T23:17:00.858+08:00  INFO 13340 --- [testhub] [main] com.testhub.config.MinioConfig           : Bucket: testhub
+2026-05-11T23:17:06.254+08:00  INFO 13340 --- [testhub] [main] o.s.s.web.DefaultSecurityFilterChain     : Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@17541204, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@2dec57c5, org.springframework.security.web.context.SecurityContextHolderFilter@782e0844, org.springframework.security.web.header.HeaderWriterFilter@4acdf6e7, org.springframework.web.filter.CorsFilter@5b8599c7, org.springframework.security.web.authentication.logout.LogoutFilter@1ae23815, com.testhub.modules.system.security.JwtAuthenticationFilter@528f5b7f, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@2643ed03, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@17d45cfb, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@31e9d94f, org.springframework.security.web.session.SessionManagementFilter@5d08a65c, org.springframework.security.web.access.ExceptionTranslationFilter@21be80f6, org.springframework.security.web.access.intercept.AuthorizationFilter@572db5ee]
+2026-05-11T23:17:06.343+08:00  INFO 13340 --- [testhub] [main] com.testhub.config.XxlJobConfig          : ========== XXL-JOB 初始化配置 ==========
+2026-05-11T23:17:06.344+08:00  INFO 13340 --- [testhub] [main] com.testhub.config.XxlJobConfig          : Admin Addresses: http://localhost:8088/xxl-job-admin
+2026-05-11T23:17:06.344+08:00  INFO 13340 --- [testhub] [main] com.testhub.config.XxlJobConfig          : App Name: testhub-executor
+2026-05-11T23:17:06.344+08:00  INFO 13340 --- [testhub] [main] com.testhub.config.XxlJobConfig          : Executor Port: 9999
+2026-05-11T23:17:07.922+08:00  INFO 13340 --- [testhub] [main] org.quartz.impl.StdSchedulerFactory      : Using default implementation for ThreadExecutor
+2026-05-11T23:17:07.970+08:00  INFO 13340 --- [testhub] [main] org.quartz.core.SchedulerSignalerImpl    : Initialized Scheduler Signaller of type: class org.quartz.core.SchedulerSignalerImpl
+2026-05-11T23:17:07.971+08:00  INFO 13340 --- [testhub] [main] org.quartz.core.QuartzScheduler          : Quartz Scheduler v.2.3.2 created.
+2026-05-11T23:17:07.974+08:00  INFO 13340 --- [testhub] [main] org.quartz.simpl.RAMJobStore             : RAMJobStore initialized.
+2026-05-11T23:17:07.976+08:00  INFO 13340 --- [testhub] [main] org.quartz.core.QuartzScheduler          : Scheduler meta-data: Quartz Scheduler (v2.3.2) 'quartzScheduler' with instanceId 'NON_CLUSTERED'
+  Scheduler class: 'org.quartz.core.QuartzScheduler' - running locally.
+  NOT STARTED.
+  Currently in standby mode.
+  Number of jobs executed: 0
+  Using thread pool 'org.quartz.simpl.SimpleThreadPool' - with 10 threads.
+  Using job-store 'org.quartz.simpl.RAMJobStore' - which does not support persistence. and is not clustered.
+
+2026-05-11T23:17:07.977+08:00  INFO 13340 --- [testhub] [main] org.quartz.impl.StdSchedulerFactory      : Quartz scheduler 'quartzScheduler' initialized from an externally provided properties instance.
+2026-05-11T23:17:07.977+08:00  INFO 13340 --- [testhub] [main] org.quartz.impl.StdSchedulerFactory      : Quartz scheduler version: 2.3.2
+2026-05-11T23:17:07.977+08:00  INFO 13340 --- [testhub] [main] org.quartz.core.QuartzScheduler          : JobFactory set to: org.springframework.scheduling.quartz.SpringBeanJobFactory@4f93a8f6
+2026-05-11T23:17:08.286+08:00  INFO 13340 --- [testhub] [main] c.xxl.job.core.executor.XxlJobExecutor   : >>>>>>>>>>> xxl-job register jobhandler success, name:apiScheduledTaskJob, jobHandler:com.xxl.job.core.handler.impl.MethodJobHandler@1d0acb8f[class com.testhub.modules.api_testing.job.ApiScheduledJobHandler#execute]
+2026-05-11T23:17:08.288+08:00  INFO 13340 --- [testhub] [main] c.xxl.job.core.executor.XxlJobExecutor   : >>>>>>>>>>> xxl-job register jobhandler success, name:apiScheduledTaskUpdateNextRunJob, jobHandler:com.xxl.job.core.handler.impl.MethodJobHandler@6abaa14b[class com.testhub.modules.api_testing.job.ApiScheduledJobHandler#updateNextRunTime]
+2026-05-11T23:17:08.629+08:00  INFO 13340 --- [testhub] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path ''
+2026-05-11T23:17:08.635+08:00  INFO 13340 --- [testhub] [main] o.s.s.quartz.SchedulerFactoryBean        : Starting Quartz Scheduler now
+2026-05-11T23:17:08.636+08:00  INFO 13340 --- [testhub] [main] org.quartz.core.QuartzScheduler          : Scheduler quartzScheduler_$_NON_CLUSTERED started.
+2026-05-11T23:17:08.669+08:00  INFO 13340 --- [testhub] [main] com.testhub.TesthubApplication           : Started TesthubApplication in 25.549 seconds (process running for 27.705)
+2026-05-11T23:17:09.417+08:00 ERROR 13340 --- [testhub] [Thread-4] com.xxl.job.core.server.EmbedServer      : >>>>>>>>>>> xxl-job remoting server error.
+
+java.net.BindException: Address already in use: bind
+	at java.base/sun.nio.ch.Net.bind0(Native Method) ~[na:na]
+	at java.base/sun.nio.ch.Net.bind(Net.java:555) ~[na:na]
+	at java.base/sun.nio.ch.ServerSocketChannelImpl.netBind(ServerSocketChannelImpl.java:337) ~[na:na]
+	at java.base/sun.nio.ch.ServerSocketChannelImpl.bind(ServerSocketChannelImpl.java:294) ~[na:na]
+	at io.netty.channel.socket.nio.NioServerSocketChannel.doBind(NioServerSocketChannel.java:141) ~[netty-transport-4.1.109.Final.jar:4.1.109.Final]
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.bind(AbstractChannel.java:562) ~[netty-transport-4.1.109.Final.jar:4.1.109.Final]
+	at io.netty.channel.DefaultChannelPipeline$HeadContext.bind(DefaultChannelPipeline.java:1334) ~[netty-transport-4.1.109.Final.jar:4.1.109.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeBind(AbstractChannelHandlerContext.java:600) ~[netty-transport-4.1.109.Final.jar:4.1.109.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.bind(AbstractChannelHandlerContext.java:579) ~[netty-transport-4.1.109.Final.jar:4.1.109.Final]
+	at io.netty.channel.DefaultChannelPipeline.bind(DefaultChannelPipeline.java:973) ~[netty-transport-4.1.109.Final.jar:4.1.109.Final]
+	at io.netty.channel.AbstractChannel.bind(AbstractChannel.java:260) ~[netty-transport-4.1.109.Final.jar:4.1.109.Final]
+	at io.netty.bootstrap.AbstractBootstrap$2.run(AbstractBootstrap.java:380) ~[netty-transport-4.1.109.Final.jar:4.1.109.Final]
+	at io.netty.util.concurrent.AbstractEventExecutor.runTask(AbstractEventExecutor.java:173) ~[netty-common-4.1.109.Final.jar:4.1.109.Final]
+	at io.netty.util.concurrent.AbstractEventExecutor.safeExecute$$$capture(AbstractEventExecutor.java:166) ~[netty-common-4.1.109.Final.jar:4.1.109.Final]
+	at io.netty.util.concurrent.AbstractEventExecutor.safeExecute(AbstractEventExecutor.java) ~[netty-common-4.1.109.Final.jar:4.1.109.Final]
+	at io.netty.util.concurrent.SingleThreadEventExecutor.runAllTasks(SingleThreadEventExecutor.java:470) ~[netty-common-4.1.109.Final.jar:4.1.109.Final]
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:569) ~[netty-transport-4.1.109.Final.jar:4.1.109.Final]
+	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:997) ~[netty-common-4.1.109.Final.jar:4.1.109.Final]
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74) ~[netty-common-4.1.109.Final.jar:4.1.109.Final]
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30) ~[netty-common-4.1.109.Final.jar:4.1.109.Final]
+	at java.base/java.lang.Thread.run(Thread.java:842) ~[na:na]
+
+2026-05-11T23:17:18.632+08:00  INFO 13340 --- [testhub] [http-nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-05-11T23:17:18.633+08:00  INFO 13340 --- [testhub] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-05-11T23:17:18.641+08:00  INFO 13340 --- [testhub] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 6 ms
+2026-05-11T23:17:18.858+08:00  INFO 13340 --- [testhub] [http-nio-8080-exec-1] c.testhub.config.ApiLoggingInterceptor   : 
+
+========== API请求日志 ==========
+URL: POST /api/auth/refresh
+Content-Type: application/json
+Content-Length: 285
+请求头:
+  sec-fetch-mode: cors
+  content-length: 285
+  referer: http://localhost:3001/ai-generation/projects/6
+  sec-fetch-site: same-origin
+  accept-language: zh-CN,zh;q=0.9
+  origin: http://localhost:3001
+  accept: application/json, text/plain, */*
+  sec-ch-ua: "Tabbit Browser";v="147", "Not.A/Brand";v="8", "Chromium";v="147"
+  sec-ch-ua-mobile: ?0
+  sec-ch-ua-platform: "Windows"
+  host: 127.0.0.1:8080
+  connection: close
+  content-type: application/json
+  accept-encoding: gzip, deflate, br, zstd
+  user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36
+  sec-fetch-dest: empty
+=================================
+2026-05-11T23:17:19.964+08:00  INFO 13340 --- [testhub] [http-nio-8080-exec-1] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-05-11T23:17:20.706+08:00  INFO 13340 --- [testhub] [http-nio-8080-exec-1] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@44eaf487
+2026-05-11T23:17:20.712+08:00  INFO 13340 --- [testhub] [http-nio-8080-exec-1] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-05-11T23:17:20.747+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-1] c.t.m.s.m.T.existsByTokenId              : ==>  Preparing: SELECT COUNT(*) > 0 FROM sys_token_blacklist WHERE token_id = ?
+2026-05-11T23:17:20.816+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-1] c.t.m.s.m.T.existsByTokenId              : ==> Parameters: e38232f1-5ee4-4487-8af3-d57f5df3ccda(String)
+2026-05-11T23:17:20.891+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-1] c.t.m.s.m.T.existsByTokenId              : <==      Total: 1
+2026-05-11T23:17:20.925+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-1] c.t.m.s.mapper.UserMapper.selectById     : ==>  Preparing: SELECT id,username,email,password,real_name,phone,avatar,status,role_name,is_superuser,is_staff,last_login_time,last_login_ip,is_deleted,created_at,updated_at,created_by,updated_by FROM sys_user WHERE id=? AND is_deleted=0
+2026-05-11T23:17:20.931+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-1] c.t.m.s.mapper.UserMapper.selectById     : ==> Parameters: 2(Long)
+2026-05-11T23:17:20.958+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-1] c.t.m.s.mapper.UserMapper.selectById     : <==      Total: 1
+2026-05-11T23:17:21.016+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-1] c.t.m.s.m.TokenBlacklistMapper.insert    : ==>  Preparing: INSERT INTO sys_token_blacklist ( token_id, user_id, expire_time, created_at ) VALUES ( ?, ?, ?, ? )
+2026-05-11T23:17:21.018+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-1] c.t.m.s.m.TokenBlacklistMapper.insert    : ==> Parameters: e38232f1-5ee4-4487-8af3-d57f5df3ccda(String), 2(Long), 2026-05-18T22:13(LocalDateTime), 2026-05-11T23:17:20.966761900(LocalDateTime)
+2026-05-11T23:17:21.082+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-1] c.t.m.s.m.TokenBlacklistMapper.insert    : <==    Updates: 1
+2026-05-11T23:17:21.190+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-1] c.t.m.s.m.U.selectByUserId               : ==>  Preparing: SELECT * FROM sys_user_profile WHERE user_id = ?
+2026-05-11T23:17:21.192+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-1] c.t.m.s.m.U.selectByUserId               : ==> Parameters: 2(Long)
+2026-05-11T23:17:21.201+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-1] c.t.m.s.m.U.selectByUserId               : <==      Total: 1
+2026-05-11T23:17:21.256+08:00  INFO 13340 --- [testhub] [http-nio-8080-exec-1] c.testhub.config.ApiLoggingInterceptor   : 
+========== API响应日志 ==========
+URL: POST /api/auth/refresh
+状态: 200
+耗时: 2400ms
+响应体:
+{"code":200,"message":"success","data":{"access_token":"eyJhbGciOiJIUzI1NiJ9.eyJ0eXBlIjoiYWNjZXNzIiwidXNlcklkIjoyLCJ1c2VybmFtZSI6InRlc3R1c2VyMTc3NzQ1MTM1OCIsInN1YiI6IjIiLCJpYXQiOjE3Nzg1MTI2NDEsImV4cCI6MTc3ODUxMzU0MSwianRpIjoiNTlhNjNlNDgtMmE3MS00NDU5LTk4NjEtODZkYjg5ZWM0ZGRiIn0.C73Rar3-cNGO7Jz7BYio8-qCMwFZaEQt56OtEYuPNys","refresh_token":"eyJhbGciOiJIUzI1NiJ9.eyJ0eXBlIjoicmVmcmVzaCIsInVzZXJJZCI6MiwidXNlcm5hbWUiOiJ0ZXN0dXNlcjE3Nzc0NTEzNTgiLCJzdWIiOiIyIiwiaWF0IjoxNzc4NTEyNjQxLCJleHAiOjE3NzkxMTc0NDEs...(省略 426 字符)
+==================================
+2026-05-11T23:17:21.647+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-2] c.t.m.s.m.T.existsByTokenId              : ==>  Preparing: SELECT COUNT(*) > 0 FROM sys_token_blacklist WHERE token_id = ?
+2026-05-11T23:17:21.648+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-2] c.t.m.s.m.T.existsByTokenId              : ==> Parameters: 59a63e48-2a71-4459-9861-86db89ec4ddb(String)
+2026-05-11T23:17:21.653+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-2] c.t.m.s.m.T.existsByTokenId              : <==      Total: 1
+2026-05-11T23:17:21.659+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-2] c.t.m.s.mapper.UserMapper.selectById     : ==>  Preparing: SELECT id,username,email,password,real_name,phone,avatar,status,role_name,is_superuser,is_staff,last_login_time,last_login_ip,is_deleted,created_at,updated_at,created_by,updated_by FROM sys_user WHERE id=? AND is_deleted=0
+2026-05-11T23:17:21.660+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-2] c.t.m.s.mapper.UserMapper.selectById     : ==> Parameters: 2(Long)
+2026-05-11T23:17:21.668+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-2] c.t.m.s.mapper.UserMapper.selectById     : <==      Total: 1
+2026-05-11T23:17:21.676+08:00  INFO 13340 --- [testhub] [http-nio-8080-exec-2] c.testhub.config.ApiLoggingInterceptor   : 
+
+========== API请求日志 ==========
+URL: GET /api/projects/6
+Content-Type: null
+Content-Length: -1
+请求头:
+  sec-fetch-mode: cors
+  referer: http://localhost:3001/ai-generation/projects/6
+  sec-fetch-site: same-origin
+  accept-language: zh-CN,zh;q=0.9
+  accept: application/json, text/plain, */*
+  sec-ch-ua: "Tabbit Browser";v="147", "Not.A/Brand";v="8", "Chromium";v="147"
+  sec-ch-ua-mobile: ?0
+  sec-ch-ua-platform: "Windows"
+  host: 127.0.0.1:8080
+  connection: close
+  accept-encoding: gzip, deflate, br, zstd
+  user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36
+  sec-fetch-dest: empty
+=================================
+2026-05-11T23:17:21.683+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-2] c.t.m.a.m.P.selectProjectWithCreator     : ==>  Preparing: SELECT p.*, u.username as creator_username, u.real_name as creator_real_name FROM prj_project p LEFT JOIN sys_user u ON p.owner_id = u.id WHERE p.id = ?
+2026-05-11T23:17:21.684+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-2] c.t.m.a.m.P.selectProjectWithCreator     : ==> Parameters: 6(Long)
+2026-05-11T23:17:21.700+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-2] c.t.m.a.m.P.selectProjectWithCreator     : <==      Total: 1
+2026-05-11T23:17:21.702+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-2] c.t.m.a.m.P.selectByProjectId            : ==>  Preparing: SELECT pm.*, u.username, u.real_name, u.email, u.avatar FROM prj_project_member pm INNER JOIN sys_user u ON pm.user_id = u.id WHERE pm.project_id = ? ORDER BY CASE pm.role WHEN 'owner' THEN 1 WHEN 'admin' THEN 2 WHEN 'developer' THEN 3 WHEN 'tester' THEN 4 ELSE 5 END, pm.joined_at ASC
+2026-05-11T23:17:21.703+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-2] c.t.m.a.m.P.selectByProjectId            : ==> Parameters: 6(Long)
+2026-05-11T23:17:21.722+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-2] c.t.m.a.m.P.selectByProjectId            : <==      Total: 2
+2026-05-11T23:17:21.723+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-2] c.t.m.a.m.P.selectByProjectId            : ==>  Preparing: SELECT * FROM prj_project_environment WHERE project_id = ? ORDER BY is_default DESC, created_at ASC
+2026-05-11T23:17:21.724+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-2] c.t.m.a.m.P.selectByProjectId            : ==> Parameters: 6(Long)
+2026-05-11T23:17:21.742+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-2] c.t.m.a.m.P.selectByProjectId            : <==      Total: 2
+2026-05-11T23:17:21.765+08:00  INFO 13340 --- [testhub] [http-nio-8080-exec-2] c.testhub.config.ApiLoggingInterceptor   : 
+========== API响应日志 ==========
+URL: GET /api/projects/6
+状态: 200
+耗时: 89ms
+响应体:
+{"code":200,"message":"success","data":{"id":6,"created_at":"2026-04-29T21:26:42","updated_at":"2026-04-29T21:26:42","created_by":null,"updated_by":null,"is_deleted":0,"name":"我的测试项目1777469202","description":"这是一个测试项目","status":"active","owner_id":3,"icon":null,"sort_order":0,"include_test_cases":true,"include_automated_tests":false,"owner_name":null,"creator_username":"admin","creator_real_name":"管理员","member_count":null,"test_case_count":null,"members":[{"id":4,"created_at":"2026-04-29T21:26:4...(省略 1080 字符)
+==================================
+2026-05-11T23:17:32.525+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-3] c.t.m.s.m.T.existsByTokenId              : ==>  Preparing: SELECT COUNT(*) > 0 FROM sys_token_blacklist WHERE token_id = ?
+2026-05-11T23:17:32.526+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-3] c.t.m.s.m.T.existsByTokenId              : ==> Parameters: 59a63e48-2a71-4459-9861-86db89ec4ddb(String)
+2026-05-11T23:17:32.529+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-3] c.t.m.s.m.T.existsByTokenId              : <==      Total: 1
+2026-05-11T23:17:32.533+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-3] c.t.m.s.mapper.UserMapper.selectById     : ==>  Preparing: SELECT id,username,email,password,real_name,phone,avatar,status,role_name,is_superuser,is_staff,last_login_time,last_login_ip,is_deleted,created_at,updated_at,created_by,updated_by FROM sys_user WHERE id=? AND is_deleted=0
+2026-05-11T23:17:32.534+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-3] c.t.m.s.mapper.UserMapper.selectById     : ==> Parameters: 2(Long)
+2026-05-11T23:17:32.541+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-3] c.t.m.s.mapper.UserMapper.selectById     : <==      Total: 1
+2026-05-11T23:17:32.546+08:00  INFO 13340 --- [testhub] [http-nio-8080-exec-3] c.testhub.config.ApiLoggingInterceptor   : 
+
+========== API请求日志 ==========
+URL: GET /api/projects
+Content-Type: null
+Content-Length: -1
+请求头:
+  sec-fetch-mode: cors
+  referer: http://localhost:3001/ai-generation/projects
+  sec-fetch-site: same-origin
+  accept-language: zh-CN,zh;q=0.9
+  accept: application/json, text/plain, */*
+  sec-ch-ua: "Tabbit Browser";v="147", "Not.A/Brand";v="8", "Chromium";v="147"
+  sec-ch-ua-mobile: ?0
+  sec-ch-ua-platform: "Windows"
+  host: 127.0.0.1:8080
+  connection: close
+  accept-encoding: gzip, deflate, br, zstd
+  user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36
+  sec-fetch-dest: empty
+请求参数:
+  page: 1
+  search: 
+  status: 
+=================================
+2026-05-11T23:17:32.551+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-3] c.t.m.a.m.P.selectProjectsByUserId       : ==>  Preparing: SELECT p.* FROM prj_project p INNER JOIN prj_project_member pm ON p.id = pm.project_id WHERE pm.user_id = ? AND p.status = 'active' ORDER BY p.created_at DESC
+2026-05-11T23:17:32.551+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-3] c.t.m.a.m.P.selectProjectsByUserId       : ==> Parameters: 2(Long)
+2026-05-11T23:17:32.560+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-3] c.t.m.a.m.P.selectProjectsByUserId       : <==      Total: 1
+2026-05-11T23:17:32.565+08:00  INFO 13340 --- [testhub] [http-nio-8080-exec-3] c.testhub.config.ApiLoggingInterceptor   : 
+========== API响应日志 ==========
+URL: GET /api/projects
+状态: 200
+耗时: 21ms
+响应体:
+{"code":200,"message":"success","data":[{"id":6,"created_at":"2026-04-29T21:26:42","updated_at":"2026-04-29T21:26:42","created_by":null,"updated_by":null,"is_deleted":0,"name":"我的测试项目1777469202","description":"这是一个测试项目","status":"active","owner_id":3,"icon":null,"sort_order":0,"include_test_cases":true,"include_automated_tests":false,"owner_name":null,"creator_username":null,"creator_real_name":null,"member_count":null,"test_case_count":null,"members":null,"environments":null}],"timestamp":17785...(省略 9 字符)
+==================================
+2026-05-11T23:17:44.533+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-4] c.t.m.s.m.T.existsByTokenId              : ==>  Preparing: SELECT COUNT(*) > 0 FROM sys_token_blacklist WHERE token_id = ?
+2026-05-11T23:17:44.534+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-4] c.t.m.s.m.T.existsByTokenId              : ==> Parameters: 59a63e48-2a71-4459-9861-86db89ec4ddb(String)
+2026-05-11T23:17:44.537+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-4] c.t.m.s.m.T.existsByTokenId              : <==      Total: 1
+2026-05-11T23:17:44.540+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-4] c.t.m.s.mapper.UserMapper.selectById     : ==>  Preparing: SELECT id,username,email,password,real_name,phone,avatar,status,role_name,is_superuser,is_staff,last_login_time,last_login_ip,is_deleted,created_at,updated_at,created_by,updated_by FROM sys_user WHERE id=? AND is_deleted=0
+2026-05-11T23:17:44.541+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-4] c.t.m.s.mapper.UserMapper.selectById     : ==> Parameters: 2(Long)
+2026-05-11T23:17:44.545+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-4] c.t.m.s.mapper.UserMapper.selectById     : <==      Total: 1
+2026-05-11T23:17:44.549+08:00  INFO 13340 --- [testhub] [http-nio-8080-exec-4] c.testhub.config.ApiLoggingInterceptor   : 
+
+========== API请求日志 ==========
+URL: POST /api/projects
+Content-Type: application/json
+Content-Length: 64
+请求头:
+  sec-fetch-mode: cors
+  content-length: 64
+  referer: http://localhost:3001/ai-generation/projects
+  sec-fetch-site: same-origin
+  accept-language: zh-CN,zh;q=0.9
+  origin: http://localhost:3001
+  accept: application/json, text/plain, */*
+  sec-ch-ua: "Tabbit Browser";v="147", "Not.A/Brand";v="8", "Chromium";v="147"
+  sec-ch-ua-mobile: ?0
+  sec-ch-ua-platform: "Windows"
+  host: 127.0.0.1:8080
+  connection: close
+  content-type: application/json
+  accept-encoding: gzip, deflate, br, zstd
+  user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36
+  sec-fetch-dest: empty
+=================================
+2026-05-11T23:17:44.606+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-4] c.t.m.a.mapper.ProjectMapper.insert      : ==>  Preparing: INSERT INTO prj_project ( name, description, status, owner_id, created_at, updated_at, created_by, updated_by ) VALUES ( ?, ?, ?, ?, ?, ?, ?, ? )
+2026-05-11T23:17:44.610+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-4] c.t.m.a.mapper.ProjectMapper.insert      : ==> Parameters: test(String), test(String), active(String), 2(Long), 2026-05-11T23:17:44.598518400(LocalDateTime), 2026-05-11T23:17:44.604814(LocalDateTime), 2(Long), 2(Long)
+2026-05-11T23:17:44.620+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-4] c.t.m.a.mapper.ProjectMapper.insert      : <==    Updates: 1
+2026-05-11T23:17:44.626+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-4] c.t.m.a.m.ProjectMemberMapper.insert     : ==>  Preparing: INSERT INTO prj_project_member ( project_id, user_id, role, joined_at, created_at, updated_at, created_by, updated_by ) VALUES ( ?, ?, ?, ?, ?, ?, ?, ? )
+2026-05-11T23:17:44.631+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-4] c.t.m.a.m.ProjectMemberMapper.insert     : ==> Parameters: 8(Long), 2(Long), owner(String), 2026-05-11T23:17:44.621845100(LocalDateTime), 2026-05-11T23:17:44.624797(LocalDateTime), 2026-05-11T23:17:44.624797(LocalDateTime), 2(Long), 2(Long)
+2026-05-11T23:17:44.640+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-4] c.t.m.a.m.ProjectMemberMapper.insert     : <==    Updates: 1
+2026-05-11T23:17:44.645+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-4] c.t.m.a.m.P.insert                       : ==>  Preparing: INSERT INTO prj_project_environment ( project_id, name, base_url, is_default, created_at, updated_at, created_by, updated_by ) VALUES ( ?, ?, ?, ?, ?, ?, ?, ? )
+2026-05-11T23:17:44.648+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-4] c.t.m.a.m.P.insert                       : ==> Parameters: 8(Long), 默认环境(String), (String), true(Boolean), 2026-05-11T23:17:44.644776200(LocalDateTime), 2026-05-11T23:17:44.644776200(LocalDateTime), 2(Long), 2(Long)
+2026-05-11T23:17:44.659+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-4] c.t.m.a.m.P.insert                       : <==    Updates: 1
+2026-05-11T23:17:44.685+08:00  INFO 13340 --- [testhub] [http-nio-8080-exec-4] c.testhub.config.ApiLoggingInterceptor   : 
+========== API响应日志 ==========
+URL: POST /api/projects
+状态: 200
+耗时: 137ms
+响应体:
+{"code":200,"message":"success","data":{"id":8,"created_at":"2026-05-11T23:17:44.5985184","updated_at":"2026-05-11T23:17:44.604814","created_by":2,"updated_by":2,"is_deleted":null,"name":"test","description":"test","status":"active","owner_id":2,"icon":null,"sort_order":null,"include_test_cases":null,"include_automated_tests":null,"owner_name":null,"creator_username":null,"creator_real_name":null,"member_count":null,"test_case_count":null,"members":null,"environments":null},"timestamp":177851266...(省略 5 字符)
+==================================
+2026-05-11T23:17:45.054+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-5] c.t.m.s.m.T.existsByTokenId              : ==>  Preparing: SELECT COUNT(*) > 0 FROM sys_token_blacklist WHERE token_id = ?
+2026-05-11T23:17:45.056+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-5] c.t.m.s.m.T.existsByTokenId              : ==> Parameters: 59a63e48-2a71-4459-9861-86db89ec4ddb(String)
+2026-05-11T23:17:45.064+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-5] c.t.m.s.m.T.existsByTokenId              : <==      Total: 1
+2026-05-11T23:17:45.076+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-5] c.t.m.s.mapper.UserMapper.selectById     : ==>  Preparing: SELECT id,username,email,password,real_name,phone,avatar,status,role_name,is_superuser,is_staff,last_login_time,last_login_ip,is_deleted,created_at,updated_at,created_by,updated_by FROM sys_user WHERE id=? AND is_deleted=0
+2026-05-11T23:17:45.077+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-5] c.t.m.s.mapper.UserMapper.selectById     : ==> Parameters: 2(Long)
+2026-05-11T23:17:45.087+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-5] c.t.m.s.mapper.UserMapper.selectById     : <==      Total: 1
+2026-05-11T23:17:45.094+08:00  INFO 13340 --- [testhub] [http-nio-8080-exec-5] c.testhub.config.ApiLoggingInterceptor   : 
+
+========== API请求日志 ==========
+URL: GET /api/projects
+Content-Type: null
+Content-Length: -1
+请求头:
+  sec-fetch-mode: cors
+  referer: http://localhost:3001/ai-generation/projects
+  sec-fetch-site: same-origin
+  accept-language: zh-CN,zh;q=0.9
+  accept: application/json, text/plain, */*
+  sec-ch-ua: "Tabbit Browser";v="147", "Not.A/Brand";v="8", "Chromium";v="147"
+  sec-ch-ua-mobile: ?0
+  sec-ch-ua-platform: "Windows"
+  host: 127.0.0.1:8080
+  connection: close
+  accept-encoding: gzip, deflate, br, zstd
+  user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36
+  sec-fetch-dest: empty
+请求参数:
+  page: 1
+  search: 
+  status: 
+=================================
+2026-05-11T23:17:45.096+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-5] c.t.m.a.m.P.selectProjectsByUserId       : ==>  Preparing: SELECT p.* FROM prj_project p INNER JOIN prj_project_member pm ON p.id = pm.project_id WHERE pm.user_id = ? AND p.status = 'active' ORDER BY p.created_at DESC
+2026-05-11T23:17:45.102+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-5] c.t.m.a.m.P.selectProjectsByUserId       : ==> Parameters: 2(Long)
+2026-05-11T23:17:45.129+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-5] c.t.m.a.m.P.selectProjectsByUserId       : <==      Total: 2
+2026-05-11T23:17:45.140+08:00  INFO 13340 --- [testhub] [http-nio-8080-exec-5] c.testhub.config.ApiLoggingInterceptor   : 
+========== API响应日志 ==========
+URL: GET /api/projects
+状态: 200
+耗时: 46ms
+响应体:
+{"code":200,"message":"success","data":[{"id":8,"created_at":"2026-05-11T23:17:45","updated_at":"2026-05-11T23:17:45","created_by":2,"updated_by":2,"is_deleted":0,"name":"test","description":"test","status":"active","owner_id":2,"icon":null,"sort_order":0,"include_test_cases":true,"include_automated_tests":false,"owner_name":null,"creator_username":null,"creator_real_name":null,"member_count":null,"test_case_count":null,"members":null,"environments":null},{"id":6,"created_at":"2026-04-29T21:26:4...(省略 429 字符)
+==================================
+2026-05-11T23:17:47.864+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-6] c.t.m.s.m.T.existsByTokenId              : ==>  Preparing: SELECT COUNT(*) > 0 FROM sys_token_blacklist WHERE token_id = ?
+2026-05-11T23:17:47.868+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-6] c.t.m.s.m.T.existsByTokenId              : ==> Parameters: 59a63e48-2a71-4459-9861-86db89ec4ddb(String)
+2026-05-11T23:17:47.875+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-6] c.t.m.s.m.T.existsByTokenId              : <==      Total: 1
+2026-05-11T23:17:47.879+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-6] c.t.m.s.mapper.UserMapper.selectById     : ==>  Preparing: SELECT id,username,email,password,real_name,phone,avatar,status,role_name,is_superuser,is_staff,last_login_time,last_login_ip,is_deleted,created_at,updated_at,created_by,updated_by FROM sys_user WHERE id=? AND is_deleted=0
+2026-05-11T23:17:47.881+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-6] c.t.m.s.mapper.UserMapper.selectById     : ==> Parameters: 2(Long)
+2026-05-11T23:17:47.887+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-6] c.t.m.s.mapper.UserMapper.selectById     : <==      Total: 1
+2026-05-11T23:17:47.892+08:00  INFO 13340 --- [testhub] [http-nio-8080-exec-6] c.testhub.config.ApiLoggingInterceptor   : 
+
+========== API请求日志 ==========
+URL: DELETE /api/projects/8
+Content-Type: null
+Content-Length: 0
+请求头:
+  sec-fetch-mode: cors
+  referer: http://localhost:3001/ai-generation/projects
+  content-length: 0
+  sec-fetch-site: same-origin
+  accept-language: zh-CN,zh;q=0.9
+  origin: http://localhost:3001
+  accept: application/json, text/plain, */*
+  sec-ch-ua: "Tabbit Browser";v="147", "Not.A/Brand";v="8", "Chromium";v="147"
+  sec-ch-ua-mobile: ?0
+  sec-ch-ua-platform: "Windows"
+  host: 127.0.0.1:8080
+  connection: close
+  accept-encoding: gzip, deflate, br, zstd
+  user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36
+  sec-fetch-dest: empty
+=================================
+2026-05-11T23:17:47.898+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-6] c.t.m.a.m.P.selectByProjectAndUser       : ==>  Preparing: SELECT * FROM prj_project_member WHERE project_id = ? AND user_id = ?
+2026-05-11T23:17:47.900+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-6] c.t.m.a.m.P.selectByProjectAndUser       : ==> Parameters: 8(Long), 2(Long)
+2026-05-11T23:17:47.906+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-6] c.t.m.a.m.P.selectByProjectAndUser       : <==      Total: 1
+2026-05-11T23:17:47.908+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-6] c.t.m.a.mapper.ProjectMapper.selectById  : ==>  Preparing: SELECT id,name,description,status,owner_id,icon,sort_order,include_test_cases,include_automated_tests,created_at,updated_at,created_by,updated_by FROM prj_project WHERE id=? AND is_deleted=0
+2026-05-11T23:17:47.911+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-6] c.t.m.a.mapper.ProjectMapper.selectById  : ==> Parameters: 8(Long)
+2026-05-11T23:17:47.918+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-6] c.t.m.a.mapper.ProjectMapper.selectById  : <==      Total: 1
+2026-05-11T23:17:48.008+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-6] c.t.m.a.mapper.ProjectMapper.deleteById  : ==>  Preparing: UPDATE prj_project SET updated_at=?,updated_by=?, is_deleted=1 WHERE id=? AND is_deleted=0
+2026-05-11T23:17:48.012+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-6] c.t.m.a.mapper.ProjectMapper.deleteById  : ==> Parameters: 2026-05-11T23:17:48.004289(LocalDateTime), 2(Long), 8(Long)
+2026-05-11T23:17:48.025+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-6] c.t.m.a.mapper.ProjectMapper.deleteById  : <==    Updates: 1
+2026-05-11T23:17:48.066+08:00  INFO 13340 --- [testhub] [http-nio-8080-exec-6] c.testhub.config.ApiLoggingInterceptor   : 
+========== API响应日志 ==========
+URL: DELETE /api/projects/8
+状态: 200
+耗时: 173ms
+响应体:
+{"code":200,"message":"success","timestamp":1778512668059}
+==================================
+2026-05-11T23:17:48.420+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-7] c.t.m.s.m.T.existsByTokenId              : ==>  Preparing: SELECT COUNT(*) > 0 FROM sys_token_blacklist WHERE token_id = ?
+2026-05-11T23:17:48.421+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-7] c.t.m.s.m.T.existsByTokenId              : ==> Parameters: 59a63e48-2a71-4459-9861-86db89ec4ddb(String)
+2026-05-11T23:17:48.427+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-7] c.t.m.s.m.T.existsByTokenId              : <==      Total: 1
+2026-05-11T23:17:48.431+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-7] c.t.m.s.mapper.UserMapper.selectById     : ==>  Preparing: SELECT id,username,email,password,real_name,phone,avatar,status,role_name,is_superuser,is_staff,last_login_time,last_login_ip,is_deleted,created_at,updated_at,created_by,updated_by FROM sys_user WHERE id=? AND is_deleted=0
+2026-05-11T23:17:48.432+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-7] c.t.m.s.mapper.UserMapper.selectById     : ==> Parameters: 2(Long)
+2026-05-11T23:17:48.436+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-7] c.t.m.s.mapper.UserMapper.selectById     : <==      Total: 1
+2026-05-11T23:17:48.440+08:00  INFO 13340 --- [testhub] [http-nio-8080-exec-7] c.testhub.config.ApiLoggingInterceptor   : 
+
+========== API请求日志 ==========
+URL: GET /api/projects
+Content-Type: null
+Content-Length: -1
+请求头:
+  sec-fetch-mode: cors
+  referer: http://localhost:3001/ai-generation/projects
+  sec-fetch-site: same-origin
+  accept-language: zh-CN,zh;q=0.9
+  accept: application/json, text/plain, */*
+  sec-ch-ua: "Tabbit Browser";v="147", "Not.A/Brand";v="8", "Chromium";v="147"
+  sec-ch-ua-mobile: ?0
+  sec-ch-ua-platform: "Windows"
+  host: 127.0.0.1:8080
+  connection: close
+  accept-encoding: gzip, deflate, br, zstd
+  user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36
+  sec-fetch-dest: empty
+请求参数:
+  page: 1
+  search: 
+  status: 
+=================================
+2026-05-11T23:17:48.443+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-7] c.t.m.a.m.P.selectProjectsByUserId       : ==>  Preparing: SELECT p.* FROM prj_project p INNER JOIN prj_project_member pm ON p.id = pm.project_id WHERE pm.user_id = ? AND p.status = 'active' ORDER BY p.created_at DESC
+2026-05-11T23:17:48.444+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-7] c.t.m.a.m.P.selectProjectsByUserId       : ==> Parameters: 2(Long)
+2026-05-11T23:17:48.450+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-7] c.t.m.a.m.P.selectProjectsByUserId       : <==      Total: 2
+2026-05-11T23:17:48.457+08:00  INFO 13340 --- [testhub] [http-nio-8080-exec-7] c.testhub.config.ApiLoggingInterceptor   : 
+========== API响应日志 ==========
+URL: GET /api/projects
+状态: 200
+耗时: 17ms
+响应体:
+{"code":200,"message":"success","data":[{"id":8,"created_at":"2026-05-11T23:17:45","updated_at":"2026-05-11T23:17:48","created_by":2,"updated_by":2,"is_deleted":1,"name":"test","description":"test","status":"active","owner_id":2,"icon":null,"sort_order":0,"include_test_cases":true,"include_automated_tests":false,"owner_name":null,"creator_username":null,"creator_real_name":null,"member_count":null,"test_case_count":null,"members":null,"environments":null},{"id":6,"created_at":"2026-04-29T21:26:4...(省略 429 字符)
+==================================
+2026-05-11T23:17:55.696+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-8] c.t.m.s.m.T.existsByTokenId              : ==>  Preparing: SELECT COUNT(*) > 0 FROM sys_token_blacklist WHERE token_id = ?
+2026-05-11T23:17:55.697+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-8] c.t.m.s.m.T.existsByTokenId              : ==> Parameters: 59a63e48-2a71-4459-9861-86db89ec4ddb(String)
+2026-05-11T23:17:55.701+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-8] c.t.m.s.m.T.existsByTokenId              : <==      Total: 1
+2026-05-11T23:17:55.706+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-8] c.t.m.s.mapper.UserMapper.selectById     : ==>  Preparing: SELECT id,username,email,password,real_name,phone,avatar,status,role_name,is_superuser,is_staff,last_login_time,last_login_ip,is_deleted,created_at,updated_at,created_by,updated_by FROM sys_user WHERE id=? AND is_deleted=0
+2026-05-11T23:17:55.707+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-8] c.t.m.s.mapper.UserMapper.selectById     : ==> Parameters: 2(Long)
+2026-05-11T23:17:55.713+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-8] c.t.m.s.mapper.UserMapper.selectById     : <==      Total: 1
+2026-05-11T23:17:55.718+08:00  INFO 13340 --- [testhub] [http-nio-8080-exec-8] c.testhub.config.ApiLoggingInterceptor   : 
+
+========== API请求日志 ==========
+URL: GET /api/projects
+Content-Type: null
+Content-Length: -1
+请求头:
+  sec-fetch-mode: cors
+  referer: http://localhost:3001/ai-generation/projects
+  sec-fetch-site: same-origin
+  accept-language: zh-CN,zh;q=0.9
+  accept: application/json, text/plain, */*
+  sec-ch-ua: "Tabbit Browser";v="147", "Not.A/Brand";v="8", "Chromium";v="147"
+  sec-ch-ua-mobile: ?0
+  sec-ch-ua-platform: "Windows"
+  host: 127.0.0.1:8080
+  connection: close
+  accept-encoding: gzip, deflate, br, zstd
+  user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36
+  sec-fetch-dest: empty
+请求参数:
+  page: 1
+  search: 
+  status: 
+=================================
+2026-05-11T23:17:55.719+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-8] c.t.m.a.m.P.selectProjectsByUserId       : ==>  Preparing: SELECT p.* FROM prj_project p INNER JOIN prj_project_member pm ON p.id = pm.project_id WHERE pm.user_id = ? AND p.status = 'active' ORDER BY p.created_at DESC
+2026-05-11T23:17:55.721+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-8] c.t.m.a.m.P.selectProjectsByUserId       : ==> Parameters: 2(Long)
+2026-05-11T23:17:55.729+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-8] c.t.m.a.m.P.selectProjectsByUserId       : <==      Total: 2
+2026-05-11T23:17:55.732+08:00  INFO 13340 --- [testhub] [http-nio-8080-exec-8] c.testhub.config.ApiLoggingInterceptor   : 
+========== API响应日志 ==========
+URL: GET /api/projects
+状态: 200
+耗时: 15ms
+响应体:
+{"code":200,"message":"success","data":[{"id":8,"created_at":"2026-05-11T23:17:45","updated_at":"2026-05-11T23:17:48","created_by":2,"updated_by":2,"is_deleted":1,"name":"test","description":"test","status":"active","owner_id":2,"icon":null,"sort_order":0,"include_test_cases":true,"include_automated_tests":false,"owner_name":null,"creator_username":null,"creator_real_name":null,"member_count":null,"test_case_count":null,"members":null,"environments":null},{"id":6,"created_at":"2026-04-29T21:26:4...(省略 429 字符)
+==================================
+2026-05-11T23:18:03.430+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-9] c.t.m.s.m.T.existsByTokenId              : ==>  Preparing: SELECT COUNT(*) > 0 FROM sys_token_blacklist WHERE token_id = ?
+2026-05-11T23:18:03.433+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-9] c.t.m.s.m.T.existsByTokenId              : ==> Parameters: 59a63e48-2a71-4459-9861-86db89ec4ddb(String)
+2026-05-11T23:18:03.437+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-9] c.t.m.s.m.T.existsByTokenId              : <==      Total: 1
+2026-05-11T23:18:03.441+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-9] c.t.m.s.mapper.UserMapper.selectById     : ==>  Preparing: SELECT id,username,email,password,real_name,phone,avatar,status,role_name,is_superuser,is_staff,last_login_time,last_login_ip,is_deleted,created_at,updated_at,created_by,updated_by FROM sys_user WHERE id=? AND is_deleted=0
+2026-05-11T23:18:03.441+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-9] c.t.m.s.mapper.UserMapper.selectById     : ==> Parameters: 2(Long)
+2026-05-11T23:18:03.446+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-9] c.t.m.s.mapper.UserMapper.selectById     : <==      Total: 1
+2026-05-11T23:18:03.450+08:00  INFO 13340 --- [testhub] [http-nio-8080-exec-9] c.testhub.config.ApiLoggingInterceptor   : 
+
+========== API请求日志 ==========
+URL: DELETE /api/projects/8
+Content-Type: null
+Content-Length: 0
+请求头:
+  sec-fetch-mode: cors
+  referer: http://localhost:3001/ai-generation/projects
+  content-length: 0
+  sec-fetch-site: same-origin
+  accept-language: zh-CN,zh;q=0.9
+  origin: http://localhost:3001
+  accept: application/json, text/plain, */*
+  sec-ch-ua: "Tabbit Browser";v="147", "Not.A/Brand";v="8", "Chromium";v="147"
+  sec-ch-ua-mobile: ?0
+  sec-ch-ua-platform: "Windows"
+  host: 127.0.0.1:8080
+  connection: close
+  accept-encoding: gzip, deflate, br, zstd
+  user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36
+  sec-fetch-dest: empty
+=================================
+2026-05-11T23:18:03.455+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-9] c.t.m.a.m.P.selectByProjectAndUser       : ==>  Preparing: SELECT * FROM prj_project_member WHERE project_id = ? AND user_id = ?
+2026-05-11T23:18:03.456+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-9] c.t.m.a.m.P.selectByProjectAndUser       : ==> Parameters: 8(Long), 2(Long)
+2026-05-11T23:18:03.461+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-9] c.t.m.a.m.P.selectByProjectAndUser       : <==      Total: 1
+2026-05-11T23:18:03.462+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-9] c.t.m.a.mapper.ProjectMapper.selectById  : ==>  Preparing: SELECT id,name,description,status,owner_id,icon,sort_order,include_test_cases,include_automated_tests,created_at,updated_at,created_by,updated_by FROM prj_project WHERE id=? AND is_deleted=0
+2026-05-11T23:18:03.462+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-9] c.t.m.a.mapper.ProjectMapper.selectById  : ==> Parameters: 8(Long)
+2026-05-11T23:18:03.466+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-9] c.t.m.a.mapper.ProjectMapper.selectById  : <==      Total: 0
+2026-05-11T23:18:03.483+08:00  WARN 13340 --- [testhub] [http-nio-8080-exec-9] c.t.c.exception.GlobalExceptionHandler   : Business exception: 项目不存在
+2026-05-11T23:18:03.486+08:00  INFO 13340 --- [testhub] [http-nio-8080-exec-9] c.testhub.config.ApiLoggingInterceptor   : 
+========== API响应日志 ==========
+URL: DELETE /api/projects/8
+状态: 200
+耗时: 37ms
+响应体:
+{"code":2001,"message":"项目不存在","timestamp":1778512683483}
+==================================
+2026-05-11T23:20:55.590+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-1] c.t.m.s.m.T.existsByTokenId              : ==>  Preparing: SELECT COUNT(*) > 0 FROM sys_token_blacklist WHERE token_id = ?
+2026-05-11T23:20:55.592+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-1] c.t.m.s.m.T.existsByTokenId              : ==> Parameters: 59a63e48-2a71-4459-9861-86db89ec4ddb(String)
+2026-05-11T23:20:55.596+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-1] c.t.m.s.m.T.existsByTokenId              : <==      Total: 1
+2026-05-11T23:20:55.599+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-1] c.t.m.s.mapper.UserMapper.selectById     : ==>  Preparing: SELECT id,username,email,password,real_name,phone,avatar,status,role_name,is_superuser,is_staff,last_login_time,last_login_ip,is_deleted,created_at,updated_at,created_by,updated_by FROM sys_user WHERE id=? AND is_deleted=0
+2026-05-11T23:20:55.600+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-1] c.t.m.s.mapper.UserMapper.selectById     : ==> Parameters: 2(Long)
+2026-05-11T23:20:55.606+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-1] c.t.m.s.mapper.UserMapper.selectById     : <==      Total: 1
+2026-05-11T23:20:55.607+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-10] c.t.m.s.m.T.existsByTokenId              : ==>  Preparing: SELECT COUNT(*) > 0 FROM sys_token_blacklist WHERE token_id = ?
+2026-05-11T23:20:55.609+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-10] c.t.m.s.m.T.existsByTokenId              : ==> Parameters: 59a63e48-2a71-4459-9861-86db89ec4ddb(String)
+2026-05-11T23:20:55.609+08:00  INFO 13340 --- [testhub] [http-nio-8080-exec-1] c.testhub.config.ApiLoggingInterceptor   : 
+
+========== API请求日志 ==========
+URL: GET /api/versions
+Content-Type: null
+Content-Length: -1
+请求头:
+  sec-fetch-mode: cors
+  referer: http://localhost:3001/ai-generation/versions
+  sec-fetch-site: same-origin
+  accept-language: zh-CN,zh;q=0.9
+  accept: application/json, text/plain, */*
+  sec-ch-ua: "Tabbit Browser";v="147", "Not.A/Brand";v="8", "Chromium";v="147"
+  sec-ch-ua-mobile: ?0
+  sec-ch-ua-platform: "Windows"
+  host: 127.0.0.1:8080
+  connection: close
+  accept-encoding: gzip, deflate, br, zstd
+  user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36
+  sec-fetch-dest: empty
+请求参数:
+  page: 1
+  search: 
+  projects: 
+  is_baseline: 
+=================================
+2026-05-11T23:20:55.613+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-10] c.t.m.s.m.T.existsByTokenId              : <==      Total: 1
+2026-05-11T23:20:55.618+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-10] c.t.m.s.mapper.UserMapper.selectById     : ==>  Preparing: SELECT id,username,email,password,real_name,phone,avatar,status,role_name,is_superuser,is_staff,last_login_time,last_login_ip,is_deleted,created_at,updated_at,created_by,updated_by FROM sys_user WHERE id=? AND is_deleted=0
+2026-05-11T23:20:55.620+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-10] c.t.m.s.mapper.UserMapper.selectById     : ==> Parameters: 2(Long)
+2026-05-11T23:20:55.624+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-10] c.t.m.s.mapper.UserMapper.selectById     : <==      Total: 1
+2026-05-11T23:20:55.627+08:00  INFO 13340 --- [testhub] [http-nio-8080-exec-10] c.testhub.config.ApiLoggingInterceptor   : 
+
+========== API请求日志 ==========
+URL: GET /api/projects
+Content-Type: null
+Content-Length: -1
+请求头:
+  sec-fetch-mode: cors
+  referer: http://localhost:3001/ai-generation/versions
+  sec-fetch-site: same-origin
+  accept-language: zh-CN,zh;q=0.9
+  accept: application/json, text/plain, */*
+  sec-ch-ua: "Tabbit Browser";v="147", "Not.A/Brand";v="8", "Chromium";v="147"
+  sec-ch-ua-mobile: ?0
+  sec-ch-ua-platform: "Windows"
+  host: 127.0.0.1:8080
+  connection: close
+  accept-encoding: gzip, deflate, br, zstd
+  user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36
+  sec-fetch-dest: empty
+=================================
+2026-05-11T23:20:55.630+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-10] c.t.m.a.m.P.selectProjectsByUserId       : ==>  Preparing: SELECT p.* FROM prj_project p INNER JOIN prj_project_member pm ON p.id = pm.project_id WHERE pm.user_id = ? AND p.status = 'active' ORDER BY p.created_at DESC
+2026-05-11T23:20:55.632+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-10] c.t.m.a.m.P.selectProjectsByUserId       : ==> Parameters: 2(Long)
+2026-05-11T23:20:55.641+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-10] c.t.m.a.m.P.selectProjectsByUserId       : <==      Total: 2
+2026-05-11T23:20:55.648+08:00  INFO 13340 --- [testhub] [http-nio-8080-exec-10] c.testhub.config.ApiLoggingInterceptor   : 
+========== API响应日志 ==========
+URL: GET /api/projects
+状态: 200
+耗时: 17ms
+响应体:
+{"code":200,"message":"success","data":[{"id":8,"created_at":"2026-05-11T23:17:45","updated_at":"2026-05-11T23:17:48","created_by":2,"updated_by":2,"is_deleted":1,"name":"test","description":"test","status":"active","owner_id":2,"icon":null,"sort_order":0,"include_test_cases":true,"include_automated_tests":false,"owner_name":null,"creator_username":null,"creator_real_name":null,"member_count":null,"test_case_count":null,"members":null,"environments":null},{"id":6,"created_at":"2026-04-29T21:26:4...(省略 429 字符)
+==================================
+2026-05-11T23:20:55.678+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-1] c.t.m.v.m.VersionMapper.selectCount      : ==>  Preparing: SELECT COUNT( * ) AS total FROM prj_version WHERE is_deleted=0 AND (is_deleted = ?) ORDER BY created_at DESC
+2026-05-11T23:20:55.679+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-1] c.t.m.v.m.VersionMapper.selectCount      : ==> Parameters: 0(Integer)
+2026-05-11T23:20:55.689+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-1] c.t.m.v.m.VersionMapper.selectCount      : <==      Total: 1
+2026-05-11T23:20:55.692+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-1] c.t.m.v.mapper.VersionMapper.selectList  : ==>  Preparing: SELECT id,project_id,name,description,status,release_date,is_baseline,is_deleted,created_at,updated_at,created_by,updated_by FROM prj_version WHERE is_deleted=0 AND (is_deleted = ?) ORDER BY created_at DESC LIMIT 10 OFFSET 0
+2026-05-11T23:20:55.693+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-1] c.t.m.v.mapper.VersionMapper.selectList  : ==> Parameters: 0(Integer)
+2026-05-11T23:20:55.697+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-1] c.t.m.v.mapper.VersionMapper.selectList  : <==      Total: 0
+2026-05-11T23:20:55.702+08:00  INFO 13340 --- [testhub] [http-nio-8080-exec-1] c.testhub.config.ApiLoggingInterceptor   : 
+========== API响应日志 ==========
+URL: GET /api/versions
+状态: 200
+耗时: 94ms
+响应体:
+{"code":200,"message":"success","data":{"count":0,"results":[]},"timestamp":1778512855698}
+==================================
+2026-05-11T23:21:14.453+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-3] c.t.m.s.m.T.existsByTokenId              : ==>  Preparing: SELECT COUNT(*) > 0 FROM sys_token_blacklist WHERE token_id = ?
+2026-05-11T23:21:14.453+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-3] c.t.m.s.m.T.existsByTokenId              : ==> Parameters: 59a63e48-2a71-4459-9861-86db89ec4ddb(String)
+2026-05-11T23:21:14.454+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-2] c.t.m.s.m.T.existsByTokenId              : ==>  Preparing: SELECT COUNT(*) > 0 FROM sys_token_blacklist WHERE token_id = ?
+2026-05-11T23:21:14.454+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-2] c.t.m.s.m.T.existsByTokenId              : ==> Parameters: 59a63e48-2a71-4459-9861-86db89ec4ddb(String)
+2026-05-11T23:21:14.458+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-3] c.t.m.s.m.T.existsByTokenId              : <==      Total: 1
+2026-05-11T23:21:14.460+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-2] c.t.m.s.m.T.existsByTokenId              : <==      Total: 1
+2026-05-11T23:21:14.462+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-3] c.t.m.s.mapper.UserMapper.selectById     : ==>  Preparing: SELECT id,username,email,password,real_name,phone,avatar,status,role_name,is_superuser,is_staff,last_login_time,last_login_ip,is_deleted,created_at,updated_at,created_by,updated_by FROM sys_user WHERE id=? AND is_deleted=0
+2026-05-11T23:21:14.463+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-3] c.t.m.s.mapper.UserMapper.selectById     : ==> Parameters: 2(Long)
+2026-05-11T23:21:14.465+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-2] c.t.m.s.mapper.UserMapper.selectById     : ==>  Preparing: SELECT id,username,email,password,real_name,phone,avatar,status,role_name,is_superuser,is_staff,last_login_time,last_login_ip,is_deleted,created_at,updated_at,created_by,updated_by FROM sys_user WHERE id=? AND is_deleted=0
+2026-05-11T23:21:14.465+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-2] c.t.m.s.mapper.UserMapper.selectById     : ==> Parameters: 2(Long)
+2026-05-11T23:21:14.472+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-3] c.t.m.s.mapper.UserMapper.selectById     : <==      Total: 1
+2026-05-11T23:21:14.475+08:00  INFO 13340 --- [testhub] [http-nio-8080-exec-3] c.testhub.config.ApiLoggingInterceptor   : 
+
+========== API请求日志 ==========
+URL: GET /api/projects
+Content-Type: null
+Content-Length: -1
+请求头:
+  sec-fetch-mode: cors
+  referer: http://localhost:3001/ai-generation/reviews
+  sec-fetch-site: same-origin
+  accept-language: zh-CN,zh;q=0.9
+  accept: application/json, text/plain, */*
+  sec-ch-ua: "Tabbit Browser";v="147", "Not.A/Brand";v="8", "Chromium";v="147"
+  sec-ch-ua-mobile: ?0
+  sec-ch-ua-platform: "Windows"
+  host: 127.0.0.1:8080
+  connection: close
+  accept-encoding: gzip, deflate, br, zstd
+  user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36
+  sec-fetch-dest: empty
+=================================
+2026-05-11T23:21:14.477+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-3] c.t.m.a.m.P.selectProjectsByUserId       : ==>  Preparing: SELECT p.* FROM prj_project p INNER JOIN prj_project_member pm ON p.id = pm.project_id WHERE pm.user_id = ? AND p.status = 'active' ORDER BY p.created_at DESC
+2026-05-11T23:21:14.478+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-2] c.t.m.s.mapper.UserMapper.selectById     : <==      Total: 1
+2026-05-11T23:21:14.478+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-3] c.t.m.a.m.P.selectProjectsByUserId       : ==> Parameters: 2(Long)
+2026-05-11T23:21:14.482+08:00  WARN 13340 --- [testhub] [http-nio-8080-exec-2] o.s.web.servlet.PageNotFound             : No mapping for GET /api/reviews/reviews/
+2026-05-11T23:21:14.484+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-3] c.t.m.a.m.P.selectProjectsByUserId       : <==      Total: 2
+2026-05-11T23:21:14.488+08:00  WARN 13340 --- [testhub] [http-nio-8080-exec-2] c.t.c.exception.GlobalExceptionHandler   : No handler found: /api/reviews/reviews/
+2026-05-11T23:21:14.489+08:00  INFO 13340 --- [testhub] [http-nio-8080-exec-3] c.testhub.config.ApiLoggingInterceptor   : 
+========== API响应日志 ==========
+URL: GET /api/projects
+状态: 200
+耗时: 14ms
+响应体:
+{"code":200,"message":"success","data":[{"id":8,"created_at":"2026-05-11T23:17:45","updated_at":"2026-05-11T23:17:48","created_by":2,"updated_by":2,"is_deleted":1,"name":"test","description":"test","status":"active","owner_id":2,"icon":null,"sort_order":0,"include_test_cases":true,"include_automated_tests":false,"owner_name":null,"creator_username":null,"creator_real_name":null,"member_count":null,"test_case_count":null,"members":null,"environments":null},{"id":6,"created_at":"2026-04-29T21:26:4...(省略 429 字符)
+==================================
+2026-05-11T23:21:14.757+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-4] c.t.m.s.m.T.existsByTokenId              : ==>  Preparing: SELECT COUNT(*) > 0 FROM sys_token_blacklist WHERE token_id = ?
+2026-05-11T23:21:14.757+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-4] c.t.m.s.m.T.existsByTokenId              : ==> Parameters: 59a63e48-2a71-4459-9861-86db89ec4ddb(String)
+2026-05-11T23:21:14.761+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-4] c.t.m.s.m.T.existsByTokenId              : <==      Total: 1
+2026-05-11T23:21:14.765+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-4] c.t.m.s.mapper.UserMapper.selectById     : ==>  Preparing: SELECT id,username,email,password,real_name,phone,avatar,status,role_name,is_superuser,is_staff,last_login_time,last_login_ip,is_deleted,created_at,updated_at,created_by,updated_by FROM sys_user WHERE id=? AND is_deleted=0
+2026-05-11T23:21:14.766+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-4] c.t.m.s.mapper.UserMapper.selectById     : ==> Parameters: 2(Long)
+2026-05-11T23:21:14.771+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-4] c.t.m.s.mapper.UserMapper.selectById     : <==      Total: 1
+2026-05-11T23:21:14.772+08:00  INFO 13340 --- [testhub] [http-nio-8080-exec-4] c.testhub.config.ApiLoggingInterceptor   : 
+
+========== API请求日志 ==========
+URL: GET /api/users
+Content-Type: null
+Content-Length: -1
+请求头:
+  sec-fetch-mode: cors
+  referer: http://localhost:3001/ai-generation/reviews
+  sec-fetch-site: same-origin
+  accept-language: zh-CN,zh;q=0.9
+  accept: application/json, text/plain, */*
+  sec-ch-ua: "Tabbit Browser";v="147", "Not.A/Brand";v="8", "Chromium";v="147"
+  sec-ch-ua-mobile: ?0
+  sec-ch-ua-platform: "Windows"
+  host: 127.0.0.1:8080
+  connection: close
+  accept-encoding: gzip, deflate, br, zstd
+  user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36
+  sec-fetch-dest: empty
+=================================
+2026-05-11T23:21:14.946+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-4] c.t.m.s.m.UserMapper.selectList_mpCount  : ==>  Preparing: SELECT COUNT(*) AS total FROM sys_user WHERE is_deleted = 0 AND (status = ?)
+2026-05-11T23:21:14.947+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-4] c.t.m.s.m.UserMapper.selectList_mpCount  : ==> Parameters: enabled(String)
+2026-05-11T23:21:14.953+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-4] c.t.m.s.m.UserMapper.selectList_mpCount  : <==      Total: 1
+2026-05-11T23:21:14.962+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-4] c.t.m.s.mapper.UserMapper.selectList     : ==>  Preparing: SELECT id,username,email,password,real_name,phone,avatar,status,role_name,is_superuser,is_staff,last_login_time,last_login_ip,is_deleted,created_at,updated_at,created_by,updated_by FROM sys_user WHERE is_deleted=0 AND (status = ?) ORDER BY created_at DESC LIMIT ?
+2026-05-11T23:21:14.963+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-4] c.t.m.s.mapper.UserMapper.selectList     : ==> Parameters: enabled(String), 20(Long)
+2026-05-11T23:21:14.977+08:00 DEBUG 13340 --- [testhub] [http-nio-8080-exec-4] c.t.m.s.mapper.UserMapper.selectList     : <==      Total: 13
+2026-05-11T23:21:14.995+08:00  INFO 13340 --- [testhub] [http-nio-8080-exec-4] c.testhub.config.ApiLoggingInterceptor   : 
+========== API响应日志 ==========
+URL: GET /api/users
+状态: 200
+耗时: 222ms
+响应体:
+{"code":200,"message":"success","data":{"records":[{"id":15,"created_at":"2026-05-11T21:58:44","updated_at":"2026-05-11T21:58:44","created_by":null,"updated_by":null,"is_deleted":0,"username":"testtoken","email":"test@example.com","password":"$2a$10$VP4Vrfo8S1JdZfF5DFSiZOz5svQwZtsr55vw3SDMmtZ9UCA1phNKK","real_name":null,"phone":null,"avatar":null,"status":"enabled","role_name":"USER","is_superuser":0,"is_staff":0,"last_login_time":null,"last_login_ip":null},{"id":13,"created_at":"2026-05-10T12:4...(省略 4942 字符)
+==================================
+2026-05-11T23:22:12.841+08:00  INFO 13340 --- [testhub] [SpringApplicationShutdownHook] org.quartz.core.QuartzScheduler          : Scheduler quartzScheduler_$_NON_CLUSTERED paused.
+2026-05-11T23:22:12.878+08:00  INFO 13340 --- [testhub] [SpringApplicationShutdownHook] o.s.s.quartz.SchedulerFactoryBean        : Shutting down Quartz Scheduler
+2026-05-11T23:22:12.878+08:00  INFO 13340 --- [testhub] [SpringApplicationShutdownHook] org.quartz.core.QuartzScheduler          : Scheduler quartzScheduler_$_NON_CLUSTERED shutting down.
+2026-05-11T23:22:12.878+08:00  INFO 13340 --- [testhub] [SpringApplicationShutdownHook] org.quartz.core.QuartzScheduler          : Scheduler quartzScheduler_$_NON_CLUSTERED paused.
+2026-05-11T23:22:12.878+08:00  INFO 13340 --- [testhub] [SpringApplicationShutdownHook] org.quartz.core.QuartzScheduler          : Scheduler quartzScheduler_$_NON_CLUSTERED shutdown complete.
+2026-05-11T23:22:12.880+08:00  INFO 13340 --- [testhub] [SpringApplicationShutdownHook] com.xxl.job.core.server.EmbedServer      : >>>>>>>>>>> xxl-job remoting server destroy success.
+2026-05-11T23:22:12.880+08:00  INFO 13340 --- [testhub] [xxl-job, executor JobLogFileCleanThread] c.x.j.core.thread.JobLogFileCleanThread  : >>>>>>>>>>> xxl-job, executor JobLogFileCleanThread thread destroy.
+2026-05-11T23:22:12.880+08:00  INFO 13340 --- [testhub] [xxl-job, executor TriggerCallbackThread] c.x.j.core.thread.TriggerCallbackThread  : >>>>>>>>>>> xxl-job, executor callback thread destroy.
+2026-05-11T23:22:12.881+08:00  INFO 13340 --- [testhub] [Thread-3] c.x.j.core.thread.TriggerCallbackThread  : >>>>>>>>>>> xxl-job, executor retry callback thread destroy.
+2026-05-11T23:22:12.893+08:00  INFO 13340 --- [testhub] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2026-05-11T23:22:12.901+08:00  INFO 13340 --- [testhub] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
