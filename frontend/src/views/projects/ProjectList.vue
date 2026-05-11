@@ -165,8 +165,17 @@ const fetchProjects = async () => {
       status: statusFilter.value
     }
     const response = await api.get('/projects', { params })
-    projects.value = response.data.results
-    total.value = response.data.count
+    // 兼容两种返回格式：分页格式 { results, count } 或直接数组
+    if (response.data.results !== undefined) {
+      projects.value = response.data.results
+      total.value = response.data.count || 0
+    } else if (Array.isArray(response.data)) {
+      projects.value = response.data
+      total.value = response.data.length
+    } else {
+      projects.value = []
+      total.value = 0
+    }
   } catch (error) {
     ElMessage.error(t('project.fetchListFailed'))
   } finally {
