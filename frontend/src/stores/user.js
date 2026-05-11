@@ -29,6 +29,7 @@ export const useUserStore = defineStore('user', () => {
 
   // 启动自动刷新token定时器
   let visibilityHandler = null
+  let storageHandler = null
 
   const startAutoRefresh = () => {
     // 清除现有定时器
@@ -83,6 +84,31 @@ export const useUserStore = defineStore('user', () => {
     }
     document.addEventListener('visibilitychange', visibilityHandler)
 
+    // 监听其他窗口的 token 更新
+    if (storageHandler) {
+      window.removeEventListener('storage', storageHandler)
+    }
+    storageHandler = (e) => {
+      if (e.key === 'access_token' && e.newValue) {
+        console.log('检测到其他窗口更新了 token，同步本地状态')
+        accessToken.value = e.newValue
+      }
+      if (e.key === 'refresh_token' && e.newValue) {
+        refreshToken.value = e.newValue
+      }
+      if (e.key === 'token_expires_at' && e.newValue) {
+        tokenExpiresAt.value = parseInt(e.newValue)
+      }
+      if (e.key === 'user' && e.newValue) {
+        try {
+          user.value = JSON.parse(e.newValue)
+        } catch (err) {
+          console.error('解析用户信息失败:', err)
+        }
+      }
+    }
+    window.addEventListener('storage', storageHandler)
+
     // 立即执行一次检查
     checkAndRefresh()
   }
@@ -96,6 +122,10 @@ export const useUserStore = defineStore('user', () => {
     if (visibilityHandler) {
       document.removeEventListener('visibilitychange', visibilityHandler)
       visibilityHandler = null
+    }
+    if (storageHandler) {
+      window.removeEventListener('storage', storageHandler)
+      storageHandler = null
     }
   }
 
@@ -177,6 +207,10 @@ export const useUserStore = defineStore('user', () => {
 
   // 刷新access token
   const refreshAccessToken = async () => {
+    if (!refreshToken.value) {
+      throw new Error('No refresh token available')
+    }
+
     try {
       const response = await api.post('/auth/refresh', {
         refresh_token: refreshToken.value
@@ -195,11 +229,28 @@ export const useUserStore = defineStore('user', () => {
       localStorage.setItem('access_token', accessToken.value)
       localStorage.setItem('token_expires_at', expiresAt.toString())
 
+      // 通知其他窗口 token 已更新
+      localStorage.setItem('token_updated', Date.now().toString())
+
       return response.data.access_token
     } catch (error) {
       console.error('Token refresh failed:', error)
-      // 不await logout()，避免死锁（响应拦截器可能已经调用了logout）
-      logout()
+
+      // 只有在 refresh token 确实无效时才 logout
+      // 判断依据：401 状态码或明确的 token 无效消息
+      const shouldLogout = error.response?.status === 401 ||
+        error.response?.data?.message?.includes('令牌') ||
+        error.response?.data?.message?.includes('token') ||
+        error.response?.data?.message?.includes('过期')
+
+      if (shouldLogout) {
+        console.log('Refresh token 无效或已过期，需要重新登录')
+        logout()
+      } else {
+        // 网络错误等临时问题，不 logout，等待下次重试
+        console.warn('Token 刷新失败（可能是网络问题），稍后重试')
+      }
+
       throw error
     }
   }
@@ -222,9 +273,7 @@ export const useUserStore = defineStore('user', () => {
       localStorage.setItem('user', JSON.stringify(user.value))
       return response.data
     } catch (error) {
-      if (error.response?.status === 401) {
-        await logout()
-      }
+      // 401 错误由 api 拦截器处理（会尝试刷新 token），这里不再重复 logout
       throw error
     }
   }
@@ -256,7 +305,10 @@ export const useUserStore = defineStore('user', () => {
           console.log('Token刷新成功')
         } catch (error) {
           console.error('Token刷新失败:', error)
-          return
+          // 刷新失败时，如果有用户信息，不立即登出，让请求拦截器处理
+          if (!user.value) {
+            return
+          }
         }
       }
 
@@ -267,7 +319,10 @@ export const useUserStore = defineStore('user', () => {
           console.log('用户信息获取成功:', user.value?.username)
         } catch (error) {
           console.error('获取用户信息失败:', error)
-          await logout()
+          // 只有在确实无法获取用户信息时才登出
+          if (error.response?.status === 401) {
+            await logout()
+          }
         }
       } else {
         console.log('用户信息已存在，跳过获取')

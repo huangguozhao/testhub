@@ -163,13 +163,13 @@ api.interceptors.response.use(
         } catch (refreshError) {
           console.error('Token刷新失败:', refreshError)
           processQueue(refreshError, null)
-          // logout内部会先清除token再调用API，避免请求拦截器尝试再次刷新
-          userStore.logout()
+          // refreshAccessToken 内部已处理 logout（仅在 token 确实无效时）
+          // 这里不再重复调用 logout，避免网络问题导致误登出
           return Promise.reject(refreshError)
         } finally {
           isRefreshing = false
         }
-      } else {
+      } else if (!userStore.refreshToken) {
         // 没有refresh token，直接退出
         console.error('没有refresh token，跳转登录页')
         userStore.logout()
