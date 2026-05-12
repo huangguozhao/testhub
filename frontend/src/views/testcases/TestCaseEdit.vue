@@ -220,20 +220,31 @@ const fetchTestCase = async () => {
     const response = await api.get(`/testcases/${route.params.id}`)
     const testcase = response.data
 
-    // Fill form data
+    // Fill form data (兼容Java后端字段名)
     form.title = testcase.title
     form.description = testcase.description
-    form.project_id = testcase.project?.id || null
+    form.project_id = testcase.project_id || testcase.project?.id || null
     form.priority = testcase.priority
-    form.test_type = testcase.test_type
-    form.preconditions = convertBrToNewline(testcase.preconditions || '')
-    form.expected_result = convertBrToNewline(testcase.expected_result || '')
+    form.test_type = testcase.type || testcase.test_type
+    form.preconditions = convertBrToNewline(testcase.precondition || testcase.preconditions || '')
+    form.expected_result = convertBrToNewline(testcase.expected_result || testcase.expectedResult || '')
 
-    // Fill steps data (convert <br> to newlines)
-    form.steps = convertBrToNewline(testcase.steps || '')
+    // Fill steps data - Java后端返回数组，需要转为文本
+    if (Array.isArray(testcase.steps) && testcase.steps.length > 0) {
+      form.steps = testcase.steps.map(s => {
+        const num = s.step_number || s.stepNumber || ''
+        const desc = s.description || s.action || ''
+        const expected = s.expected_result || s.expectedResult || ''
+        return `${num}. ${desc}${expected ? ' -> ' + expected : ''}`
+      }).join('\n')
+    } else if (typeof testcase.steps === 'string') {
+      form.steps = convertBrToNewline(testcase.steps)
+    } else {
+      form.steps = ''
+    }
 
     // Fill version associations
-    form.version_ids = testcase.versions ? testcase.versions.map(v => v.id) : []
+    form.version_ids = testcase.version_ids || (testcase.versions ? testcase.versions.map(v => v.id) : [])
 
     // If project exists, fetch versions for that project
     if (form.project_id) {
@@ -242,6 +253,7 @@ const fetchTestCase = async () => {
 
     loading.value = false
   } catch (error) {
+    console.error('获取用例详情失败:', error)
     ElMessage.error(t('testcase.fetchDetailFailed'))
     router.back()
   }
