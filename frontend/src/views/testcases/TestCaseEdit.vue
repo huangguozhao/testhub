@@ -197,7 +197,7 @@ const fetchProjectVersions = async (projectId) => {
   }
 
   try {
-    const response = await api.get(`/versions/projects/${projectId}/versions/`)
+    const response = await api.get(`/versions/projects/${projectId}/versions`)
     projectVersions.value = response.data || []
   } catch (error) {
     console.error(t('testcase.fetchVersionsFailed'), error)
