@@ -4,6 +4,7 @@ import lombok.Data;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -16,6 +17,8 @@ public class TestCaseDTO {
 
     @NotNull(message = "项目ID不能为空")
     private Long projectId;
+
+    private String projectName;
 
     @NotBlank(message = "用例标题不能为空")
     private String title;
@@ -33,6 +36,12 @@ public class TestCaseDTO {
     private String expectedResult;
 
     private List<StepDTO> steps;
+
+    private String creatorUsername;
+
+    private String creatorRealName;
+
+    private LocalDateTime createdAt;
 
     /**
      * 步骤 DTO

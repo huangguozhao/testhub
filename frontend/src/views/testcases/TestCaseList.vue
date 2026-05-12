@@ -74,9 +74,9 @@
               </el-link>
             </template>
           </el-table-column>
-          <el-table-column prop="project.name" :label="$t('testcase.relatedProject')" width="150">
+          <el-table-column prop="project_name" :label="$t('testcase.relatedProject')" width="150">
             <template #default="{ row }">
-              {{ row.project?.name || '-' }}
+              {{ row.project_name || '-' }}
             </template>
           </el-table-column>
           <el-table-column prop="versions" :label="$t('testcase.relatedVersions')" width="200">
@@ -105,12 +105,16 @@
               <el-tag :class="`priority-tag ${row.priority}`">{{ getPriorityText(row.priority) }}</el-tag>
             </template>
           </el-table-column>
-          <el-table-column prop="test_type" :label="$t('testcase.testType')" width="120">
+          <el-table-column prop="type" :label="$t('testcase.testType')" width="120">
             <template #default="{ row }">
-              {{ getTypeText(row.test_type) }}
+              {{ getTypeText(row.type) }}
             </template>
           </el-table-column>
-          <el-table-column prop="author.username" :label="$t('testcase.author')" width="120" />
+          <el-table-column prop="creator_username" :label="$t('testcase.author')" width="120">
+            <template #default="{ row }">
+              {{ row.creator_username || row.creator_real_name || '-' }}
+            </template>
+          </el-table-column>
           <el-table-column prop="created_at" :label="$t('testcase.createdAt')" width="180">
             <template #default="{ row }">
               {{ formatDate(row.created_at) }}
@@ -398,14 +402,14 @@ const exportToExcel = async () => {
       worksheetData.push([
         `TC${String(index + 1).padStart(3, '0')}`,
         testcase.title || '',
-        testcase.project?.name || '',
+        testcase.project_name || '',
         versions,
-        convertBrToNewline(testcase.preconditions || ''),
-        convertBrToNewline(testcase.steps || ''),
-        convertBrToNewline(testcase.expected_result || ''),
+        convertBrToNewline(testcase.precondition || testcase.preconditions || ''),
+        '',
+        convertBrToNewline(testcase.expected_result || testcase.expectedResult || ''),
         getPriorityText(testcase.priority),
-        getTypeText(testcase.test_type),
-        testcase.author?.username || '',
+        getTypeText(testcase.type),
+        testcase.creator_username || testcase.creator_real_name || '',
         formatDate(testcase.created_at)
       ])
     })

@@ -4,12 +4,16 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.testhub.modules.ai_generation.domain.Project;
 import com.testhub.modules.ai_generation.domain.TestCase;
 import com.testhub.modules.ai_generation.domain.TestCaseStep;
 import com.testhub.modules.ai_generation.dto.TestCaseDTO;
+import com.testhub.modules.ai_generation.mapper.ProjectMapper;
 import com.testhub.modules.ai_generation.mapper.TestCaseMapper;
 import com.testhub.modules.ai_generation.mapper.TestCaseStepMapper;
 import com.testhub.modules.ai_generation.service.TestCaseService;
+import com.testhub.modules.system.domain.User;
+import com.testhub.modules.system.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -26,6 +30,8 @@ import java.util.List;
 public class TestCaseServiceImpl extends ServiceImpl<TestCaseMapper, TestCase> implements TestCaseService {
 
     private final TestCaseStepMapper testCaseStepMapper;
+    private final ProjectMapper projectMapper;
+    private final UserMapper userMapper;
 
     @Override
     public IPage<TestCase> getTestCasePage(Long projectId, String keyword, String priority, String status, long current, long size) {
@@ -53,13 +59,30 @@ public class TestCaseServiceImpl extends ServiceImpl<TestCaseMapper, TestCase> i
         wrapper.orderByDesc(TestCase::getCreatedAt);
         IPage<TestCase> result = this.page(page, wrapper);
 
-        // 统计每个用例的步骤数
+        // 统计每个用例的步骤数，填充项目名称和创建者信息
         for (TestCase testCase : result.getRecords()) {
             Long stepCount = testCaseStepMapper.selectCount(
                     new LambdaQueryWrapper<TestCaseStep>()
                             .eq(TestCaseStep::getTestCaseId, testCase.getId())
             );
             testCase.setStepCount(stepCount);
+
+            // 填充项目名称
+            if (testCase.getProjectId() != null) {
+                Project project = projectMapper.selectById(testCase.getProjectId());
+                if (project != null) {
+                    testCase.setProjectName(project.getName());
+                }
+            }
+
+            // 填充创建者信息
+            if (testCase.getCreatedBy() != null) {
+                User creator = userMapper.selectById(testCase.getCreatedBy());
+                if (creator != null) {
+                    testCase.setCreatorUsername(creator.getUsername());
+                    testCase.setCreatorRealName(creator.getRealName());
+                }
+            }
         }
 
         return result;
@@ -145,6 +168,24 @@ public class TestCaseServiceImpl extends ServiceImpl<TestCaseMapper, TestCase> i
         dto.setStatus(testCase.getStatus());
         dto.setPrecondition(testCase.getPrecondition());
         dto.setExpectedResult(testCase.getExpectedResult());
+        dto.setCreatedAt(testCase.getCreatedAt());
+
+        // 填充项目名称
+        if (testCase.getProjectId() != null) {
+            Project project = projectMapper.selectById(testCase.getProjectId());
+            if (project != null) {
+                dto.setProjectName(project.getName());
+            }
+        }
+
+        // 填充创建者信息
+        if (testCase.getCreatedBy() != null) {
+            User creator = userMapper.selectById(testCase.getCreatedBy());
+            if (creator != null) {
+                dto.setCreatorUsername(creator.getUsername());
+                dto.setCreatorRealName(creator.getRealName());
+            }
+        }
 
         // 获取步骤
         List<TestCaseStep> steps = getTestCaseSteps(id);

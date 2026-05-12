@@ -62,4 +62,7 @@ public class TestCase extends BaseEntity {
 
     @TableField(exist = false)
     private Long stepCount;
+
+    @TableField(exist = false)
+    private String projectName;
 }

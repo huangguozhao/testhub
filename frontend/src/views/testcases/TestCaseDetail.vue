@@ -14,8 +14,8 @@
         <el-descriptions-item :label="$t('testcase.priority')">
           <el-tag :class="`priority-tag ${testcase.priority}`">{{ getPriorityText(testcase.priority) }}</el-tag>
         </el-descriptions-item>
-        <el-descriptions-item :label="$t('testcase.testType')">{{ getTypeText(testcase.test_type) }}</el-descriptions-item>
-        <el-descriptions-item :label="$t('testcase.project')">{{ testcase.project?.name || $t('testcase.noProject') }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('testcase.testType')">{{ getTypeText(testcase.type) }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('testcase.project')">{{ testcase.project_name || $t('testcase.noProject') }}</el-descriptions-item>
         <el-descriptions-item :label="$t('testcase.relatedVersions')" :span="2">
           <div v-if="testcase.versions && testcase.versions.length > 0" class="version-tags">
             <el-tag
@@ -30,17 +30,35 @@
           </div>
           <span v-else class="no-version">{{ $t('testcase.noVersion') }}</span>
         </el-descriptions-item>
-        <el-descriptions-item :label="$t('testcase.author')">{{ testcase.author?.username }}</el-descriptions-item>
-        <el-descriptions-item :label="$t('testcase.createdAt')" :span="2">{{ formatDate(testcase.created_at) }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('testcase.author')">{{ testcase.creator_username || testcase.creator_real_name || '-' }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('testcase.createdAt')" :span="2">{{ formatDate(testcase.created_at || testcase.createdAt) }}</el-descriptions-item>
         <el-descriptions-item :label="$t('testcase.caseDescription')" :span="2">{{ testcase.description || $t('testcase.noDescription') }}</el-descriptions-item>
         <el-descriptions-item :label="$t('testcase.preconditions')" :span="2">
-          <div v-html="testcase.preconditions || $t('testcase.none')"></div>
+          <div class="steps-content" v-html="formatMultiline(testcase.precondition || testcase.preconditions) || $t('testcase.none')"></div>
         </el-descriptions-item>
         <el-descriptions-item :label="$t('testcase.steps')" :span="2">
-          <div class="steps-content" v-html="testcase.steps || $t('testcase.none')"></div>
+          <div v-if="hasStepDetails" class="steps-table-wrapper">
+            <table class="steps-table">
+              <thead>
+                <tr>
+                  <th class="step-num-col">#</th>
+                  <th>{{ $t('testcase.stepAction') || '操作步骤' }}</th>
+                  <th>{{ $t('testcase.expectedResult') }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="step in testcase.steps" :key="step.step_number || step.stepNumber">
+                  <td class="step-num-col">{{ step.step_number || step.stepNumber }}</td>
+                  <td v-html="formatMultiline(step.description || step.action)"></td>
+                  <td v-html="formatMultiline(step.expected_result || step.expectedResult)"></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div v-else class="steps-content" v-html="formatMultiline(testcase.steps_text) || $t('testcase.none')"></div>
         </el-descriptions-item>
         <el-descriptions-item :label="$t('testcase.expectedResult')" :span="2">
-          <div v-html="testcase.expected_result || $t('testcase.none')"></div>
+          <div class="steps-content" v-html="formatMultiline(testcase.expected_result || testcase.expectedResult) || $t('testcase.none')"></div>
         </el-descriptions-item>
       </el-descriptions>
     </div>
@@ -48,7 +66,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
@@ -59,6 +77,15 @@ const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const testcase = ref(null)
+
+const hasStepDetails = computed(() => {
+  return Array.isArray(testcase.value?.steps) && testcase.value.steps.length > 0
+})
+
+const formatMultiline = (text) => {
+  if (!text) return ''
+  return String(text).replace(/\n/g, '<br>')
+}
 
 const fetchTestCase = async () => {
   try {
@@ -133,5 +160,36 @@ onMounted(() => {
   line-height: 1.6;
   color: #303133;
   font-family: inherit;
+}
+
+.steps-table-wrapper {
+  overflow-x: auto;
+}
+
+.steps-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #303133;
+}
+
+.steps-table th,
+.steps-table td {
+  border: 1px solid #ebeef5;
+  padding: 10px 12px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.steps-table th {
+  background: #fafafa;
+  font-weight: 600;
+  color: #606266;
+}
+
+.step-num-col {
+  width: 50px;
+  text-align: center;
 }
 </style>
