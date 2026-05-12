@@ -169,6 +169,7 @@ export default {
     statusPending: '需求分析中',
     statusGenerating: '用例编写中',
     statusReviewing: '用例评审中',
+    statusRevising: '用例改进中',
     statusCompleted: '已完成',
     statusFailed: '失败',
     statusDraft: '草稿',
@@ -517,6 +518,7 @@ export default {
     statusPending: '需求分析中',
     statusGenerating: '用例编写中',
     statusReviewing: '用例评审中',
+    statusRevising: '用例改进中',
     statusCompleted: '已完成',
     statusFailed: '失败',
 

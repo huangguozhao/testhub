@@ -13,6 +13,7 @@
             <option value="pending">{{ $t('generatedTestCases.statusPending') }}</option>
             <option value="generating">{{ $t('generatedTestCases.statusGenerating') }}</option>
             <option value="reviewing">{{ $t('generatedTestCases.statusReviewing') }}</option>
+            <option value="revising">{{ $t('generatedTestCases.statusRevising') }}</option>
             <option value="completed">{{ $t('generatedTestCases.statusCompleted') }}</option>
             <option value="failed">{{ $t('generatedTestCases.statusFailed') }}</option>
           </select>
@@ -622,7 +623,7 @@ export default {
         // 统计各状态的数量
         this.allStats.total = allTasks.length
         this.allStats.completed = allTasks.filter(t => t.status === 'completed').length
-        this.allStats.running = allTasks.filter(t => ['pending', 'generating', 'reviewing'].includes(t.status)).length
+        this.allStats.running = allTasks.filter(t => ['pending', 'generating', 'reviewing', 'revising'].includes(t.status)).length
         this.allStats.failed = allTasks.filter(t => t.status === 'failed').length
         
       } catch (error) {
@@ -640,6 +641,7 @@ export default {
         'pending': this.$t('generatedTestCases.statusPending'),
         'generating': this.$t('generatedTestCases.statusGenerating'),
         'reviewing': this.$t('generatedTestCases.statusReviewing'),
+        'revising': this.$t('generatedTestCases.statusRevising'),
         'completed': this.$t('generatedTestCases.statusCompleted'),
         'failed': this.$t('generatedTestCases.statusFailed')
       }
@@ -700,7 +702,7 @@ export default {
     },
 
     viewTaskDetail(task) {
-      if (['pending', 'generating', 'reviewing'].includes(task.status)) {
+      if (['pending', 'generating', 'reviewing', 'revising'].includes(task.status)) {
         ElMessage.info(this.$t('generatedTestCases.generatingWait'))
         return
       }
@@ -1411,7 +1413,8 @@ export default {
 }
 
 .status-tag.generating,
-.status-tag.reviewing {
+.status-tag.reviewing,
+.status-tag.revising {
   background: rgba(59, 130, 246, 0.1);
   color: #3b82f6;
 }

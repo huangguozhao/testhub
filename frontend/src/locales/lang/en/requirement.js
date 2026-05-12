@@ -169,6 +169,7 @@ export default {
     statusPending: 'Analyzing',
     statusGenerating: 'Writing',
     statusReviewing: 'Reviewing',
+    statusRevising: 'Revising',
     statusCompleted: 'Completed',
     statusFailed: 'Failed',
     statusDraft: 'Draft',
@@ -517,6 +518,7 @@ export default {
     statusPending: 'Analyzing Requirement',
     statusGenerating: 'Writing Test Cases',
     statusReviewing: 'Reviewing Test Cases',
+    statusRevising: 'Revising Test Cases',
     statusCompleted: 'Completed',
     statusFailed: 'Failed',
 
