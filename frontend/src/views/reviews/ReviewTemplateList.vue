@@ -55,14 +55,12 @@
             <div class="info-item">
               <span class="info-label">{{ $t('reviewTemplate.projectLabel') }}</span>
               <span class="info-value">
-                {{ Array.isArray(template.project)
-                    ? template.project.map(p => p.name).join(', ')
-                    : (template.project?.name || $t('reviewTemplate.noData')) }}
+                {{ template.project_name || $t('reviewTemplate.noData') }}
               </span>
             </div>
             <div class="info-item">
               <span class="info-label">{{ $t('reviewTemplate.creatorLabel') }}</span>
-              <span class="info-value">{{ template.creator?.username }}</span>
+              <span class="info-value">{{ template.creator_name || '-' }}</span>
             </div>
             <div class="info-item">
               <span class="info-label">{{ $t('reviewTemplate.createdAtLabel') }}</span>
@@ -244,8 +242,8 @@ const fetchTemplates = async () => {
       params.project = filters.project
     }
 
-    const response = await api.get('/reviews/review-templates/', { params })
-    templates.value = response.data.results || response.data || []
+    const response = await api.get('/reviews/review-templates', { params })
+    templates.value = response.data.records || response.data.results || response.data || []
   } catch (error) {
     ElMessage.error(t('reviewTemplate.fetchListFailed'))
   } finally {
@@ -285,14 +283,8 @@ const editTemplate = (template) => {
   
   templateForm.name = template.name
   templateForm.description = template.description
-  // 处理project字段：如果是数组，取第一个ID；如果是单个对象，取其ID
-  if (Array.isArray(template.project) && template.project.length > 0) {
-    templateForm.project = template.project[0].id
-  } else if (template.project && template.project.id) {
-    templateForm.project = template.project.id
-  } else {
-    templateForm.project = ''
-  }
+  // 处理project字段：兼容Java后端(project_id)和Django后端(project对象)
+  templateForm.project = template.project_id || template.project?.id || ''
   templateForm.checklist = template.checklist.length ? [...template.checklist] : ['']
   templateForm.default_reviewers = template.default_reviewers.map(u => u.id)
   
@@ -323,10 +315,10 @@ const saveTemplate = async () => {
     }
 
     if (isEdit.value) {
-      await api.put(`/reviews/review-templates/${editingTemplateId.value}/`, data)
+      await api.put(`/reviews/review-templates/${editingTemplateId.value}`, data)
       ElMessage.success(t('reviewTemplate.updateSuccess'))
     } else {
-      await api.post('/reviews/review-templates/', data)
+      await api.post('/reviews/review-templates', data)
       ElMessage.success(t('reviewTemplate.createSuccess'))
     }
 
@@ -343,7 +335,7 @@ const saveTemplate = async () => {
 
 const deleteTemplate = async (id) => {
   try {
-    await api.delete(`/reviews/review-templates/${id}/`)
+    await api.delete(`/reviews/review-templates/${id}`)
     ElMessage.success(t('reviewTemplate.deleteSuccess'))
     fetchTemplates()
   } catch (error) {

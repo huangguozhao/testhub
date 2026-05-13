@@ -1,11 +1,16 @@
 package com.testhub.modules.review.controller;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.testhub.common.result.Result;
+import com.testhub.modules.review.domain.ReviewTemplate;
 import com.testhub.modules.review.domain.TestCaseReview;
 import com.testhub.modules.review.service.ReviewService;
+import com.testhub.modules.review.service.ReviewTemplateService;
+import com.testhub.modules.system.security.UserDetailsImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -17,6 +22,7 @@ import java.util.Map;
 public class ReviewController {
 
     private final ReviewService reviewService;
+    private final ReviewTemplateService reviewTemplateService;
 
     @GetMapping
     @Operation(summary = "获取评审列表")
@@ -70,5 +76,52 @@ public class ReviewController {
         String comment = (String) request.get("comment");
         TestCaseReview review = reviewService.submitReview(id, status, comment, userId);
         return Result.success(review);
+    }
+
+    // ==================== 评审模板 ====================
+
+    @GetMapping("/review-templates")
+    @Operation(summary = "获取评审模板列表")
+    public Result<IPage<ReviewTemplate>> listTemplates(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "20") int page_size,
+            @RequestParam(required = false) Long project) {
+        IPage<ReviewTemplate> result = reviewTemplateService.listTemplates(page, page_size, project);
+        return Result.success(result);
+    }
+
+    @GetMapping("/review-templates/{id}")
+    @Operation(summary = "获取评审模板详情")
+    public Result<ReviewTemplate> getTemplate(@PathVariable Long id) {
+        ReviewTemplate template = reviewTemplateService.getTemplate(id);
+        return Result.success(template);
+    }
+
+    @PostMapping("/review-templates")
+    @Operation(summary = "创建评审模板")
+    public Result<ReviewTemplate> createTemplate(
+            @RequestBody ReviewTemplate template,
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        ReviewTemplate created = reviewTemplateService.createTemplate(template, userDetails.getId());
+        return Result.success(created);
+    }
+
+    @PutMapping("/review-templates/{id}")
+    @Operation(summary = "更新评审模板")
+    public Result<ReviewTemplate> updateTemplate(
+            @PathVariable Long id,
+            @RequestBody ReviewTemplate template,
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        ReviewTemplate updated = reviewTemplateService.updateTemplate(id, template, userDetails.getId());
+        return Result.success(updated);
+    }
+
+    @DeleteMapping("/review-templates/{id}")
+    @Operation(summary = "删除评审模板")
+    public Result<Void> deleteTemplate(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        reviewTemplateService.deleteTemplate(id, userDetails.getId());
+        return Result.success();
     }
 }
