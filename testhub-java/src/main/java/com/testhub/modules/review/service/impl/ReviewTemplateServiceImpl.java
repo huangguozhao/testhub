@@ -32,7 +32,7 @@ public class ReviewTemplateServiceImpl extends ServiceImpl<ReviewTemplateMapper,
             wrapper.eq(ReviewTemplate::getProjectId, projectId);
         }
 
-        wrapper.eq(ReviewTemplate::getIsActive, 1);
+        wrapper.eq(ReviewTemplate::getIsDeleted, 0);
         wrapper.orderByDesc(ReviewTemplate::getCreatedAt);
 
         IPage<ReviewTemplate> result = this.page(pageParam, wrapper);
@@ -58,7 +58,7 @@ public class ReviewTemplateServiceImpl extends ServiceImpl<ReviewTemplateMapper,
     @Override
     public ReviewTemplate createTemplate(ReviewTemplate template, Long userId) {
         template.setCreatedBy(userId);
-        template.setIsActive(1);
+        template.setIsDeleted(0);
         this.save(template);
         log.info("创建评审模板: id={}, name={}", template.getId(), template.getName());
         return template;
@@ -82,7 +82,7 @@ public class ReviewTemplateServiceImpl extends ServiceImpl<ReviewTemplateMapper,
     public void deleteTemplate(Long id, Long userId) {
         ReviewTemplate template = new ReviewTemplate();
         template.setId(id);
-        template.setIsActive(0);
+        template.setIsDeleted(1);
         this.updateById(template);
         log.info("删除评审模板: id={}", id);
     }

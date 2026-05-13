@@ -6,7 +6,7 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Data
-@TableName("review_templates")
+@TableName("rv_review_template")
 public class ReviewTemplate {
 
     @TableId(type = IdType.AUTO)
@@ -22,7 +22,7 @@ public class ReviewTemplate {
      */
     private String checklist;
 
-    private Integer isActive;
+    private Integer isDeleted;
 
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createdAt;
