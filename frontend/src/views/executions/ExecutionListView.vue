@@ -314,9 +314,9 @@ const fetchTestPlans = async () => {
       }
     })
 
-    const response = await api.get('/executions/plans/', { params })
-    testPlans.value = response.data.results || response.data || []
-    total.value = response.data.count || testPlans.value.length
+    const response = await api.get('/test-plans', { params })
+    testPlans.value = response.data.records || response.data.results || response.data || []
+    total.value = response.data.total || testPlans.value.length
   } catch (error) {
     ElMessage.error(t('execution.fetchListFailed'))
   } finally {
@@ -353,9 +353,9 @@ const loadTestcasesByProjects = async (projectIds) => {
     const params = new URLSearchParams()
     projectIds.forEach(id => params.append('project_ids', id))
 
-    console.log('API URL:', `/executions/plans/testcases_by_projects/?${params.toString()}`)
+    console.log('API URL:', `/test-plans/testcases_by_projects?${params.toString()}`)
 
-    const response = await api.get(`/executions/plans/testcases_by_projects/?${params.toString()}`)
+    const response = await api.get(`/test-plans/testcases_by_projects?${params.toString()}`)
     console.log('API Response:', response.data)
 
     filteredTestcases.value = response.data.results || []
@@ -401,7 +401,7 @@ const createPlan = async () => {
     await planFormRef.value.validate()
     creating.value = true
 
-    await api.post('/executions/plans/', newPlanForm)
+    await api.post('/test-plans', newPlanForm)
     ElMessage.success(t('execution.createSuccess'))
     isCreatePlanDialogOpen.value = false
     resetPlanForm()
@@ -422,7 +422,7 @@ const viewPlan = (id) => {
 const editPlan = async (plan) => {
   try {
     // 获取完整的测试计划详情
-    const response = await api.get(`/executions/plans/${plan.id}/`)
+    const response = await api.get(`/test-plans/${plan.id}`)
     const planDetail = response.data
 
     // 设置当前编辑的计划
@@ -463,7 +463,7 @@ const updatePlan = async () => {
       is_active: editPlanForm.is_active
     }
 
-    await api.put(`/executions/plans/${editPlanForm.id}/`, updateData)
+    await api.put(`/test-plans/${editPlanForm.id}`, updateData)
     ElMessage.success(t('execution.updateSuccess'))
     isEditPlanDialogOpen.value = false
     resetEditForm()
@@ -498,7 +498,7 @@ const togglePlanStatus = async (plan) => {
       type: 'warning'
     })
 
-    await api.patch(`/executions/plans/${plan.id}/`, {
+    await api.patch(`/test-plans/${plan.id}`, {
       is_active: !plan.is_active
     })
 
@@ -594,7 +594,7 @@ const batchDeletePlans = async () => {
 
     for (const plan of selectedPlans.value) {
       try {
-        await api.delete(`/executions/plans/${plan.id}/`)
+        await api.delete(`/test-plans/${plan.id}`)
         successCount++
       } catch (error) {
         console.error(`删除测试计划 ${plan.id} 失败:`, error)

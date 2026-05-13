@@ -218,7 +218,7 @@ const tableRef = ref(null)
 const fetchTestPlan = async () => {
   try {
     const planId = route.params.id
-    const response = await axios.get(`/api/executions/plans/${planId}/`)
+    const response = await axios.get(`/api/test-plans/${planId}`)
     testPlan.value = response.data
   } catch (error) {
     ElMessage.error(t('execution.fetchDetailFailed'))
