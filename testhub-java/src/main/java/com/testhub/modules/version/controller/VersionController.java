@@ -30,14 +30,14 @@ public class VersionController {
         return Result.success(result);
     }
 
-    @GetMapping("/projects/{projectId}/versions")
+    @GetMapping("/projects/{projectId:\\d+}/versions")
     @Operation(summary = "获取项目版本列表")
     public Result<List<Version>> getProjectVersions(@PathVariable Long projectId) {
         List<Version> versions = versionService.getProjectVersions(projectId);
         return Result.success(versions);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{id:\\d+}")
     @Operation(summary = "获取版本详情")
     public Result<Version> getVersion(@PathVariable Long id) {
         Version version = versionService.getVersion(id);
@@ -51,14 +51,14 @@ public class VersionController {
         return Result.success(created);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/{id:\\d+}")
     @Operation(summary = "更新版本")
     public Result<Version> updateVersion(@PathVariable Long id, @RequestBody Version version) {
         Version updated = versionService.updateVersion(id, version);
         return Result.success(updated);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{id:\\d+}")
     @Operation(summary = "删除版本")
     public Result<Void> deleteVersion(@PathVariable Long id) {
         versionService.deleteVersion(id);

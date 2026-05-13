@@ -70,14 +70,14 @@ public class TestSuiteController {
         return Result.success();
     }
 
-    @GetMapping("/{id}/cases")
+    @GetMapping("/{id:\\d+}/cases")
     @Operation(summary = "获取套件的用例ID列表")
     public Result<List<Long>> getSuiteCaseIds(@PathVariable Long id) {
         List<Long> caseIds = testSuiteService.getSuiteCaseIds(id);
         return Result.success(caseIds);
     }
 
-    @PostMapping("/{id}/cases")
+    @PostMapping("/{id:\\d+}/cases")
     @Operation(summary = "添加用例到套件")
     public Result<Void> addCases(
             @PathVariable Long id,
@@ -86,7 +86,7 @@ public class TestSuiteController {
         return Result.success();
     }
 
-    @DeleteMapping("/{id}/cases")
+    @DeleteMapping("/{id:\\d+}/cases")
     @Operation(summary = "从套件移除用例")
     public Result<Void> removeCases(
             @PathVariable Long id,

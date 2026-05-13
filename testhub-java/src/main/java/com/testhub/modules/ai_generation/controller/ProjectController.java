@@ -54,14 +54,14 @@ public class ProjectController {
         return Result.success(PageResult.of(page));
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{id:\\d+}")
     @Operation(summary = "获取项目详情")
     public Result<Project> getProjectById(@PathVariable Long id) {
         Project project = projectService.getProjectDetail(id);
         return Result.success(project);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/{id:\\d+}")
     @Operation(summary = "更新项目")
     public Result<Project> updateProject(
             @PathVariable Long id,
@@ -72,7 +72,7 @@ public class ProjectController {
         return Result.success(updated);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{id:\\d+}")
     @Operation(summary = "删除项目")
     public Result<Void> deleteProject(
             @PathVariable Long id,
@@ -93,14 +93,14 @@ public class ProjectController {
 
     // ========== ProjectMember 成员管理 ==========
 
-    @GetMapping("/{id}/members")
+    @GetMapping("/{id:\\d+}/members")
     @Operation(summary = "获取项目成员列表")
     public Result<List<ProjectMember>> getProjectMembers(@PathVariable Long id) {
         List<ProjectMember> members = projectService.getProjectMembers(id);
         return Result.success(members);
     }
 
-    @PostMapping("/{id}/members")
+    @PostMapping("/{id:\\d+}/members")
     @Operation(summary = "添加项目成员")
     public Result<ProjectMember> addMember(
             @PathVariable Long id,
@@ -112,7 +112,7 @@ public class ProjectController {
         return Result.success(member);
     }
 
-    @PutMapping("/{projectId}/members/{memberId}")
+    @PutMapping("/{projectId:\\d+}/members/{memberId:\\d+}")
     @Operation(summary = "更新成员角色")
     public Result<ProjectMember> updateMemberRole(
             @PathVariable Long projectId,
@@ -124,7 +124,7 @@ public class ProjectController {
         return Result.success(member);
     }
 
-    @DeleteMapping("/{id}/members/{userId}")
+    @DeleteMapping("/{id:\\d+}/members/{userId:\\d+}")
     @Operation(summary = "移除项目成员")
     public Result<Void> removeMember(
             @PathVariable Long id,
@@ -135,7 +135,7 @@ public class ProjectController {
         return Result.success();
     }
 
-    @GetMapping("/{id}/members/role")
+    @GetMapping("/{id:\\d+}/members/role")
     @Operation(summary = "获取当前用户在项目中的角色")
     public Result<String> getMyRole(
             @PathVariable Long id,
@@ -146,21 +146,21 @@ public class ProjectController {
 
     // ========== ProjectEnvironment 环境管理 ==========
 
-    @GetMapping("/{id}/environments")
+    @GetMapping("/{id:\\d+}/environments")
     @Operation(summary = "获取项目环境列表")
     public Result<List<ProjectEnvironment>> getProjectEnvironments(@PathVariable Long id) {
         List<ProjectEnvironment> environments = projectService.getProjectEnvironments(id);
         return Result.success(environments);
     }
 
-    @GetMapping("/{id}/environments/default")
+    @GetMapping("/{id:\\d+}/environments/default")
     @Operation(summary = "获取项目默认环境")
     public Result<ProjectEnvironment> getDefaultEnvironment(@PathVariable Long id) {
         ProjectEnvironment env = projectService.getDefaultEnvironment(id);
         return Result.success(env);
     }
 
-    @PostMapping("/{id}/environments")
+    @PostMapping("/{id:\\d+}/environments")
     @Operation(summary = "创建项目环境")
     public Result<ProjectEnvironment> createEnvironment(
             @PathVariable Long id,
@@ -172,7 +172,7 @@ public class ProjectController {
         return Result.success(created);
     }
 
-    @PutMapping("/{projectId}/environments/{envId}")
+    @PutMapping("/{projectId:\\d+}/environments/{envId:\\d+}")
     @Operation(summary = "更新项目环境")
     public Result<ProjectEnvironment> updateEnvironment(
             @PathVariable Long projectId,
@@ -184,7 +184,7 @@ public class ProjectController {
         return Result.success(updated);
     }
 
-    @DeleteMapping("/{projectId}/environments/{envId}")
+    @DeleteMapping("/{projectId:\\d+}/environments/{envId:\\d+}")
     @Operation(summary = "删除项目环境")
     public Result<Void> deleteEnvironment(
             @PathVariable Long projectId,
@@ -195,7 +195,7 @@ public class ProjectController {
         return Result.success();
     }
 
-    @PutMapping("/{projectId}/environments/{envId}/default")
+    @PutMapping("/{projectId:\\d+}/environments/{envId:\\d+}/default")
     @Operation(summary = "设置默认环境")
     public Result<Void> setDefaultEnvironment(
             @PathVariable Long projectId,

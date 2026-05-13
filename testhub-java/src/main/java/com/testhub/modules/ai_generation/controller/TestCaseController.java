@@ -77,7 +77,7 @@ public class TestCaseController {
         return Result.success();
     }
 
-    @GetMapping("/{id}/steps")
+    @GetMapping("/{id:\\d+}/steps")
     @Operation(summary = "获取用例步骤")
     public Result<List<TestCaseStep>> getTestCaseSteps(@PathVariable Long id) {
         List<TestCaseStep> steps = testCaseService.getTestCaseSteps(id);

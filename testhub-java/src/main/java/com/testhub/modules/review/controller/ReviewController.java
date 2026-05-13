@@ -35,7 +35,7 @@ public class ReviewController {
         return Result.success(result);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{id:\\d+}")
     @Operation(summary = "获取评审详情")
     public Result<TestCaseReview> getReview(@PathVariable Long id) {
         TestCaseReview review = reviewService.getReview(id);
@@ -50,7 +50,7 @@ public class ReviewController {
         return Result.success(created);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/{id:\\d+}")
     @Operation(summary = "更新评审")
     public Result<TestCaseReview> updateReview(@PathVariable Long id, @RequestBody TestCaseReview review) {
         Long userId = 1L; // TODO: 从认证上下文获取
@@ -58,7 +58,7 @@ public class ReviewController {
         return Result.success(updated);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{id:\\d+}")
     @Operation(summary = "删除评审")
     public Result<Void> deleteReview(@PathVariable Long id) {
         Long userId = 1L; // TODO: 从认证上下文获取
@@ -66,7 +66,7 @@ public class ReviewController {
         return Result.success();
     }
 
-    @PostMapping("/{id}/submit_review")
+    @PostMapping("/{id:\\d+}/submit_review")
     @Operation(summary = "提交评审")
     public Result<TestCaseReview> submitReview(
             @PathVariable Long id,
@@ -90,7 +90,7 @@ public class ReviewController {
         return Result.success(result);
     }
 
-    @GetMapping("/review-templates/{id}")
+    @GetMapping("/review-templates/{id:\\d+}")
     @Operation(summary = "获取评审模板详情")
     public Result<ReviewTemplate> getTemplate(@PathVariable Long id) {
         ReviewTemplate template = reviewTemplateService.getTemplate(id);
@@ -106,7 +106,7 @@ public class ReviewController {
         return Result.success(created);
     }
 
-    @PutMapping("/review-templates/{id}")
+    @PutMapping("/review-templates/{id:\\d+}")
     @Operation(summary = "更新评审模板")
     public Result<ReviewTemplate> updateTemplate(
             @PathVariable Long id,
@@ -116,7 +116,7 @@ public class ReviewController {
         return Result.success(updated);
     }
 
-    @DeleteMapping("/review-templates/{id}")
+    @DeleteMapping("/review-templates/{id:\\d+}")
     @Operation(summary = "删除评审模板")
     public Result<Void> deleteTemplate(
             @PathVariable Long id,
