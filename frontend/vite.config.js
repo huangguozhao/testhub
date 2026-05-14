@@ -28,8 +28,8 @@ export default defineConfig({
     target: 'es2022',
   },
   server: {
-    port: 3001,
-    host: '0.0.0.0',
+    port: 5173,
+    host: 'localhost',
     headers: {
       'Cache-Control': 'no-cache, no-store, must-revalidate',
       'Pragma': 'no-cache',
