@@ -906,7 +906,7 @@ export default {
             } else if (data.status === 'failed') {
               this.currentStep = 4
               this.progressText = this.$t('requirementAnalysis.statusFailed')
-              this.handleGenerationError()
+              this.handleGenerationError(data.error_message)
             }
           } else if (data.type === 'done') {
             // 流式结束，立即关闭EventSource，获取最终结果
@@ -1061,7 +1061,7 @@ export default {
       }
     },
 
-    handleGenerationError() {
+    handleGenerationError(errorMessage) {
       this.isGenerating = false
       if (this.eventSource) {
         this.eventSource.close()
@@ -1071,6 +1071,9 @@ export default {
         clearInterval(this.pollInterval)
         this.pollInterval = null
       }
+      // 展示友好的错误提示
+      const msg = errorMessage || this.$t('requirementAnalysis.unknownError') || '未知错误'
+      ElMessage.error(this.$t('requirementAnalysis.generateFailed') + ': ' + msg)
     },
 
     startPolling() {

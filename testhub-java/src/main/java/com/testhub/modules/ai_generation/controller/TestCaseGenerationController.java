@@ -180,6 +180,15 @@ public class TestCaseGenerationController {
                         statusData.put("type", "status");
                         statusData.put("status", currentStatus);
                         statusData.put("progress", progress);
+                        // 失败时携带错误信息
+                        if ("failed".equals(currentStatus)) {
+                            String errorMsg = task.getErrorMessage();
+                            if (errorMsg != null) {
+                                // 截取关键错误信息，去掉堆栈等冗余内容
+                                String friendlyMsg = extractFriendlyError(errorMsg);
+                                statusData.put("error_message", friendlyMsg);
+                            }
+                        }
                         sendSseData(emitter, mapper, null, statusData);
                         sendSseData(emitter, mapper, "done", null);
                         emitter.complete();
@@ -248,6 +257,37 @@ public class TestCaseGenerationController {
             log.warn("SSE发送失败: {}", e.getMessage());
             throw e;
         }
+    }
+
+    /**
+     * 从异常信息中提取用户友好的错误提示
+     */
+    private String extractFriendlyError(String errorMessage) {
+        if (errorMessage == null) {
+            return "未知错误";
+        }
+        // 限流错误
+        if (errorMessage.contains("rate_limit") || errorMessage.contains("429") || errorMessage.contains("usage limit")) {
+            return "AI 服务请求频率过高，请稍后再试";
+        }
+        // 认证错误
+        if (errorMessage.contains("authentication") || errorMessage.contains("401") || errorMessage.contains("403") || errorMessage.contains("forbidden")) {
+            return "AI 服务认证失败，请检查 API Key 配置";
+        }
+        // 超时
+        if (errorMessage.contains("timeout") || errorMessage.contains("TimeoutException")) {
+            return "AI 服务响应超时，请稍后再试";
+        }
+        // 网络错误
+        if (errorMessage.contains("ConnectException") || errorMessage.contains("connection refused")) {
+            return "无法连接到 AI 服务，请检查网络";
+        }
+        // 通用处理：取第一行或前100字符
+        String msg = errorMessage.split("\n")[0];
+        if (msg.length() > 100) {
+            msg = msg.substring(0, 100) + "...";
+        }
+        return "AI 生成失败: " + msg;
     }
 
     @PostMapping("/{taskId}/save_to_records")
