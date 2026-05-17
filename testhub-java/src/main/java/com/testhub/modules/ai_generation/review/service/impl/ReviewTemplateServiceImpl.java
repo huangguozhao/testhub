@@ -1,4 +1,4 @@
-package com.testhub.modules.review.service.impl;
+package com.testhub.modules.ai_generation.review.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -6,9 +6,9 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.testhub.modules.ai_generation.domain.Project;
 import com.testhub.modules.ai_generation.mapper.ProjectMapper;
-import com.testhub.modules.review.domain.ReviewTemplate;
-import com.testhub.modules.review.mapper.ReviewTemplateMapper;
-import com.testhub.modules.review.service.ReviewTemplateService;
+import com.testhub.modules.ai_generation.review.domain.ReviewTemplate;
+import com.testhub.modules.ai_generation.review.mapper.ReviewTemplateMapper;
+import com.testhub.modules.ai_generation.review.service.ReviewTemplateService;
 import com.testhub.modules.system.domain.User;
 import com.testhub.modules.system.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;

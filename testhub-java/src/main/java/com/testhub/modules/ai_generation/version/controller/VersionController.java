@@ -1,8 +1,8 @@
-package com.testhub.modules.version.controller;
+package com.testhub.modules.ai_generation.version.controller;
 
 import com.testhub.common.result.Result;
-import com.testhub.modules.version.domain.Version;
-import com.testhub.modules.version.service.VersionService;
+import com.testhub.modules.ai_generation.version.domain.Version;
+import com.testhub.modules.ai_generation.version.service.VersionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +13,7 @@ import java.util.Map;
 
 @Tag(name = "版本管理", description = "项目版本管理")
 @RestController
-@RequestMapping("/api/versions")
+@RequestMapping("/api/ai-generation/versions")
 @RequiredArgsConstructor
 public class VersionController {
 

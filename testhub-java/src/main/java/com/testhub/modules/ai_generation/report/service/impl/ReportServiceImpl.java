@@ -1,4 +1,4 @@
-package com.testhub.modules.report.service.impl;
+package com.testhub.modules.ai_generation.report.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.testhub.modules.ai_generation.domain.TestPlan;
@@ -8,7 +8,7 @@ import com.testhub.modules.ai_generation.mapper.TestCaseMapper;
 import com.testhub.modules.ai_generation.mapper.TestPlanMapper;
 import com.testhub.modules.ai_generation.mapper.TestRunCaseMapper;
 import com.testhub.modules.ai_generation.mapper.TestRunMapper;
-import com.testhub.modules.report.service.ReportService;
+import com.testhub.modules.ai_generation.report.service.ReportService;
 import com.testhub.modules.system.domain.User;
 import com.testhub.modules.system.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;

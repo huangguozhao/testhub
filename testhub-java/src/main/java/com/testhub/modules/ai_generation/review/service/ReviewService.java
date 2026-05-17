@@ -1,9 +1,9 @@
-package com.testhub.modules.review.service;
+package com.testhub.modules.ai_generation.review.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.testhub.common.exception.BusinessException;
-import com.testhub.modules.review.domain.TestCaseReview;
-import com.testhub.modules.review.mapper.TestCaseReviewMapper;
+import com.testhub.modules.ai_generation.review.domain.TestCaseReview;
+import com.testhub.modules.ai_generation.review.mapper.TestCaseReviewMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

@@ -1,7 +1,7 @@
-package com.testhub.modules.review.mapper;
+package com.testhub.modules.ai_generation.review.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.testhub.modules.review.domain.TestCaseReview;
+import com.testhub.modules.ai_generation.review.domain.TestCaseReview;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper

@@ -1,4 +1,4 @@
-package com.testhub.modules.report.service;
+package com.testhub.modules.ai_generation.report.service;
 
 import java.util.List;
 import java.util.Map;

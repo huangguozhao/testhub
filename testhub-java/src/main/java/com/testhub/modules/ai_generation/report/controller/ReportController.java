@@ -1,7 +1,7 @@
-package com.testhub.modules.report.controller;
+package com.testhub.modules.ai_generation.report.controller;
 
 import com.testhub.common.result.Result;
-import com.testhub.modules.report.service.ReportService;
+import com.testhub.modules.ai_generation.report.service.ReportService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +12,7 @@ import java.util.Map;
 
 @Tag(name = "测试报告", description = "测试报告统计分析")
 @RestController
-@RequestMapping("/api/reports/reports")
+@RequestMapping("/api/ai-generation/reports")
 @RequiredArgsConstructor
 public class ReportController {
 

@@ -1,4 +1,4 @@
-package com.testhub.modules.version.domain;
+package com.testhub.modules.ai_generation.version.domain;
 
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;

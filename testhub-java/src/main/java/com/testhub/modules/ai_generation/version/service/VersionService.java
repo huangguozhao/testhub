@@ -1,8 +1,7 @@
-package com.testhub.modules.version.service;
+package com.testhub.modules.ai_generation.version.service;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.testhub.modules.version.domain.Version;
-import com.testhub.modules.version.mapper.VersionMapper;
+import com.testhub.modules.ai_generation.version.domain.Version;
+import com.testhub.modules.ai_generation.version.mapper.VersionMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -22,7 +21,7 @@ public class VersionService {
      * 分页查询版本列表
      */
     public Map<String, Object> listVersions(int page, int pageSize, Long projectId, String status) {
-        LambdaQueryWrapper<Version> wrapper = new LambdaQueryWrapper<>();
+        var wrapper = new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<Version>();
         wrapper.eq(Version::getIsDeleted, 0);
 
         if (projectId != null) {
@@ -48,7 +47,7 @@ public class VersionService {
      */
     public List<Version> getProjectVersions(Long projectId) {
         return versionMapper.selectList(
-                new LambdaQueryWrapper<Version>()
+                new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<Version>()
                         .eq(Version::getProjectId, projectId)
                         .eq(Version::getIsDeleted, 0)
                         .orderByDesc(Version::getCreatedAt));

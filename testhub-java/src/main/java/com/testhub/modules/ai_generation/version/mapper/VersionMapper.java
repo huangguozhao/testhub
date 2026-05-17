@@ -1,7 +1,7 @@
-package com.testhub.modules.version.mapper;
+package com.testhub.modules.ai_generation.version.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.testhub.modules.version.domain.Version;
+import com.testhub.modules.ai_generation.version.domain.Version;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper

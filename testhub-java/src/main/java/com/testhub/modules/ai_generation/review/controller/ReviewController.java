@@ -1,11 +1,11 @@
-package com.testhub.modules.review.controller;
+package com.testhub.modules.ai_generation.review.controller;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.testhub.common.result.Result;
-import com.testhub.modules.review.domain.ReviewTemplate;
-import com.testhub.modules.review.domain.TestCaseReview;
-import com.testhub.modules.review.service.ReviewService;
-import com.testhub.modules.review.service.ReviewTemplateService;
+import com.testhub.modules.ai_generation.review.domain.ReviewTemplate;
+import com.testhub.modules.ai_generation.review.domain.TestCaseReview;
+import com.testhub.modules.ai_generation.review.service.ReviewService;
+import com.testhub.modules.ai_generation.review.service.ReviewTemplateService;
 import com.testhub.modules.system.security.UserDetailsImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -17,7 +17,7 @@ import java.util.Map;
 
 @Tag(name = "评审管理", description = "测试用例评审管理")
 @RestController
-@RequestMapping("/api/reviews")
+@RequestMapping("/api/ai-generation/reviews")
 @RequiredArgsConstructor
 public class ReviewController {
 

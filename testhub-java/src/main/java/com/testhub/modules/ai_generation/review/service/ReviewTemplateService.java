@@ -1,7 +1,7 @@
-package com.testhub.modules.review.service;
+package com.testhub.modules.ai_generation.review.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.testhub.modules.review.domain.ReviewTemplate;
+import com.testhub.modules.ai_generation.review.domain.ReviewTemplate;
 
 public interface ReviewTemplateService {
 
