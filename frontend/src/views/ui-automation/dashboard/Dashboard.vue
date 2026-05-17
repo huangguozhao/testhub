@@ -247,7 +247,7 @@ const loadDashboardData = async () => {
     executionCount.value = stats.execution_count || 0
 
     // 操作记录
-    operationRecords.value = recordsRes.data.results || recordsRes.data || []
+    operationRecords.value = recordsRes.data.records || recordsRes.data.results || []
   } catch (error) {
     ElMessage.error(t('uiAutomation.dashboard.messages.loadFailed'))
     console.error('Failed to load dashboard data:', error)
@@ -286,7 +286,13 @@ const getOperationIconClass = (operationType) => {
 
 // 格式化相对时间
 const formatRelativeTime = (dateString) => {
+  if (!dateString) {
+    return ''
+  }
   const date = new Date(dateString)
+  if (isNaN(date.getTime())) {
+    return ''
+  }
   const now = new Date()
   const diffMs = now - date
   const diffMins = Math.floor(diffMs / (1000 * 60))

@@ -3,7 +3,7 @@ import request from '@/utils/api'
 // 仪表盘相关API
 export function getDashboardStats() {
   return request({
-    url: '/ui-automation/dashboard/stats/',
+    url: '/ui-automation/dashboard/stats',
     method: 'get'
   })
 }
@@ -13,7 +13,7 @@ export function getDashboardStats() {
 // 获取UI项目列表
 export function getUiProjects(params) {
   return request({
-    url: '/ui-automation/projects/',
+    url: '/ui-automation/projects',
     method: 'get',
     params
   })
@@ -22,7 +22,7 @@ export function getUiProjects(params) {
 // 创建UI项目
 export function createUiProject(data) {
   return request({
-    url: '/ui-automation/projects/',
+    url: '/ui-automation/projects',
     method: 'post',
     data
   })
@@ -31,7 +31,7 @@ export function createUiProject(data) {
 // 获取UI项目详情
 export function getUiProjectDetail(id) {
   return request({
-    url: `/ui-automation/projects/${id}/`,
+    url: `/ui-automation/projects/${id}`,
     method: 'get'
   })
 }
@@ -39,8 +39,8 @@ export function getUiProjectDetail(id) {
 // 更新UI项目
 export function updateUiProject(id, data) {
   return request({
-    url: `/ui-automation/projects/${id}/`,
-    method: 'patch',
+    url: `/ui-automation/projects/${id}`,
+    method: 'put',
     data
   })
 }
@@ -48,7 +48,7 @@ export function updateUiProject(id, data) {
 // 删除UI项目
 export function deleteUiProject(id) {
   return request({
-    url: `/ui-automation/projects/${id}/`,
+    url: `/ui-automation/projects/${id}`,
     method: 'delete'
   })
 }
@@ -58,7 +58,7 @@ export function deleteUiProject(id) {
 // 获取定位策略列表
 export function getLocatorStrategies(params) {
   return request({
-    url: '/ui-automation/locator-strategies/',
+    url: '/ui-automation/locator-strategies',
     method: 'get',
     params
   })
@@ -67,7 +67,7 @@ export function getLocatorStrategies(params) {
 // 创建定位策略
 export function createLocatorStrategy(data) {
   return request({
-    url: '/ui-automation/locator-strategies/',
+    url: '/ui-automation/locator-strategies',
     method: 'post',
     data
   })
@@ -78,7 +78,7 @@ export function createLocatorStrategy(data) {
 // 获取UI元素列表
 export function getElements(params) {
   return request({
-    url: '/ui-automation/elements/',
+    url: '/ui-automation/elements',
     method: 'get',
     params
   })
@@ -87,7 +87,7 @@ export function getElements(params) {
 // 创建UI元素
 export function createElement(data) {
   return request({
-    url: '/ui-automation/elements/',
+    url: '/ui-automation/elements',
     method: 'post',
     data
   })
@@ -96,7 +96,7 @@ export function createElement(data) {
 // 获取UI元素详情
 export function getElementDetail(id) {
   return request({
-    url: `/ui-automation/elements/${id}/`,
+    url: `/ui-automation/elements/${id}`,
     method: 'get'
   })
 }
@@ -104,8 +104,8 @@ export function getElementDetail(id) {
 // 更新UI元素
 export function updateElement(id, data) {
   return request({
-    url: `/ui-automation/elements/${id}/`,
-    method: 'patch',
+    url: `/ui-automation/elements/${id}`,
+    method: 'put',
     data
   })
 }
@@ -113,7 +113,7 @@ export function updateElement(id, data) {
 // 删除UI元素
 export function deleteElement(id) {
   return request({
-    url: `/ui-automation/elements/${id}/`,
+    url: `/ui-automation/elements/${id}`,
     method: 'delete'
   })
 }
@@ -124,7 +124,7 @@ export function batchImportElements(projectId, file) {
   formData.append('project_id', projectId)
   formData.append('file', file)
   return request({
-    url: '/ui-automation/elements/batch_import/',
+    url: '/ui-automation/elements/batch_import',
     method: 'post',
     data: formData,
     headers: {
@@ -136,7 +136,7 @@ export function batchImportElements(projectId, file) {
 // 获取元素导入模板
 export function getElementImportTemplate() {
   return request({
-    url: '/ui-automation/elements/import_template/',
+    url: '/ui-automation/elements/import_template',
     method: 'get',
     responseType: 'blob'
   })
@@ -147,7 +147,7 @@ export function getElementImportTemplate() {
 // 获取测试脚本列表
 export function getTestScripts(params) {
   return request({
-    url: '/ui-automation/test-scripts/',
+    url: '/ui-automation/test-scripts',
     method: 'get',
     params
   })
@@ -156,7 +156,7 @@ export function getTestScripts(params) {
 // 创建测试脚本
 export function createTestScript(data) {
   return request({
-    url: '/ui-automation/test-scripts/',
+    url: '/ui-automation/test-scripts',
     method: 'post',
     data
   })
@@ -165,7 +165,7 @@ export function createTestScript(data) {
 // 获取测试脚本详情
 export function getTestScriptDetail(id) {
   return request({
-    url: `/ui-automation/test-scripts/${id}/`,
+    url: `/ui-automation/test-scripts/${id}`,
     method: 'get'
   })
 }
@@ -173,8 +173,8 @@ export function getTestScriptDetail(id) {
 // 更新测试脚本
 export function updateTestScript(id, data) {
   return request({
-    url: `/ui-automation/test-scripts/${id}/`,
-    method: 'patch',
+    url: `/ui-automation/test-scripts/${id}`,
+    method: 'put',
     data
   })
 }
@@ -182,7 +182,7 @@ export function updateTestScript(id, data) {
 // 删除测试脚本
 export function deleteTestScript(id) {
   return request({
-    url: `/ui-automation/test-scripts/${id}/`,
+    url: `/ui-automation/test-scripts/${id}`,
     method: 'delete'
   })
 }
@@ -192,7 +192,7 @@ export function deleteTestScript(id) {
 // 获取测试套件列表
 export function getTestSuites(params) {
   return request({
-    url: '/ui-automation/test-suites/',
+    url: '/ui-automation/test-suites',
     method: 'get',
     params
   })
@@ -201,7 +201,7 @@ export function getTestSuites(params) {
 // 创建测试套件
 export function createTestSuite(data) {
   return request({
-    url: '/ui-automation/test-suites/',
+    url: '/ui-automation/test-suites',
     method: 'post',
     data
   })
@@ -210,7 +210,7 @@ export function createTestSuite(data) {
 // 获取测试套件详情
 export function getTestSuiteDetail(id) {
   return request({
-    url: `/ui-automation/test-suites/${id}/`,
+    url: `/ui-automation/test-suites/${id}`,
     method: 'get'
   })
 }
@@ -218,8 +218,8 @@ export function getTestSuiteDetail(id) {
 // 更新测试套件
 export function updateTestSuite(id, data) {
   return request({
-    url: `/ui-automation/test-suites/${id}/`,
-    method: 'patch',
+    url: `/ui-automation/test-suites/${id}`,
+    method: 'put',
     data
   })
 }
@@ -227,7 +227,7 @@ export function updateTestSuite(id, data) {
 // 删除测试套件
 export function deleteTestSuite(id) {
   return request({
-    url: `/ui-automation/test-suites/${id}/`,
+    url: `/ui-automation/test-suites/${id}`,
     method: 'delete'
   })
 }
@@ -235,7 +235,7 @@ export function deleteTestSuite(id) {
 // 获取测试套件中的测试用例
 export function getTestSuiteTestCases(id) {
   return request({
-    url: `/ui-automation/test-suites/${id}/test_cases/`,
+    url: `/ui-automation/test-suites/${id}/test_cases`,
     method: 'get'
   })
 }
@@ -243,7 +243,7 @@ export function getTestSuiteTestCases(id) {
 // 向测试套件添加测试用例
 export function addTestCaseToTestSuite(id, data) {
   return request({
-    url: `/ui-automation/test-suites/${id}/add_test_case/`,
+    url: `/ui-automation/test-suites/${id}/add_test_case`,
     method: 'post',
     data
   })
@@ -252,7 +252,7 @@ export function addTestCaseToTestSuite(id, data) {
 // 从测试套件移除测试用例
 export function removeTestCaseFromTestSuite(suiteId, testCaseId) {
   return request({
-    url: `/ui-automation/test-suites/${suiteId}/remove_test_case/`,
+    url: `/ui-automation/test-suites/${suiteId}/remove_test_case`,
     method: 'delete',
     data: { test_case_id: testCaseId }
   })
@@ -261,7 +261,7 @@ export function removeTestCaseFromTestSuite(suiteId, testCaseId) {
 // 更新测试套件中测试用例的顺序
 export function updateTestCaseOrder(suiteId, testCaseOrders) {
   return request({
-    url: `/ui-automation/test-suites/${suiteId}/update_test_case_order/`,
+    url: `/ui-automation/test-suites/${suiteId}/update_test_case_order`,
     method: 'post',
     data: { test_case_orders: testCaseOrders }
   })
@@ -270,7 +270,7 @@ export function updateTestCaseOrder(suiteId, testCaseOrders) {
 // 运行测试套件
 export function runTestSuite(suiteId, data) {
   return request({
-    url: `/ui-automation/test-suites/${suiteId}/run_suite/`,
+    url: `/ui-automation/test-suites/${suiteId}/run_suite`,
     method: 'post',
     data,
     timeout: 600000  // 10分钟超时，因为套件可能包含多个测试用例
@@ -282,7 +282,7 @@ export function runTestSuite(suiteId, data) {
 // 获取测试执行列表
 export function getTestExecutions(params) {
   return request({
-    url: '/ui-automation/test-executions/',
+    url: '/ui-automation/test-executions',
     method: 'get',
     params
   })
@@ -291,7 +291,7 @@ export function getTestExecutions(params) {
 // 创建测试执行
 export function createTestExecution(data) {
   return request({
-    url: '/ui-automation/test-executions/',
+    url: '/ui-automation/test-executions',
     method: 'post',
     data
   })
@@ -300,7 +300,7 @@ export function createTestExecution(data) {
 // 获取测试执行详情
 export function getTestExecutionDetail(id) {
   return request({
-    url: `/ui-automation/test-executions/${id}/`,
+    url: `/ui-automation/test-executions/${id}`,
     method: 'get'
   })
 }
@@ -308,7 +308,7 @@ export function getTestExecutionDetail(id) {
 // 删除测试执行记录
 export function deleteTestExecution(id) {
   return request({
-    url: `/ui-automation/test-executions/${id}/`,
+    url: `/ui-automation/test-executions/${id}`,
     method: 'delete'
   })
 }
@@ -316,7 +316,7 @@ export function deleteTestExecution(id) {
 // 运行测试执行
 export function runTestExecution(id) {
   return request({
-    url: `/ui-automation/test-executions/${id}/run/`,
+    url: `/ui-automation/test-executions/${id}/run`,
     method: 'post'
   })
 }
@@ -324,7 +324,7 @@ export function runTestExecution(id) {
 // 中止测试执行
 export function abortTestExecution(id) {
   return request({
-    url: `/ui-automation/test-executions/${id}/abort/`,
+    url: `/ui-automation/test-executions/${id}/abort`,
     method: 'post'
   })
 }
@@ -334,7 +334,7 @@ export function abortTestExecution(id) {
 // 获取测试环境列表
 export function getTestEnvironments(params) {
   return request({
-    url: '/ui-automation/test-environments/',
+    url: '/ui-automation/test-environments',
     method: 'get',
     params
   })
@@ -343,7 +343,7 @@ export function getTestEnvironments(params) {
 // 创建测试环境
 export function createTestEnvironment(data) {
   return request({
-    url: '/ui-automation/test-environments/',
+    url: '/ui-automation/test-environments',
     method: 'post',
     data
   })
@@ -352,7 +352,7 @@ export function createTestEnvironment(data) {
 // 获取测试环境详情
 export function getTestEnvironmentDetail(id) {
   return request({
-    url: `/ui-automation/test-environments/${id}/`,
+    url: `/ui-automation/test-environments/${id}`,
     method: 'get'
   })
 }
@@ -360,8 +360,8 @@ export function getTestEnvironmentDetail(id) {
 // 更新测试环境
 export function updateTestEnvironment(id, data) {
   return request({
-    url: `/ui-automation/test-environments/${id}/`,
-    method: 'patch',
+    url: `/ui-automation/test-environments/${id}`,
+    method: 'put',
     data
   })
 }
@@ -369,7 +369,7 @@ export function updateTestEnvironment(id, data) {
 // 删除测试环境
 export function deleteTestEnvironment(id) {
   return request({
-    url: `/ui-automation/test-environments/${id}/`,
+    url: `/ui-automation/test-environments/${id}`,
     method: 'delete'
   })
 }
@@ -379,7 +379,7 @@ export function deleteTestEnvironment(id) {
 // 获取截图列表
 export function getScreenshots(params) {
   return request({
-    url: '/ui-automation/screenshots/',
+    url: '/ui-automation/screenshots',
     method: 'get',
     params
   })
@@ -388,7 +388,7 @@ export function getScreenshots(params) {
 // 创建截图
 export function createScreenshot(data) {
   return request({
-    url: '/ui-automation/screenshots/',
+    url: '/ui-automation/screenshots',
     method: 'post',
     data
   })
@@ -397,7 +397,7 @@ export function createScreenshot(data) {
 // 获取截图详情
 export function getScreenshotDetail(id) {
   return request({
-    url: `/ui-automation/screenshots/${id}/`,
+    url: `/ui-automation/screenshots/${id}`,
     method: 'get'
   })
 }
@@ -405,7 +405,7 @@ export function getScreenshotDetail(id) {
 // 删除截图
 export function deleteScreenshot(id) {
   return request({
-    url: `/ui-automation/screenshots/${id}/`,
+    url: `/ui-automation/screenshots/${id}`,
     method: 'delete'
   })
 }
@@ -415,7 +415,7 @@ export function deleteScreenshot(id) {
 // 元素分组相关API
 export function getElementGroups(params) {
   return request({
-    url: '/ui-automation/element-groups/',
+    url: '/ui-automation/element-groups',
     method: 'get',
     params
   })
@@ -423,7 +423,7 @@ export function getElementGroups(params) {
 
 export function createElementGroup(data) {
   return request({
-    url: '/ui-automation/element-groups/',
+    url: '/ui-automation/element-groups',
     method: 'post',
     data
   })
@@ -431,29 +431,29 @@ export function createElementGroup(data) {
 
 export function getElementGroupDetail(id) {
   return request({
-    url: `/ui-automation/element-groups/${id}/`,
+    url: `/ui-automation/element-groups/${id}`,
     method: 'get'
   })
 }
 
 export function updateElementGroup(id, data) {
   return request({
-    url: `/ui-automation/element-groups/${id}/`,
-    method: 'patch',
+    url: `/ui-automation/element-groups/${id}`,
+    method: 'put',
     data
   })
 }
 
 export function deleteElementGroup(id) {
   return request({
-    url: `/ui-automation/element-groups/${id}/`,
+    url: `/ui-automation/element-groups/${id}`,
     method: 'delete'
   })
 }
 
 export function getElementGroupTree(params) {
   return request({
-    url: '/ui-automation/element-groups/tree/',
+    url: '/ui-automation/element-groups/tree',
     method: 'get',
     params
   })
@@ -462,21 +462,21 @@ export function getElementGroupTree(params) {
 // 元素增强功能API
 export function validateElementLocator(id) {
   return request({
-    url: `/ui-automation/elements/${id}/validate_locator/`,
+    url: `/ui-automation/elements/${id}/validate_locator`,
     method: 'post'
   })
 }
 
 export function getElementUsages(id) {
   return request({
-    url: `/ui-automation/elements/${id}/usages/`,
+    url: `/ui-automation/elements/${id}/usages`,
     method: 'get'
   })
 }
 
 export function getElementTree(params) {
   return request({
-    url: '/ui-automation/elements/tree/',
+    url: '/ui-automation/elements/tree',
     method: 'get',
     params
   })
@@ -484,7 +484,7 @@ export function getElementTree(params) {
 
 export function addBackupLocator(id, data) {
   return request({
-    url: `/ui-automation/elements/${id}/add_backup_locator/`,
+    url: `/ui-automation/elements/${id}/add_backup_locator`,
     method: 'post',
     data
   })
@@ -492,7 +492,7 @@ export function addBackupLocator(id, data) {
 
 export function generateElementSuggestions(id) {
   return request({
-    url: `/ui-automation/elements/${id}/generate_suggestions/`,
+    url: `/ui-automation/elements/${id}/generate_suggestions`,
     method: 'post'
   })
 }
@@ -500,7 +500,7 @@ export function generateElementSuggestions(id) {
 // 页面对象相关API
 export function getPageObjects(params) {
   return request({
-    url: '/ui-automation/page-objects/',
+    url: '/ui-automation/page-objects',
     method: 'get',
     params
   })
@@ -508,7 +508,7 @@ export function getPageObjects(params) {
 
 export function createPageObject(data) {
   return request({
-    url: '/ui-automation/page-objects/',
+    url: '/ui-automation/page-objects',
     method: 'post',
     data
   })
@@ -516,29 +516,29 @@ export function createPageObject(data) {
 
 export function getPageObjectDetail(id) {
   return request({
-    url: `/ui-automation/page-objects/${id}/`,
+    url: `/ui-automation/page-objects/${id}`,
     method: 'get'
   })
 }
 
 export function updatePageObject(id, data) {
   return request({
-    url: `/ui-automation/page-objects/${id}/`,
-    method: 'patch',
+    url: `/ui-automation/page-objects/${id}`,
+    method: 'put',
     data
   })
 }
 
 export function deletePageObject(id) {
   return request({
-    url: `/ui-automation/page-objects/${id}/`,
+    url: `/ui-automation/page-objects/${id}`,
     method: 'delete'
   })
 }
 
 export function generatePageObjectCode(id, data) {
   return request({
-    url: `/ui-automation/page-objects/${id}/generate_code/`,
+    url: `/ui-automation/page-objects/${id}/generate_code`,
     method: 'post',
     data
   })
@@ -546,7 +546,7 @@ export function generatePageObjectCode(id, data) {
 
 export function addElementToPageObject(id, data) {
   return request({
-    url: `/ui-automation/page-objects/${id}/add_element/`,
+    url: `/ui-automation/page-objects/${id}/add_element`,
     method: 'post',
     data
   })
@@ -554,7 +554,7 @@ export function addElementToPageObject(id, data) {
 
 export function getPageObjectElements(id) {
   return request({
-    url: `/ui-automation/page-objects/${id}/elements/`,
+    url: `/ui-automation/page-objects/${id}/elements`,
     method: 'get'
   })
 }
@@ -562,7 +562,7 @@ export function getPageObjectElements(id) {
 // 页面对象元素关联API
 export function getPageObjectElementDetails(params) {
   return request({
-    url: '/ui-automation/page-object-elements/',
+    url: '/ui-automation/page-object-elements',
     method: 'get',
     params
   })
@@ -570,7 +570,7 @@ export function getPageObjectElementDetails(params) {
 
 export function createPageObjectElement(data) {
   return request({
-    url: '/ui-automation/page-object-elements/',
+    url: '/ui-automation/page-object-elements',
     method: 'post',
     data
   })
@@ -578,15 +578,15 @@ export function createPageObjectElement(data) {
 
 export function updatePageObjectElement(id, data) {
   return request({
-    url: `/ui-automation/page-object-elements/${id}/`,
-    method: 'patch',
+    url: `/ui-automation/page-object-elements/${id}`,
+    method: 'put',
     data
   })
 }
 
 export function deletePageObjectElement(id) {
   return request({
-    url: `/ui-automation/page-object-elements/${id}/`,
+    url: `/ui-automation/page-object-elements/${id}`,
     method: 'delete'
   })
 }
@@ -594,7 +594,7 @@ export function deletePageObjectElement(id) {
 // 脚本步骤相关API
 export function getScriptSteps(params) {
   return request({
-    url: '/ui-automation/script-steps/',
+    url: '/ui-automation/script-steps',
     method: 'get',
     params
   })
@@ -602,7 +602,7 @@ export function getScriptSteps(params) {
 
 export function createScriptStep(data) {
   return request({
-    url: '/ui-automation/script-steps/',
+    url: '/ui-automation/script-steps',
     method: 'post',
     data
   })
@@ -610,7 +610,7 @@ export function createScriptStep(data) {
 
 export function batchCreateScriptSteps(data) {
   return request({
-    url: '/ui-automation/script-steps/batch_create/',
+    url: '/ui-automation/script-steps/batch_create',
     method: 'post',
     data
   })
@@ -618,15 +618,15 @@ export function batchCreateScriptSteps(data) {
 
 export function updateScriptStep(id, data) {
   return request({
-    url: `/ui-automation/script-steps/${id}/`,
-    method: 'patch',
+    url: `/ui-automation/script-steps/${id}`,
+    method: 'put',
     data
   })
 }
 
 export function deleteScriptStep(id) {
   return request({
-    url: `/ui-automation/script-steps/${id}/`,
+    url: `/ui-automation/script-steps/${id}`,
     method: 'delete'
   })
 }
@@ -634,7 +634,7 @@ export function deleteScriptStep(id) {
 // 脚本元素使用情况API
 export function getScriptElementUsages(params) {
   return request({
-    url: '/ui-automation/script-element-usages/',
+    url: '/ui-automation/script-element-usages',
     method: 'get',
     params
   })
@@ -642,7 +642,7 @@ export function getScriptElementUsages(params) {
 
 export function analyzeScriptElements(data) {
   return request({
-    url: '/ui-automation/script-element-usages/analyze_script/',
+    url: '/ui-automation/script-element-usages/analyze_script',
     method: 'post',
     data
   })
@@ -650,7 +650,7 @@ export function analyzeScriptElements(data) {
 
 export function createScriptElementUsage(data) {
   return request({
-    url: '/ui-automation/script-element-usages/',
+    url: '/ui-automation/script-element-usages',
     method: 'post',
     data
   })
@@ -658,15 +658,15 @@ export function createScriptElementUsage(data) {
 
 export function updateScriptElementUsage(id, data) {
   return request({
-    url: `/ui-automation/script-element-usages/${id}/`,
-    method: 'patch',
+    url: `/ui-automation/script-element-usages/${id}`,
+    method: 'put',
     data
   })
 }
 
 export function deleteScriptElementUsage(id) {
   return request({
-    url: `/ui-automation/script-element-usages/${id}/`,
+    url: `/ui-automation/script-element-usages/${id}`,
     method: 'delete'
   })
 }
@@ -676,7 +676,7 @@ export function deleteScriptElementUsage(id) {
 // 获取测试用例列表
 export function getTestCases(params) {
   return request({
-    url: '/ui-automation/test-cases/',
+    url: '/ui-automation/test-cases',
     method: 'get',
     params
   })
@@ -685,7 +685,7 @@ export function getTestCases(params) {
 // 创建测试用例
 export function createTestCase(data) {
   return request({
-    url: '/ui-automation/test-cases/',
+    url: '/ui-automation/test-cases',
     method: 'post',
     data
   })
@@ -694,7 +694,7 @@ export function createTestCase(data) {
 // 获取测试用例详情
 export function getTestCaseDetail(id) {
   return request({
-    url: `/ui-automation/test-cases/${id}/`,
+    url: `/ui-automation/test-cases/${id}`,
     method: 'get'
   })
 }
@@ -702,8 +702,8 @@ export function getTestCaseDetail(id) {
 // 更新测试用例
 export function updateTestCase(id, data) {
   return request({
-    url: `/ui-automation/test-cases/${id}/`,
-    method: 'patch',
+    url: `/ui-automation/test-cases/${id}`,
+    method: 'put',
     data
   })
 }
@@ -711,7 +711,7 @@ export function updateTestCase(id, data) {
 // 删除测试用例
 export function deleteTestCase(id) {
   return request({
-    url: `/ui-automation/test-cases/${id}/`,
+    url: `/ui-automation/test-cases/${id}`,
     method: 'delete'
   })
 }
@@ -719,7 +719,7 @@ export function deleteTestCase(id) {
 // 运行测试用例
 export function runTestCase(testCaseId, data) {
   return request({
-    url: `/ui-automation/test-cases/${testCaseId}/run/`,
+    url: `/ui-automation/test-cases/${testCaseId}/run`,
     method: 'post',
     data,
     timeout: 300000  // 5分钟超时，因为测试执行需要启动浏览器和执行多个步骤
@@ -729,7 +729,7 @@ export function runTestCase(testCaseId, data) {
 // 复制测试用例
 export function copyTestCase(id) {
   return request({
-    url: `/ui-automation/test-cases/${id}/copy_case/`,
+    url: `/ui-automation/test-cases/${id}/copy_case`,
     method: 'post'
   })
 }
@@ -737,7 +737,7 @@ export function copyTestCase(id) {
 // 获取测试用例执行历史
 export function getTestCaseExecutions(params) {
   return request({
-    url: '/ui-automation/test-case-executions/',
+    url: '/ui-automation/test-case-executions',
     method: 'get',
     params
   })
@@ -746,7 +746,7 @@ export function getTestCaseExecutions(params) {
 // 删除测试用例执行记录
 export function deleteTestCaseExecution(id) {
   return request({
-    url: `/ui-automation/test-case-executions/${id}/`,
+    url: `/ui-automation/test-case-executions/${id}`,
     method: 'delete'
   })
 }
@@ -754,7 +754,7 @@ export function deleteTestCaseExecution(id) {
 // 批量删除测试用例执行记录
 export function batchDeleteTestCaseExecutions(ids) {
   return request({
-    url: '/ui-automation/test-case-executions/batch-delete/',
+    url: '/ui-automation/test-case-executions/batch-delete',
     method: 'post',
     data: { ids }
   })
@@ -763,7 +763,7 @@ export function batchDeleteTestCaseExecutions(ids) {
 // 批量运行测试用例
 export function batchRunTestCases(data) {
   return request({
-    url: '/ui-automation/test-cases/batch-run/',
+    url: '/ui-automation/test-cases/batch-run',
     method: 'post',
     data
   })
@@ -774,7 +774,7 @@ export function batchRunTestCases(data) {
 // 获取操作记录列表
 export function getOperationRecords(params) {
   return request({
-    url: '/ui-automation/operation-records/',
+    url: '/ui-automation/operation-records',
     method: 'get',
     params
   })
@@ -783,7 +783,7 @@ export function getOperationRecords(params) {
 // 创建操作记录
 export function createOperationRecord(data) {
   return request({
-    url: '/ui-automation/operation-records/',
+    url: '/ui-automation/operation-records',
     method: 'post',
     data
   })
@@ -794,7 +794,7 @@ export function createOperationRecord(data) {
 // 获取定时任务列表
 export function getScheduledTasks(params) {
   return request({
-    url: '/ui-automation/scheduled-tasks/',
+    url: '/ui-automation/scheduled-tasks',
     method: 'get',
     params
   })
@@ -803,7 +803,7 @@ export function getScheduledTasks(params) {
 // 创建定时任务
 export function createScheduledTask(data) {
   return request({
-    url: '/ui-automation/scheduled-tasks/',
+    url: '/ui-automation/scheduled-tasks',
     method: 'post',
     data
   })
@@ -812,7 +812,7 @@ export function createScheduledTask(data) {
 // 获取定时任务详情
 export function getScheduledTaskDetail(id) {
   return request({
-    url: `/ui-automation/scheduled-tasks/${id}/`,
+    url: `/ui-automation/scheduled-tasks/${id}`,
     method: 'get'
   })
 }
@@ -820,8 +820,8 @@ export function getScheduledTaskDetail(id) {
 // 更新定时任务
 export function updateScheduledTask(id, data) {
   return request({
-    url: `/ui-automation/scheduled-tasks/${id}/`,
-    method: 'patch',
+    url: `/ui-automation/scheduled-tasks/${id}`,
+    method: 'put',
     data
   })
 }
@@ -829,7 +829,7 @@ export function updateScheduledTask(id, data) {
 // 删除定时任务
 export function deleteScheduledTask(id) {
   return request({
-    url: `/ui-automation/scheduled-tasks/${id}/`,
+    url: `/ui-automation/scheduled-tasks/${id}`,
     method: 'delete'
   })
 }
@@ -837,7 +837,7 @@ export function deleteScheduledTask(id) {
 // 暂停定时任务
 export function pauseScheduledTask(id) {
   return request({
-    url: `/ui-automation/scheduled-tasks/${id}/pause/`,
+    url: `/ui-automation/scheduled-tasks/${id}/pause`,
     method: 'post'
   })
 }
@@ -845,7 +845,7 @@ export function pauseScheduledTask(id) {
 // 恢复定时任务
 export function resumeScheduledTask(id) {
   return request({
-    url: `/ui-automation/scheduled-tasks/${id}/resume/`,
+    url: `/ui-automation/scheduled-tasks/${id}/resume`,
     method: 'post'
   })
 }
@@ -853,7 +853,7 @@ export function resumeScheduledTask(id) {
 // 立即运行任务
 export function runScheduledTask(id) {
   return request({
-    url: `/ui-automation/scheduled-tasks/${id}/run_now/`,
+    url: `/ui-automation/scheduled-tasks/${id}/run_now`,
     method: 'post'
   })
 }
@@ -863,7 +863,7 @@ export function runScheduledTask(id) {
 // 获取通知配置列表
 export function getNotificationConfigs(params) {
   return request({
-    url: '/ui-automation/notification-configs/',
+    url: '/ui-automation/notification-configs',
     method: 'get',
     params
   })
@@ -872,7 +872,7 @@ export function getNotificationConfigs(params) {
 // 创建通知配置
 export function createNotificationConfig(data) {
   return request({
-    url: '/ui-automation/notification-configs/',
+    url: '/ui-automation/notification-configs',
     method: 'post',
     data
   })
@@ -881,7 +881,7 @@ export function createNotificationConfig(data) {
 // 获取通知配置详情
 export function getNotificationConfigDetail(id) {
   return request({
-    url: `/ui-automation/notification-configs/${id}/`,
+    url: `/ui-automation/notification-configs/${id}`,
     method: 'get'
   })
 }
@@ -889,8 +889,8 @@ export function getNotificationConfigDetail(id) {
 // 更新通知配置
 export function updateNotificationConfig(id, data) {
   return request({
-    url: `/ui-automation/notification-configs/${id}/`,
-    method: 'patch',
+    url: `/ui-automation/notification-configs/${id}`,
+    method: 'put',
     data
   })
 }
@@ -898,7 +898,7 @@ export function updateNotificationConfig(id, data) {
 // 删除通知配置
 export function deleteNotificationConfig(id) {
   return request({
-    url: `/ui-automation/notification-configs/${id}/`,
+    url: `/ui-automation/notification-configs/${id}`,
     method: 'delete'
   })
 }
@@ -906,7 +906,7 @@ export function deleteNotificationConfig(id) {
 // 设置为默认配置
 export function setDefaultNotificationConfig(id) {
   return request({
-    url: `/ui-automation/notification-configs/${id}/set_default/`,
+    url: `/ui-automation/notification-configs/${id}/set_default`,
     method: 'post'
   })
 }
@@ -916,7 +916,7 @@ export function setDefaultNotificationConfig(id) {
 // 获取通知日志列表
 export function getNotificationLogs(params) {
   return request({
-    url: '/ui-automation/notification-logs/',
+    url: '/ui-automation/notification-logs',
     method: 'get',
     params
   })
@@ -925,7 +925,7 @@ export function getNotificationLogs(params) {
 // 重试发送通知
 export function retryNotification(id) {
   return request({
-    url: `/ui-automation/notification-logs/${id}/retry/`,
+    url: `/ui-automation/notification-logs/${id}/retry`,
     method: 'post'
   })
 }
@@ -935,7 +935,7 @@ export function retryNotification(id) {
 // 获取任务通知设置
 export function getTaskNotificationSettings(params) {
   return request({
-    url: '/ui-automation/task-notification-settings/',
+    url: '/ui-automation/task-notification-settings',
     method: 'get',
     params
   })
@@ -944,7 +944,7 @@ export function getTaskNotificationSettings(params) {
 // 创建任务通知设置
 export function createTaskNotificationSetting(data) {
   return request({
-    url: '/ui-automation/task-notification-settings/',
+    url: '/ui-automation/task-notification-settings',
     method: 'post',
     data
   })
@@ -953,8 +953,8 @@ export function createTaskNotificationSetting(data) {
 // 更新任务通知设置
 export function updateTaskNotificationSetting(id, data) {
   return request({
-    url: `/ui-automation/task-notification-settings/${id}/`,
-    method: 'patch',
+    url: `/ui-automation/task-notification-settings/${id}`,
+    method: 'put',
     data
   })
 }
@@ -973,7 +973,7 @@ export function getUiUsers(params) {
 // 获取 AI 用例列表
 export function getAICases(params) {
   return request({
-    url: '/ui-automation/ai-cases/',
+    url: '/ui-automation/ai-cases',
     method: 'get',
     params
   })
@@ -982,7 +982,7 @@ export function getAICases(params) {
 // 创建 AI 用例
 export function createAICase(data) {
   return request({
-    url: '/ui-automation/ai-cases/',
+    url: '/ui-automation/ai-cases',
     method: 'post',
     data
   })
@@ -991,7 +991,7 @@ export function createAICase(data) {
 // 获取 AI 用例详情
 export function getAICaseDetail(id) {
   return request({
-    url: `/ui-automation/ai-cases/${id}/`,
+    url: `/ui-automation/ai-cases/${id}`,
     method: 'get'
   })
 }
@@ -999,8 +999,8 @@ export function getAICaseDetail(id) {
 // 更新 AI 用例
 export function updateAICase(id, data) {
   return request({
-    url: `/ui-automation/ai-cases/${id}/`,
-    method: 'patch',
+    url: `/ui-automation/ai-cases/${id}`,
+    method: 'put',
     data
   })
 }
@@ -1008,7 +1008,7 @@ export function updateAICase(id, data) {
 // 删除 AI 用例
 export function deleteAICase(id) {
   return request({
-    url: `/ui-automation/ai-cases/${id}/`,
+    url: `/ui-automation/ai-cases/${id}`,
     method: 'delete'
   })
 }
@@ -1016,7 +1016,7 @@ export function deleteAICase(id) {
 // 运行 AI 用例
 export function runAICase(id) {
   return request({
-    url: `/ui-automation/ai-cases/${id}/run/`,
+    url: `/ui-automation/ai-cases/${id}/run`,
     method: 'post'
   })
 }
@@ -1024,7 +1024,7 @@ export function runAICase(id) {
 // 获取 AI 执行记录列表
 export function getAIExecutionRecords(params) {
   return request({
-    url: '/ui-automation/ai-execution-records/',
+    url: '/ui-automation/ai-execution-records',
     method: 'get',
     params
   })
@@ -1033,7 +1033,7 @@ export function getAIExecutionRecords(params) {
 // 获取 AI 执行记录详情
 export function getAIExecutionRecordDetail(id) {
   return request({
-    url: `/ui-automation/ai-execution-records/${id}/`,
+    url: `/ui-automation/ai-execution-records/${id}`,
     method: 'get'
   })
 }
@@ -1041,7 +1041,7 @@ export function getAIExecutionRecordDetail(id) {
 // 执行临时 AI 任务
 export function runAdhocAITask(data) {
   return request({
-    url: '/ui-automation/ai-execution-records/run_adhoc/',
+    url: '/ui-automation/ai-execution-records/run_adhoc',
     method: 'post',
     data
   })
@@ -1050,7 +1050,7 @@ export function runAdhocAITask(data) {
 // 停止 AI 任务
 export function stopAITask(id) {
   return request({
-    url: `/ui-automation/ai-execution-records/${id}/stop/`,
+    url: `/ui-automation/ai-execution-records/${id}/stop`,
     method: 'post'
   })
 }
@@ -1058,7 +1058,7 @@ export function stopAITask(id) {
 // 批量删除 AI 执行记录
 export function batchDeleteAIExecutionRecords(ids) {
   return request({
-    url: '/ui-automation/ai-execution-records/batch_delete/',
+    url: '/ui-automation/ai-execution-records/batch_delete',
     method: 'post',
     data: { ids }
   })
@@ -1067,7 +1067,7 @@ export function batchDeleteAIExecutionRecords(ids) {
 // 获取 AI 执行报告
 export function getAIExecutionReport(id, params = {}) {
   return request({
-    url: `/ui-automation/ai-execution-records/${id}/report/`,
+    url: `/ui-automation/ai-execution-records/${id}/report`,
     method: 'get',
     params
   })
@@ -1076,7 +1076,7 @@ export function getAIExecutionReport(id, params = {}) {
 // 导出 AI 执行报告为 PDF
 export function exportAIExecutionReportPDF(id, params = {}) {
   return request({
-    url: `/ui-automation/ai-execution-records/${id}/export-pdf/`,
+    url: `/ui-automation/ai-execution-records/${id}/export-pdf`,
     method: 'get',
     params,
     responseType: 'blob'

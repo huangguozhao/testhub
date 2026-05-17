@@ -294,8 +294,8 @@ const loadProjects = async () => {
     }
     
     const response = await getUiProjects(params)
-    projects.value = response.data.results || response.data
-    total.value = response.data.count || projects.value.length
+    projects.value = response.data.records || response.data.results || response.data
+    total.value = response.data.total || response.data.count || projects.value.length
   } catch (error) {
     ElMessage.error(t('uiAutomation.project.messages.loadFailed'))
     console.error('获取项目列表失败:', error)
