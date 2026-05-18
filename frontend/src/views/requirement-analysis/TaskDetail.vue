@@ -411,7 +411,12 @@ export default {
 
       for (let line of lines) {
         const trimmedLine = line.trim()
-        if (trimmedLine.includes('|') && !trimmedLine.includes('--------')) {
+        // 过滤分隔行 - 分隔行通常包含多个连续的 - 或 : 符号
+        if (trimmedLine.includes('|')) {
+          // 检查是否是分隔行（包含多个 - 但不是数据行）
+          const isSeparatorRow = /^[\|\s\-:]+$/.test(trimmedLine.replace(/\s+/g, ''))
+          if (isSeparatorRow) continue
+
           const cells = trimmedLine.split('|').map(cell => cell.trim()).filter(cell => cell)
           if (cells.length > 1) {
             tableData.push(cells)
@@ -435,25 +440,21 @@ export default {
 
           headers.forEach((header, index) => {
             const value = cleanBrTags(row[index] || '')
-
-            // 使用更精确的匹配逻辑，避免误判
             const cleanHeader = header.trim().toLowerCase()
 
-            // 优先级匹配，避免误判
-            if (cleanHeader === '优先级' || cleanHeader === 'priority' || cleanHeader === 'priority（优先级）' || cleanHeader === '优先级（priority）') {
+            // 优先级匹配 - 精确匹配P0/P1/P2等格式的值，或者列名包含"优先级"
+            const isPriorityValue = /^p[0-3]$/i.test(value.trim()) || /^P[0-3](,|$)/.test(value.trim())
+            if (isPriorityValue || cleanHeader.includes('优先级') || cleanHeader === 'priority') {
               testCase.priority = value
-            } else if (cleanHeader === '用例id' || cleanHeader === '编号' || cleanHeader === 'id' || cleanHeader.includes('用例id')) {
+            } else if (cleanHeader.includes('用例编号') || cleanHeader.includes('用例id') || cleanHeader === '编号' || cleanHeader === 'id') {
               testCase.caseId = value
-            } else if (cleanHeader === '测试目标' || cleanHeader === '测试场景' || cleanHeader === '场景' || cleanHeader === '标题' || cleanHeader.includes('测试目标')) {
+            } else if (cleanHeader.includes('标题') || cleanHeader.includes('测试场景') || cleanHeader.includes('测试目标') || cleanHeader === '场景') {
               testCase.scenario = value
-            } else if (cleanHeader === '前置条件' || cleanHeader === '前置' || cleanHeader === '前提条件') {
+            } else if (cleanHeader.includes('前置条件') || cleanHeader === '前置') {
               testCase.precondition = value
-            } else if (cleanHeader === '测试步骤' || cleanHeader === '操作步骤' || cleanHeader === '步骤') {
-              // 确保不要误匹配"预期结果"中包含的"步骤"字样
-              if (!cleanHeader.includes('预期') && !cleanHeader.includes('结果')) {
-                testCase.steps = value
-              }
-            } else if (cleanHeader === '预期结果' || cleanHeader === '预期' || cleanHeader === '结果' || cleanHeader.includes('预期结果')) {
+            } else if (cleanHeader.includes('测试步骤') || cleanHeader === '步骤') {
+              testCase.steps = value
+            } else if (cleanHeader.includes('预期结果')) {
               testCase.expected = value
             }
           })
