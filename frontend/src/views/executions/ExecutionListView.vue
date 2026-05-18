@@ -328,7 +328,7 @@ const fetchBasicData = async () => {
   try {
     const [projectsRes, versionsRes, usersRes] = await Promise.all([
       api.get('/projects'), // 只显示用户参与的项目
-      api.get('/versions'),
+      api.get('/ai-generation/versions'),
       api.get('/users') // 修正用户API路径
     ])
     

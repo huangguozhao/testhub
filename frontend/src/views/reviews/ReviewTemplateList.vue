@@ -242,7 +242,7 @@ const fetchTemplates = async () => {
       params.project = filters.project
     }
 
-    const response = await api.get('/reviews/review-templates', { params })
+    const response = await api.get('/ai-generation/reviews/review-templates', { params })
     templates.value = response.data.records || response.data.results || response.data || []
   } catch (error) {
     ElMessage.error(t('reviewTemplate.fetchListFailed'))
@@ -315,10 +315,10 @@ const saveTemplate = async () => {
     }
 
     if (isEdit.value) {
-      await api.put(`/reviews/review-templates/${editingTemplateId.value}`, data)
+      await api.put(`/ai-generation/reviews/review-templates/${editingTemplateId.value}`, data)
       ElMessage.success(t('reviewTemplate.updateSuccess'))
     } else {
-      await api.post('/reviews/review-templates', data)
+      await api.post('/ai-generation/reviews/review-templates', data)
       ElMessage.success(t('reviewTemplate.createSuccess'))
     }
 
@@ -335,7 +335,7 @@ const saveTemplate = async () => {
 
 const deleteTemplate = async (id) => {
   try {
-    await api.delete(`/reviews/review-templates/${id}`)
+    await api.delete(`/ai-generation/reviews/review-templates/${id}`)
     ElMessage.success(t('reviewTemplate.deleteSuccess'))
     fetchTemplates()
   } catch (error) {

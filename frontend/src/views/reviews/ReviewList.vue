@@ -195,7 +195,7 @@ const fetchReviews = async () => {
     }
     Object.keys(params).forEach(key => params[key] === '' && delete params[key])
 
-    const response = await api.get('/reviews', { params })
+    const response = await api.get('/ai-generation/reviews', { params })
     reviews.value = response.data.results
     pagination.total = response.data.count
   } catch (error) {
@@ -244,7 +244,7 @@ const submitReview = (review) => {
 
 const confirmSubmitReview = async () => {
   try {
-    await api.post(`/reviews/${currentReview.value.id}/submit_review`, reviewForm)
+    await api.post(`/ai-generation/reviews/${currentReview.value.id}/submit_review`, reviewForm)
     ElMessage.success(t('reviewList.submitSuccess'))
     reviewDialogVisible.value = false
     fetchReviews()
@@ -255,7 +255,7 @@ const confirmSubmitReview = async () => {
 
 const deleteReview = async (id) => {
   try {
-    await api.delete(`/reviews/${id}`)
+    await api.delete(`/ai-generation/reviews/${id}`)
     ElMessage.success(t('reviewList.deleteSuccess'))
     fetchReviews()
   } catch (error) {

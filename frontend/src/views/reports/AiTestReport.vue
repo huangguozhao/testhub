@@ -190,7 +190,7 @@ const fetchProjects = async () => {
 const fetchDashboardData = async () => {
   try {
     const params = { project: filters.project }
-    const response = await api.get('/reports/reports/dashboard', { params })
+    const response = await api.get('/ai-generation/reports/dashboard', { params })
     dashboardData.value = response.data
   } catch (error) {
     console.error(t('report.fetchDashboardFailed'), error)
@@ -225,7 +225,7 @@ const loadChartsData = async () => {
 
   // 1. Status distribution
   try {
-    const res = await api.get('/reports/reports/status_distribution', { params })
+    const res = await api.get('/ai-generation/reports/status_distribution', { params })
     const data = [
       { value: res.data.passed, name: t('report.passed'), itemStyle: { color: '#67C23A' } },
       { value: res.data.failed, name: t('report.failed'), itemStyle: { color: '#F56C6C' } },
@@ -254,7 +254,7 @@ const loadChartsData = async () => {
 
   // 2. Execution trend
   try {
-    const res = await api.get('/reports/reports/execution_trend', { params })
+    const res = await api.get('/ai-generation/reports/execution_trend', { params })
     const dates = res.data.map(item => item.date)
     const counts = res.data.map(item => item.count)
 
@@ -277,7 +277,7 @@ const loadChartsData = async () => {
 
   // 3. Defect distribution
   try {
-    const res = await api.get('/reports/reports/defect_distribution', { params })
+    const res = await api.get('/ai-generation/reports/defect_distribution', { params })
     defectChart.setOption({
       tooltip: { trigger: 'item' },
       legend: { bottom: '0%', left: 'center' },
@@ -300,13 +300,13 @@ const loadChartsData = async () => {
 
   // 4. 失败用例TOP榜
   try {
-    const res = await api.get('/reports/reports/failed_cases_top', { params })
+    const res = await api.get('/ai-generation/reports/failed_cases_top', { params })
     failedCasesTop.value = res.data
   } catch (e) { console.error(e) }
 
   // 5. AI efficiency
   try {
-    const res = await api.get('/reports/reports/ai_efficiency', { params })
+    const res = await api.get('/ai-generation/reports/ai_efficiency', { params })
     aiData.value = res.data
     const aiCounts = res.data.ai_vs_manual
 
@@ -324,7 +324,7 @@ const loadChartsData = async () => {
 
   // 6. Team workload
   try {
-    const res = await api.get('/reports/reports/team_workload', { params })
+    const res = await api.get('/ai-generation/reports/team_workload', { params })
     const users = res.data.map(item => item.username)
     const execCounts = res.data.map(item => item.execution_count)
     const defectCounts = res.data.map(item => item.defect_count)

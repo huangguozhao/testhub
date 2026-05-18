@@ -217,7 +217,7 @@ const fetchVersions = async () => {
       projects: projectFilter.value,
       is_baseline: baselineFilter.value
     }
-    const response = await api.get('/versions', { params })
+    const response = await api.get('/ai-generation/versions', { params })
     versions.value = response.data.results || []
     total.value = response.data.count || 0
   } catch (error) {
@@ -276,10 +276,10 @@ const saveVersion = async () => {
     saving.value = true
 
     if (isEdit.value) {
-      await api.put(`/versions/${editingVersionId.value}/`, versionForm)
+      await api.put(`/ai-generation/versions/${editingVersionId.value}`, versionForm)
       ElMessage.success(t('version.updateSuccess'))
     } else {
-      await api.post('/versions', versionForm)
+      await api.post('/ai-generation/versions', versionForm)
       ElMessage.success(t('version.createSuccess'))
     }
 
@@ -306,7 +306,7 @@ const deleteVersion = async (version) => {
       type: 'warning'
     })
 
-    await api.delete(`/versions/${version.id}/`)
+    await api.delete(`/ai-generation/versions/${version.id}`)
     ElMessage.success(t('version.deleteSuccess'))
     fetchVersions()
   } catch (error) {
@@ -351,7 +351,7 @@ const batchDeleteVersions = async () => {
     // 逐个删除选中的版本
     for (const version of selectedVersions.value) {
       try {
-        await api.delete(`/versions/${version.id}/`)
+        await api.delete(`/ai-generation/versions/${version.id}`)
         successCount++
       } catch (error) {
         console.error(`删除版本 ${version.id} 失败:`, error)

@@ -337,7 +337,7 @@ const canReview = computed(() => {
 
 const fetchReview = async () => {
   try {
-    const response = await api.get(`/reviews/${route.params.id}`)
+    const response = await api.get(`/ai-generation/reviews/${route.params.id}`)
     review.value = response.data
   } catch (error) {
     ElMessage.error(t('reviewDetail.fetchDetailFailed'))
@@ -366,7 +366,7 @@ const showReviewDialog = () => {
 
 const submitReview = async () => {
   try {
-    await api.post(`/reviews/${route.params.id}/submit_review`, reviewForm)
+    await api.post(`/ai-generation/reviews/${route.params.id}/submit_review`, reviewForm)
     ElMessage.success(t('reviewDetail.submitSuccess'))
     reviewDialogVisible.value = false
     fetchReview()
@@ -406,7 +406,7 @@ const addCommentSubmit = async () => {
       data.testcase = commentForm.testcase
     }
 
-    await api.post('/reviews/review-comments/', data)
+    await api.post(`/ai-generation/reviews/${route.params.id}/submit_review`, data)
     ElMessage.success(t('reviewDetail.addCommentSuccess'))
     commentDialogVisible.value = false
     fetchReview()

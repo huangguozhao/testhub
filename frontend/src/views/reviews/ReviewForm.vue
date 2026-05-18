@@ -283,7 +283,7 @@ const fetchTemplates = async (projectIds) => {
 
     // 获取所有选中项目的模板
     const promises = projectIds.map(projectId =>
-      api.get('/reviews/review-templates/', { params: { project: projectId } })
+      api.get('/ai-generation/reviews/review-templates/', { params: { project: projectId } })
     )
 
     const responses = await Promise.all(promises)
@@ -378,10 +378,10 @@ const saveReview = async () => {
     }
 
     if (isEdit.value) {
-      await api.put(`/reviews/${route.params.id}`, data)
+      await api.put(`/ai-generation/reviews/${route.params.id}`, data)
       ElMessage.success(t('reviewForm.updateSuccess'))
     } else {
-      await api.post('/reviews', data)
+      await api.post('/ai-generation/reviews', data)
       ElMessage.success(t('reviewForm.createSuccess'))
     }
 
@@ -504,7 +504,7 @@ onMounted(async () => {
     if (templateId) {
       try {
         // 获取模板详情
-        const response = await api.get(`/reviews/review-templates/${templateId}/`)
+        const response = await api.get(`/ai-generation/reviews/review-templates/${templateId}`)
         const template = response.data
 
         // 设置模板ID到表单

@@ -776,7 +776,7 @@ export default {
     // 获取所有版本列表
     async fetchAllVersions() {
       try {
-        const response = await api.get('/versions')
+        const response = await api.get('/ai-generation/versions')
         this.allVersions = response.data.results || response.data || []
       } catch (error) {
         console.error(this.$t('generatedTestCases.fetchVersionsFailed'), error)
@@ -792,7 +792,7 @@ export default {
       }
 
       try {
-        const response = await api.get(`/versions/projects/${projectId}/versions`)
+        const response = await api.get(`/ai-generation/versions/projects/${projectId}/versions`)
         this.projectVersions = response.data || []
       } catch (error) {
         console.error(this.$t('generatedTestCases.fetchProjectVersionsFailed'), error)
