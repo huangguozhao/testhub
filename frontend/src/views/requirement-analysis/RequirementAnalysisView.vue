@@ -1525,8 +1525,10 @@ export default {
 
     // 将HTML的<br>标签转换为换行符（用于Excel导出）
     convertBrToNewline(text) {
-      if (!text) return '';
-      return text.replace(/<br\s*\/?>/gi, '\n');
+      if (text == null) return '';
+      // 确保是字符串类型
+      const str = String(text);
+      return str.replace(/<br\s*\/?>/gi, '\n');
     },
 
     // 过滤掉总结和建议部分，只保留测试用例内容
