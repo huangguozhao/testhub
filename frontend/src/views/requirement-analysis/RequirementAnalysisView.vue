@@ -1207,8 +1207,10 @@ export default {
                 }
               }
             }
-          } else {
-            // 否则尝试解析结构化格式
+          }
+
+          // 如果表格解析结果行数少于3行，说明解析可能失败，尝试结构化解析
+          if (worksheetData.length < 3) {
             worksheetData = this.parseStructuredFormat(filteredContent);
           }
         }
@@ -1539,7 +1541,8 @@ export default {
       const filteredLines = [];
       let inTestCaseSection = true;
 
-      for (let line of lines) {
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
         const trimmedLine = line.trim();
 
         // 检查是否到了总结或建议部分
@@ -1558,6 +1561,11 @@ export default {
         }
       }
 
+      // 如果过滤后内容为空或只有很少的行，返回原始内容
+      if (filteredLines.length < 3) {
+        return content;
+      }
+
       return filteredLines.join('\n');
     },
 
@@ -1565,19 +1573,27 @@ export default {
     parseTableFormat(content) {
       if (!content) return [];
 
-      const lines = content.split('\n').filter(line => line.trim());
+      const lines = content.split('\n');
       const worksheetData = [];
 
       for (let line of lines) {
         const trimmedLine = line.trim();
+        // 检查是否是表格行（包含|分隔符）
+        if (trimmedLine.includes('|')) {
+          // 检查是否是分隔行（只包含 -, : 和空格）
+          const isSeparatorRow = /^[\|\s\-:]+$/.test(trimmedLine.replace(/\s+/g, ''));
+          if (isSeparatorRow) continue;
 
-        // 检查是否是表格行（包含|分隔符，且不是分隔线）
-        if (trimmedLine.includes('|') && !trimmedLine.includes('--------')) {
           const cells = trimmedLine.split('|').map(cell => cell.trim()).filter(cell => cell);
           if (cells.length > 1) {
             worksheetData.push(cells);
           }
         }
+      }
+
+      // 如果解析到的行数太少，说明表格格式解析可能失败
+      if (worksheetData.length < 3) {
+        return [];
       }
 
       return worksheetData;
