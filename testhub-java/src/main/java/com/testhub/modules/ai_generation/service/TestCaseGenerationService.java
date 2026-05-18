@@ -667,21 +667,55 @@ public class TestCaseGenerationService {
         }
 
         // 最终DB更新
+        // 提取纯JSON数组内容（过滤掉AI思考内容和markdown格式）
+        String rawContent = buffer.toString();
+        String cleanContent = extractJsonArrayContent(rawContent);
+
         switch (phase) {
             case "stream" -> {
-                task.setStreamBuffer(buffer.toString());
-                task.setStreamPosition(buffer.length());
+                task.setStreamBuffer(cleanContent);
+                task.setStreamPosition(cleanContent.length());
             }
             case "review" -> {
-                task.setReviewFeedback(buffer.toString());
-                task.setReviewPosition(buffer.length());
+                task.setReviewFeedback(rawContent); // 评审内容保留完整格式
+                task.setReviewPosition(rawContent.length());
             }
             case "final" -> {
-                task.setFinalTestCases(buffer.toString());
-                task.setFinalPosition(buffer.length());
+                task.setFinalTestCases(cleanContent);
+                task.setFinalPosition(cleanContent.length());
             }
         }
         taskMapper.updateById(task);
+    }
+
+    /**
+     * 从内容中提取纯JSON数组
+     * 过滤掉AI思考内容和markdown格式
+     */
+    private String extractJsonArrayContent(String content) {
+        if (content == null || content.isBlank()) return "";
+
+        // 先过滤掉AI思考内容
+        String cleaned = content.replaceAll("<think>[\\s\\S]*?", "");
+
+        // 尝试从 ```json 代码块中提取
+        java.util.regex.Pattern codeBlockPattern = java.util.regex.Pattern.compile("```json\\s*([\\s\\S]*?)```");
+        java.util.regex.Matcher matcher = codeBlockPattern.matcher(cleaned);
+        if (matcher.find()) {
+            String jsonContent = matcher.group(1).trim();
+            // 只返回JSON数组部分，不包含其他markdown
+            return jsonContent;
+        }
+
+        // 如果没有代码块，查找第一个完整的JSON数组
+        int start = cleaned.indexOf('[');
+        int end = cleaned.lastIndexOf(']');
+        if (start != -1 && end != -1 && end > start) {
+            return cleaned.substring(start, end + 1);
+        }
+
+        // 如果都找不到，返回清理后的内容
+        return cleaned.trim();
     }
 
     /**
@@ -691,9 +725,15 @@ public class TestCaseGenerationService {
     private boolean isJsonArrayComplete(String content) {
         if (content == null || content.isBlank()) return false;
 
+        // 先过滤掉AI思考内容（<think>...）
+        String cleaned = content.replaceAll("<think>[\\s\\S]*?", "").trim();
+
+        // 如果过滤后为空，返回false
+        if (cleaned.isBlank()) return false;
+
         // 策略1: 尝试从 ```json...``` 代码块中提取并检查
         java.util.regex.Pattern codeBlockPattern = java.util.regex.Pattern.compile("```json\\s*([\\s\\S]*?)```");
-        java.util.regex.Matcher matcher = codeBlockPattern.matcher(content);
+        java.util.regex.Matcher matcher = codeBlockPattern.matcher(cleaned);
         while (matcher.find()) {
             String jsonContent = matcher.group(1).trim();
             if (isJsonArrayContent(jsonContent)) {
@@ -701,9 +741,8 @@ public class TestCaseGenerationService {
             }
         }
 
-        // 策略2: 在整个内容中查找完整的JSON数组
-        // 找到第一个 [ 然后检查是否有匹配的 ]
-        return isJsonArrayContent(content);
+        // 策略2: 在过滤后的内容中查找完整的JSON数组
+        return isJsonArrayContent(cleaned);
     }
 
     /**
