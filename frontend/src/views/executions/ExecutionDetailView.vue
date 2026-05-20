@@ -201,7 +201,7 @@ import {
   Delete, Clock, Document, CircleCheck, CircleClose,
   WarningFilled, QuestionFilled, Stamp, FolderOpened
 } from '@element-plus/icons-vue'
-import axios from 'axios'
+import api from '@/utils/api'
 
 const { t } = useI18n()
 
@@ -218,7 +218,7 @@ const tableRef = ref(null)
 const fetchTestPlan = async () => {
   try {
     const planId = route.params.id
-    const response = await axios.get(`/api/test-plans/${planId}`)
+    const response = await api.get(`/test-plans/${planId}`)
     testPlan.value = response.data
   } catch (error) {
     ElMessage.error(t('execution.fetchDetailFailed'))
@@ -252,7 +252,7 @@ const updateCaseDetails = async (runCase) => {
 
 const viewCaseHistory = async (runCase) => {
   try {
-    const response = await axios.get(`/api/executions/run_cases/${runCase.id}/history/`)
+    const response = await api.get(`/executions/run_cases/${runCase.id}/history/`)
     currentCaseHistory.value = response.data
     historyDialogVisible.value = true
   } catch (error) {
