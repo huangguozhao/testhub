@@ -15,7 +15,6 @@ public class TestPlanDTO {
 
     private Long id;
 
-    @NotNull(message = "项目ID不能为空")
     private Long projectId;
 
     @NotBlank(message = "计划名称不能为空")
