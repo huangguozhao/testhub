@@ -457,7 +457,7 @@ const updatePlan = async () => {
     const updateData = {
       name: editPlanForm.name,
       description: editPlanForm.description,
-      projects: editPlanForm.projects,
+      projectId: editPlanForm.projects?.[0] || null,
       version: editPlanForm.version,
       assignees: editPlanForm.assignees,
       is_active: editPlanForm.is_active
