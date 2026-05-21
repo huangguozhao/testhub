@@ -66,7 +66,10 @@ public class TestPlanServiceImpl extends ServiceImpl<TestPlanMapper, TestPlan> i
 
         plan.setName(dto.getName());
         plan.setDescription(dto.getDescription());
-        plan.setProjectId(dto.getProjectId());
+        // 只有DTO中的projectId不为null时才更新
+        if (dto.getProjectId() != null) {
+            plan.setProjectId(dto.getProjectId());
+        }
         plan.setStartDate(dto.getStartDate());
         plan.setEndDate(dto.getEndDate());
         plan.setStatus(dto.getStatus());
