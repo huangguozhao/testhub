@@ -433,11 +433,7 @@ const editPlan = async (plan) => {
       id: planDetail.id,
       name: planDetail.name,
       description: planDetail.description || '',
-      projects: planDetail.projects?.map(p => {
-        // 如果是字符串，需要找到对应的项目ID
-        const project = projects.value.find(proj => proj.name === p)
-        return project ? project.id : p
-      }) || [],
+      projects: planDetail.project_id ? [planDetail.project_id] : [],
       version: planDetail.version ? versions.value.find(v => v.name === planDetail.version)?.id : null,
       assignees: planDetail.assignees || [],
       is_active: planDetail.is_active
