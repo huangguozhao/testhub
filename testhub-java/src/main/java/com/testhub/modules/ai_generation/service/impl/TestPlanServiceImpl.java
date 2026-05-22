@@ -5,9 +5,13 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.testhub.modules.ai_generation.domain.TestPlan;
+import com.testhub.modules.ai_generation.domain.Project;
 import com.testhub.modules.ai_generation.dto.TestPlanDTO;
 import com.testhub.modules.ai_generation.mapper.TestPlanMapper;
+import com.testhub.modules.ai_generation.mapper.ProjectMapper;
 import com.testhub.modules.ai_generation.service.TestPlanService;
+import com.testhub.modules.system.domain.User;
+import com.testhub.modules.system.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -19,6 +23,9 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class TestPlanServiceImpl extends ServiceImpl<TestPlanMapper, TestPlan> implements TestPlanService {
+
+    private final ProjectMapper projectMapper;
+    private final UserMapper userMapper;
 
     @Override
     public IPage<TestPlan> getTestPlanPage(Long projectId, String keyword, String status, long current, long size) {
@@ -38,7 +45,35 @@ public class TestPlanServiceImpl extends ServiceImpl<TestPlanMapper, TestPlan> i
         }
 
         wrapper.orderByDesc(TestPlan::getCreatedAt);
-        return this.page(page, wrapper);
+        IPage<TestPlan> result = this.page(page, wrapper);
+
+        // 填充扩展字段：项目名称、创建者名称
+        for (TestPlan plan : result.getRecords()) {
+            fillExtraFields(plan);
+        }
+
+        return result;
+    }
+
+    private void fillExtraFields(TestPlan plan) {
+        // 设置 isActive 状态
+        plan.setIsActive("active".equals(plan.getStatus()));
+
+        // 填充项目名称
+        if (plan.getProjectId() != null) {
+            Project project = projectMapper.selectById(plan.getProjectId());
+            if (project != null) {
+                plan.setProjectName(project.getName());
+            }
+        }
+
+        // 填充创建者名称
+        if (plan.getCreatedBy() != null) {
+            User user = userMapper.selectById(plan.getCreatedBy());
+            if (user != null) {
+                plan.setCreatorName(user.getUsername());
+            }
+        }
     }
 
     @Override

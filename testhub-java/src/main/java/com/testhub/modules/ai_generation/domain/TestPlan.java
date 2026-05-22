@@ -58,6 +58,12 @@ public class TestPlan extends BaseEntity {
     private String assigneeName;
 
     @TableField(exist = false)
+    private String creatorName;
+
+    @TableField(exist = false)
+    private String projectName;
+
+    @TableField(exist = false)
     private Long totalCases;
 
     @TableField(exist = false)

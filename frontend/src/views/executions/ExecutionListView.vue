@@ -56,16 +56,13 @@
           </el-link>
         </template>
       </el-table-column>
-      <el-table-column prop="projects" :label="$t('execution.projects')" width="200">
+      <el-table-column prop="project_name" :label="$t('execution.projects')" width="200">
         <template #default="scope">
-          <span v-if="scope.row.projects && scope.row.projects.length > 0">
-            {{ scope.row.projects.join(', ') }}
-          </span>
+          <span v-if="scope.row.project_name">{{ scope.row.project_name }}</span>
           <span v-else>{{ $t('execution.noData') }}</span>
         </template>
       </el-table-column>
-      <el-table-column prop="version" :label="$t('execution.version')" width="120"></el-table-column>
-      <el-table-column prop="creator.username" :label="$t('execution.creator')" width="120"></el-table-column>
+      <el-table-column prop="creator_name" :label="$t('execution.creator')" width="120"></el-table-column>
       <el-table-column :label="$t('execution.status')" width="100">
         <template #default="scope">
           <el-tag :type="scope.row.is_active ? 'success' : 'info'">
