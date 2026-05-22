@@ -401,7 +401,15 @@ const createPlan = async () => {
     await planFormRef.value.validate()
     creating.value = true
 
-    await api.post('/test-plans', newPlanForm)
+    const createData = {
+      name: newPlanForm.name,
+      description: newPlanForm.description,
+      project_id: newPlanForm.projects?.[0] || null,
+      version: newPlanForm.version,
+      assignee_id: newPlanForm.assignees?.[0] || null
+    }
+
+    await api.post('/test-plans', createData)
     ElMessage.success(t('execution.createSuccess'))
     isCreatePlanDialogOpen.value = false
     resetPlanForm()
@@ -453,7 +461,7 @@ const updatePlan = async () => {
     const updateData = {
       name: editPlanForm.name,
       description: editPlanForm.description,
-      projectId: editPlanForm.projects?.[0] || null,
+      project_id: editPlanForm.projects?.[0] || null,
       version: editPlanForm.version,
       assignees: editPlanForm.assignees,
       is_active: editPlanForm.is_active

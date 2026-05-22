@@ -64,20 +64,45 @@ public class TestPlanServiceImpl extends ServiceImpl<TestPlanMapper, TestPlan> i
             throw new RuntimeException("计划不存在: " + id);
         }
 
-        plan.setName(dto.getName());
-        plan.setDescription(dto.getDescription());
-        // 只有DTO中的projectId不为null时才更新
-        if (dto.getProjectId() != null) {
-            plan.setProjectId(dto.getProjectId());
-        }
-        plan.setStartDate(dto.getStartDate());
-        plan.setEndDate(dto.getEndDate());
-        plan.setStatus(dto.getStatus());
-        plan.setAssigneeId(dto.getAssigneeId());
+        log.info("updateTestPlan - dto.getProjectId() = {}", dto.getProjectId());
+        log.info("updateTestPlan - before update, plan.projectId = {}", plan.getProjectId());
 
-        this.updateById(plan);
-        log.info("更新测试计划: id={}", id);
-        return plan;
+        // 使用LambdaUpdateWrapper直接更新，避免实体属性比较问题
+        com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper<TestPlan> updateWrapper =
+            new com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper<>();
+        updateWrapper.eq(TestPlan::getId, id);
+
+        if (dto.getName() != null) {
+            updateWrapper.set(TestPlan::getName, dto.getName());
+        }
+        if (dto.getDescription() != null) {
+            updateWrapper.set(TestPlan::getDescription, dto.getDescription());
+        }
+        if (dto.getProjectId() != null) {
+            updateWrapper.set(TestPlan::getProjectId, dto.getProjectId());
+            log.info("updateTestPlan - set projectId to {}", dto.getProjectId());
+        }
+        if (dto.getStartDate() != null) {
+            updateWrapper.set(TestPlan::getStartDate, dto.getStartDate());
+        }
+        if (dto.getEndDate() != null) {
+            updateWrapper.set(TestPlan::getEndDate, dto.getEndDate());
+        }
+        if (dto.getStatus() != null) {
+            updateWrapper.set(TestPlan::getStatus, dto.getStatus());
+        }
+        if (dto.getAssigneeId() != null) {
+            updateWrapper.set(TestPlan::getAssigneeId, dto.getAssigneeId());
+        }
+
+        log.info("updateTestPlan - executing update with projectId={}", dto.getProjectId());
+        boolean updated = this.update(updateWrapper);
+        log.info("updateTestPlan - update result = {}, rows affected", updated);
+
+        // 返回更新后的数据
+        TestPlan updatedPlan = this.getById(id);
+        log.info("updateTestPlan - after update, plan.projectId = {}", updatedPlan.getProjectId());
+        return updatedPlan;
     }
 
     @Override
