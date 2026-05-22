@@ -66,6 +66,15 @@ public class TestPlanController {
         return Result.success(plan);
     }
 
+    @PatchMapping("/{id}")
+    @Operation(summary = "部分更新计划")
+    public Result<TestPlan> patchTestPlan(
+            @PathVariable Long id,
+            @RequestBody TestPlanDTO dto) {
+        TestPlan plan = testPlanService.updateTestPlan(id, dto);
+        return Result.success(plan);
+    }
+
     @DeleteMapping("/{id}")
     @Operation(summary = "删除计划")
     public Result<Void> deleteTestPlan(@PathVariable Long id) {

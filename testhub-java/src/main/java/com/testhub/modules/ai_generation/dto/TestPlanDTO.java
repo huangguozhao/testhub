@@ -30,5 +30,7 @@ public class TestPlanDTO {
 
     private Long assigneeId;
 
+    private Boolean isActive;
+
     private List<Long> suiteIds;
 }

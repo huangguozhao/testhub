@@ -52,6 +52,9 @@ public class TestPlan extends BaseEntity {
 
     // 扩展字段（非数据库）
     @TableField(exist = false)
+    private Boolean isActive;
+
+    @TableField(exist = false)
     private String assigneeName;
 
     @TableField(exist = false)

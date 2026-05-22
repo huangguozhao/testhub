@@ -94,6 +94,10 @@ public class TestPlanServiceImpl extends ServiceImpl<TestPlanMapper, TestPlan> i
         if (dto.getAssigneeId() != null) {
             updateWrapper.set(TestPlan::getAssigneeId, dto.getAssigneeId());
         }
+        // 处理 is_active 字段（激活/停用）
+        if (dto.getIsActive() != null) {
+            updateWrapper.set(TestPlan::getStatus, dto.getIsActive() ? "active" : "inactive");
+        }
 
         log.info("updateTestPlan - executing update with projectId={}", dto.getProjectId());
         boolean updated = this.update(updateWrapper);
