@@ -135,7 +135,7 @@
               </el-table-column>
               <el-table-column :label="$t('apiTesting.common.operation')" width="150">
                 <template #default="scope">
-                  <el-button link type="primary" @click="editAssertions(scope.row)" size="small">
+                  <el-button link type="primary" @click="editAssertions(scope.row)" size="small" class="white-text-btn">
                     {{ $t('apiTesting.automation.editAssertions') }}
                   </el-button>
                   <el-button link type="danger" @click="removeRequest(scope.row)" size="small">
