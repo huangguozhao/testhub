@@ -884,6 +884,7 @@ export default {
       loadTestSuites: '加载测试套件失败',
       loadRequestTree: '加载请求树失败',
       loadExecutionHistory: '加载执行历史失败',
+      loadExecutionDetail: '加载执行详情失败',
       executeSuite: '执行测试套件失败',
       copyFailed: '复制失败',
       deleteFailed: '删除失败',

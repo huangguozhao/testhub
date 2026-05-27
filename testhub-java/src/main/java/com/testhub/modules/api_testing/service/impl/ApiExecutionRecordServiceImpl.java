@@ -2,6 +2,8 @@ package com.testhub.modules.api_testing.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.testhub.modules.api_testing.domain.ApiExecutionRecord;
 import com.testhub.modules.api_testing.domain.ApiTestSuite;
 import com.testhub.modules.api_testing.mapper.ApiExecutionRecordMapper;
@@ -26,6 +28,7 @@ public class ApiExecutionRecordServiceImpl extends ServiceImpl<ApiExecutionRecor
 
     private final ApiTestSuiteService apiTestSuiteService;
     private final UserService userService;
+    private final ObjectMapper objectMapper;
 
     @Override
     public ApiExecutionRecord createRecord(ApiExecutionRecord record) {
@@ -135,6 +138,22 @@ public class ApiExecutionRecordServiceImpl extends ServiceImpl<ApiExecutionRecor
             if (record.getCreatedBy() != null && userMap.containsKey(record.getCreatedBy())) {
                 User user = userMap.get(record.getCreatedBy());
                 record.setExecutedBy(Map.of("id", user.getId(), "username", user.getUsername()));
+            }
+
+            // 解析 resultData 为 requestResults
+            if (record.getResultData() != null && !record.getResultData().isBlank()) {
+                try {
+                    List<Map<String, Object>> requestResults = objectMapper.readValue(
+                            record.getResultData(),
+                            new TypeReference<List<Map<String, Object>>>() {}
+                    );
+                    record.setRequestResults(requestResults);
+                } catch (Exception e) {
+                    log.warn("解析执行结果失败: {}", e.getMessage());
+                    record.setRequestResults(Collections.emptyList());
+                }
+            } else {
+                record.setRequestResults(Collections.emptyList());
             }
         }
     }

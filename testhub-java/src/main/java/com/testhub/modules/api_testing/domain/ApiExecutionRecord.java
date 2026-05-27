@@ -6,6 +6,7 @@ import lombok.Data;
 import com.testhub.modules.system.domain.BaseEntity;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -82,4 +83,11 @@ public class ApiExecutionRecord extends BaseEntity {
     @TableField(exist = false)
     @JsonProperty("executed_by")
     private Map<String, Object> executedBy;
+
+    /**
+     * 请求结果列表（非数据库字段）
+     */
+    @TableField(exist = false)
+    @JsonProperty("request_results")
+    private List<Map<String, Object>> requestResults;
 }

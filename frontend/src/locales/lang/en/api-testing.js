@@ -872,6 +872,7 @@ export default {
       requestFailed: 'Request failed',
       loadRequestTree: 'Failed to load request tree',
       loadExecutionHistory: 'Failed to load execution history',
+      loadExecutionDetail: 'Failed to load execution detail',
       executeSuite: 'Failed to execute test suite',
       addFailed: 'Failed to add',
       removeFailed: 'Failed to remove',

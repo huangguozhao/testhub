@@ -890,9 +890,14 @@ const reloadCurrentSuite = async () => {
   }
 }
 
-const viewExecutionDetail = (execution) => {
-  currentExecution.value = execution
-  showExecutionDialog.value = true
+const viewExecutionDetail = async (execution) => {
+  try {
+    const response = await api.get(`/api-execution-records/${execution.id}`)
+    currentExecution.value = response.data
+    showExecutionDialog.value = true
+  } catch (error) {
+    ElMessage.error(t('apiTesting.messages.error.loadExecutionDetail'))
+  }
 }
 
 const formatExecutionResults = (results) => {
