@@ -40,4 +40,10 @@ public class ApiTestSuite extends BaseEntity {
      * 失败重试次数
      */
     private Integer retryCount;
+
+    /**
+     * 请求数量（非数据库字段）
+     */
+    @TableField(exist = false)
+    private Integer requestCount;
 }

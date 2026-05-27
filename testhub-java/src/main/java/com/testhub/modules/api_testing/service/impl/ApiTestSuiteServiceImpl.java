@@ -3,7 +3,9 @@ package com.testhub.modules.api_testing.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.testhub.modules.api_testing.domain.ApiTestSuite;
+import com.testhub.modules.api_testing.domain.ApiTestSuiteRequest;
 import com.testhub.modules.api_testing.mapper.ApiTestSuiteMapper;
+import com.testhub.modules.api_testing.mapper.ApiTestSuiteRequestMapper;
 import com.testhub.modules.api_testing.service.ApiTestSuiteService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +21,8 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class ApiTestSuiteServiceImpl extends ServiceImpl<ApiTestSuiteMapper, ApiTestSuite> implements ApiTestSuiteService {
+
+    private final ApiTestSuiteRequestMapper apiTestSuiteRequestMapper;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -45,9 +49,20 @@ public class ApiTestSuiteServiceImpl extends ServiceImpl<ApiTestSuiteMapper, Api
 
     @Override
     public List<ApiTestSuite> getTestSuitesByProject(Long projectId) {
-        return this.list(new LambdaQueryWrapper<ApiTestSuite>()
+        List<ApiTestSuite> suites = this.list(new LambdaQueryWrapper<ApiTestSuite>()
                 .eq(ApiTestSuite::getProjectId, projectId)
                 .orderByDesc(ApiTestSuite::getCreatedAt));
+
+        // 统计每个套件的请求数量
+        for (ApiTestSuite suite : suites) {
+            Long count = apiTestSuiteRequestMapper.selectCount(
+                    new LambdaQueryWrapper<ApiTestSuiteRequest>()
+                            .eq(ApiTestSuiteRequest::getTestSuiteId, suite.getId())
+            );
+            suite.setRequestCount(count != null ? count.intValue() : 0);
+        }
+
+        return suites;
     }
 
     @Override

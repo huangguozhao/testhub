@@ -46,7 +46,7 @@
               <div class="suite-info">
                 <div class="suite-name">{{ suite.name }}</div>
                 <div class="suite-meta">
-                  {{ $t('apiTesting.automation.requestCount', { n: suite.suite_requests?.length || 0 }) }}
+                  {{ $t('apiTesting.automation.requestCount', { n: suite.request_count || 0 }) }}
                 </div>
               </div>
               <el-dropdown @command="handleSuiteAction" trigger="click">
@@ -188,7 +188,7 @@
               </el-table-column>
               <el-table-column :label="$t('apiTesting.common.operation')" width="120">
                 <template #default="scope">
-                  <el-button link type="primary" @click="viewExecutionDetail(scope.row)" size="small">
+                  <el-button link type="primary" @click="viewExecutionDetail(scope.row)" size="small" class="white-text-btn">
                     {{ $t('apiTesting.automation.viewDetails') }}
                   </el-button>
                 </template>
@@ -1119,5 +1119,9 @@ onMounted(() => {
 .execution-results h4 {
   margin: 0 0 15px 0;
   color: #303133;
+}
+
+.white-text-btn {
+  color: #ffffff !important;
 }
 </style>
