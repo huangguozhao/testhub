@@ -830,7 +830,9 @@ export default {
       taskUpdated: '更新任务成功',
       taskDeleted: '删除任务成功',
       taskPaused: '任务已暂停',
-      taskActivated: '任务已激活'
+      taskActivated: '任务已激活',
+      suiteCreated: '测试套件创建成功',
+      suiteUpdated: '测试套件更新成功'
     },
     error: {
       loadFailed: '加载失败',

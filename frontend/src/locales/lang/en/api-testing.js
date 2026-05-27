@@ -819,7 +819,9 @@ export default {
       taskUpdated: 'Task updated successfully',
       taskDeleted: 'Task deleted successfully',
       taskPaused: 'Task paused',
-      taskActivated: 'Task activated'
+      taskActivated: 'Task activated',
+      suiteCreated: 'Test suite created successfully',
+      suiteUpdated: 'Test suite updated successfully'
     },
     error: {
       loadFailed: 'Failed to load',

@@ -173,9 +173,22 @@ api.interceptors.response.use(
         // 没有refresh token，直接退出
         console.error('没有refresh token，跳转登录页')
         userStore.logout()
+        return Promise.reject(error)
+      } else {
+        // 正在刷新token时收到401，将请求加入队列等待
+        console.log('Token正在刷新中，401请求加入队列等待...')
+        return new Promise((resolve, reject) => {
+          failedQueue.push({
+            resolve: (token) => {
+              originalRequest.headers.Authorization = `Bearer ${token}`
+              resolve(api(originalRequest))
+            },
+            reject: (err) => {
+              reject(err)
+            }
+          })
+        })
       }
-
-      return Promise.reject(error)
     }
 
     // 其他错误处理（跳过请求拦截器已处理的刷新失败场景，避免重复报错）
