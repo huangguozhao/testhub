@@ -465,19 +465,16 @@ const getExecutionTime = (execution) => {
 }
 
 const getAverageExecutionTime = (execution) => {
-  if (!execution.results || !Array.isArray(execution.results) || execution.results.length === 0) {
-    return '-'
+  // 优先使用 duration / total_requests 计算平均耗时
+  if (execution.duration && execution.total_requests) {
+    const avgTime = execution.duration / execution.total_requests
+    if (avgTime < 1000) {
+      return `${Math.round(avgTime)}ms`
+    } else {
+      return `${(avgTime / 1000).toFixed(1)}s`
+    }
   }
-  
-  // 计算所有请求的平均响应时间
-  const totalResponseTime = execution.results.reduce((sum, result) => sum + (result.response_time || 0), 0)
-  const averageTime = totalResponseTime / execution.results.length
-  
-  if (averageTime < 1000) {
-    return `${Math.round(averageTime)}ms`
-  } else {
-    return `${(averageTime / 1000).toFixed(1)}s`
-  }
+  return '-'
 }
 
 const getPassRate = (execution) => {
