@@ -821,7 +821,11 @@ export default {
       taskPaused: 'Task paused',
       taskActivated: 'Task activated',
       suiteCreated: 'Test suite created successfully',
-      suiteUpdated: 'Test suite updated successfully'
+      suiteUpdated: 'Test suite updated successfully',
+      removeSuccess: 'Removed successfully',
+      addSuccess: 'Added successfully',
+      copy: 'Copied successfully',
+      delete: 'Deleted successfully'
     },
     error: {
       loadFailed: 'Failed to load',
@@ -865,7 +869,13 @@ export default {
       executionLogsFailed: 'Failed to load execution logs',
       batchDeleteFailed: 'Batch delete failed',
       formatFailed: 'Failed to format',
-      requestFailed: 'Request failed'
+      requestFailed: 'Request failed',
+      loadRequestTree: 'Failed to load request tree',
+      loadExecutionHistory: 'Failed to load execution history',
+      executeSuite: 'Failed to execute test suite',
+      addFailed: 'Failed to add',
+      removeFailed: 'Failed to remove',
+      refreshSuiteFailed: 'Failed to refresh test suite'
     },
     warning: {
       pleaseConnect: 'Please establish WebSocket connection first',
@@ -875,7 +885,8 @@ export default {
       pleaseSelectEnvironment: 'Please select an environment',
       pleaseSelectProject: 'Please select a project first',
       pleaseCreateCollection: 'Please create a collection first',
-      websocketNotInSuite: 'WebSocket projects do not support test suite functionality'
+      websocketNotInSuite: 'WebSocket projects do not support test suite functionality',
+      selectAtLeastOneRequest: 'Please select at least one request'
     },
     info: {
       websocketClosed: 'WebSocket connection closed',

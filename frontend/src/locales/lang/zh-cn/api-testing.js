@@ -832,7 +832,11 @@ export default {
       taskPaused: '任务已暂停',
       taskActivated: '任务已激活',
       suiteCreated: '测试套件创建成功',
-      suiteUpdated: '测试套件更新成功'
+      suiteUpdated: '测试套件更新成功',
+      removeSuccess: '移除成功',
+      addSuccess: '添加成功',
+      copy: '复制成功',
+      delete: '删除成功'
     },
     error: {
       loadFailed: '加载失败',
@@ -876,7 +880,18 @@ export default {
       executionLogsFailed: '加载执行日志失败',
       batchDeleteFailed: '批量删除失败',
       formatFailed: '格式化失败',
-      requestFailed: '请求发送失败'
+      requestFailed: '请求发送失败',
+      loadTestSuites: '加载测试套件失败',
+      loadRequestTree: '加载请求树失败',
+      loadExecutionHistory: '加载执行历史失败',
+      executeSuite: '执行测试套件失败',
+      copyFailed: '复制失败',
+      deleteFailed: '删除失败',
+      updateFailed: '更新失败',
+      createFailed: '创建失败',
+      addFailed: '添加失败',
+      removeFailed: '移除失败',
+      refreshSuiteFailed: '刷新测试套件失败'
     },
     warning: {
       pleaseConnect: '请先建立WebSocket连接',
@@ -886,7 +901,8 @@ export default {
       pleaseSelectEnvironment: '请选择环境',
       pleaseSelectProject: '请先选择一个项目',
       pleaseCreateCollection: '请先创建一个集合',
-      websocketNotInSuite: 'WebSocket项目不支持测试套件功能'
+      websocketNotInSuite: 'WebSocket项目不支持测试套件功能',
+      selectAtLeastOneRequest: '请至少选择一个请求'
     },
     info: {
       websocketClosed: 'WebSocket连接已关闭',
