@@ -82,7 +82,7 @@ public class ApiTestSuiteRequestServiceImpl extends ServiceImpl<ApiTestSuiteRequ
             }
         }
 
-        // 填充request字段
+        // 填充request字段和断言数量
         for (ApiTestSuiteRequest suiteRequest : suiteRequests) {
             ApiRequest apiRequest = requestMap.get(suiteRequest.getRequestId());
             if (apiRequest != null) {
@@ -92,6 +92,21 @@ public class ApiTestSuiteRequestServiceImpl extends ServiceImpl<ApiTestSuiteRequ
                 requestInfo.put("method", apiRequest.getMethod());
                 requestInfo.put("url", apiRequest.getUrl());
                 suiteRequest.setRequest(requestInfo);
+
+                // 解析assertions JSON字符串并计算断言数量（断言存储在ApiRequest表中）
+                if (apiRequest.getAssertions() != null && !apiRequest.getAssertions().isBlank()) {
+                    try {
+                        com.fasterxml.jackson.databind.ObjectMapper objectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
+                        java.util.List<?> assertionsList = objectMapper.readValue(apiRequest.getAssertions(), java.util.List.class);
+                        suiteRequest.setAssertionCount(assertionsList.size());
+                    } catch (Exception e) {
+                        suiteRequest.setAssertionCount(0);
+                    }
+                } else {
+                    suiteRequest.setAssertionCount(0);
+                }
+            } else {
+                suiteRequest.setAssertionCount(0);
             }
         }
 

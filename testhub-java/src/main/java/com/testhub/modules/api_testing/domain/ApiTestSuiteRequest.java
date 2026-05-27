@@ -46,4 +46,10 @@ public class ApiTestSuiteRequest {
      */
     @TableField(exist = false)
     private Map<String, Object> request;
+
+    /**
+     * 断言数量（非数据库字段）
+     */
+    @TableField(exist = false)
+    private Integer assertionCount;
 }

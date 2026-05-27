@@ -130,7 +130,7 @@
               </el-table-column>
               <el-table-column :label="$t('apiTesting.automation.assertions')" width="100">
                 <template #default="scope">
-                  {{ $t('apiTesting.automation.assertionCount', { n: scope.row.assertions?.length || 0 }) }}
+                  {{ $t('apiTesting.automation.assertionCount', { n: scope.row.assertion_count || 0 }) }}
                 </template>
               </el-table-column>
               <el-table-column :label="$t('apiTesting.common.operation')" width="150">
